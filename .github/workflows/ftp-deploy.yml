@@ -2,10 +2,9 @@ name: FTP Deploy on Push
 
 on:
   push:
-    branches:
-      - '**'                 # change to ["main"] if you only want main
+    branches: ['**']          # change to ["main"] if you want only main
     paths-ignore:
-      - '.github/**'         # don't run if only workflow files changed
+      - '.github/**'
       - '.gitignore'
   workflow_dispatch:
 
@@ -16,33 +15,26 @@ jobs:
       group: ftp-${{ github.ref }}
       cancel-in-progress: true
 
+    env:
+      # Intelligent handling: ensure trailing slash for FTP_DIR
+      SERVER_DIR: ${{ endsWith(secrets.FTP_DIR, '/') && secrets.FTP_DIR || format('{0}/', secrets.FTP_DIR) }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Optional: show what changed in this push
-      - name: Git diff summary
-        run: |
-          echo "Changed files in this push:"
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} || true
-
-      - name: Deploy to FTP / FTPS
+      - name: Deploy to BunnyCDN Storage (FTPS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_HOST }}          # jh.storage.bunnycdn.com
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # For FTPS set this secret to "ftps"; leave unset for plain FTP
-          protocol: ${{ secrets.FTP_PROTOCOL }}
-          # Optional custom port via secret (e.g., 21 for FTP, 990 for implicit FTPS)
-          port: ${{ secrets.FTP_PORT }}
-          # Remote target directory (e.g., /public_html/app)
-          server-dir: ${{ secrets.FTP_DIR }}
-          # Local directory to upload (repo root by default)
-          local-dir: .
-          # Exclusions (won't be uploaded)
+          protocol: ftps                           # Bunny uses FTPS (TLS) on port 21
+          port: 21
+          server-dir: ${{ env.SERVER_DIR }}
+          local-dir: ./                            # MUST end with "/"
           exclude: |
             **/.git/**
             .github/**
