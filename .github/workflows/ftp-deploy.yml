@@ -1,0 +1,43 @@
+name: FTP Deploy on Push
+
+on:
+  push:
+    branches:
+      - '**'        # deploy from any branch (change to ["main"] if you only want main)
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ftp-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # protocol defaults to ftp. Set a secret FTP_PROTOCOL to "ftps" or "sftp" if needed:
+          protocol: ${{ secrets.FTP_PROTOCOL }}
+          # Optional: custom port (falls back to action defaults if unset)
+          port: ${{ secrets.FTP_PORT }}
+          # Remote directory (optional)
+          server-dir: ${{ secrets.FTP_DIR }}
+          # Local directory to upload (defaults to repo root)
+          local-dir: .
+          # Exclusions (adjust to your stack)
+          exclude: |
+            **/.git*
+            .github/**
+            node_modules/**
+            **/.DS_Store
+            **/*.map
+            coverage/**
