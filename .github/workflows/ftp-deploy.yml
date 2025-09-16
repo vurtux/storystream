@@ -2,8 +2,7 @@ name: FTP Deploy on Push
 
 on:
   push:
-    branches:
-    - main
+    branches: ['**']          # change to ["main"] if you want only main
     paths-ignore:
       - '.github/**'
       - '.gitignore'
@@ -24,18 +23,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Deploy to BunnyCDN Storage (FTPS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_HOST }}          # jh.storage.bunnycdn.com
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftps                           # Bunny uses FTPS (TLS) on port 21
           port: 21
-          server-dir: ${{ env.SERVER_DIR }}/app/   # ✅ upload inside /app/
-          local-dir: ./out/
+          server-dir: ${{ env.SERVER_DIR }}
+          local-dir: ./                            # MUST end with "/"
           exclude: |
             **/.git/**
             .github/**
