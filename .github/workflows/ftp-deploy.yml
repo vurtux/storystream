@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 
 
       - name: Deploy to BunnyCDN Storage (FTPS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
