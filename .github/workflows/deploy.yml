@@ -48,19 +48,19 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           DEPLOY_KEY:  ${{ secrets.DEPLOY_KEY }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST <<'SSH'
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
             set -e
             cd $DEPLOY_PATH
             rm -rf current_new
             mkdir -p current_new
             tar xzf releases/app-release.tgz -C current_new
-            # Keep secrets on VM: ensure /srv/app/.env.production exists with correct values & perms (600, owner deploy)
+            # keep /srv/app/.env.production on the VM (owner deploy, chmod 600)
             mv current current_old 2>/dev/null || true
             mv current_new current
             command -v pm2 >/dev/null 2>&1 || npm i -g pm2
             cd current
             pm2 delete next-app || true
-            pm2 start "npm -- start -- -p 3000" --name next-app
+            pm2 start 'npm -- start -- -p 3000' --name next-app
             pm2 save
             rm -rf $DEPLOY_PATH/current_old || true
-SSH
+          "
