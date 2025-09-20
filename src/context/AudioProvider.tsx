@@ -13,6 +13,7 @@ interface AudioContextType {
     audioList: any;
     setAudioList: (track: any) => void;
     audioRef: React.RefObject<HTMLAudioElement | null>;
+    handlePlay: (episodeData: any) => void;
     handlePlayPause: (episodeData: any) => void;
 }
 
@@ -36,6 +37,21 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     //         if (parsed?.stream_url) setAudioSrc(parsed.stream_url);
     //     }
     // }, []);
+
+    const handlePlay = (episodeData: any) => {
+        if (episodeData.is_billable === 2) {
+            // confirm()
+            return;
+        }
+
+        const audio = audioRef.current;
+        console.log(audio, "audio")
+        if (!audio) return;
+
+        audio.play();
+        setOpenPlayButton(true);
+        setIsPlaying(true);
+    };
 
     const handlePlayPause = (episodeData: any) => {
         if (episodeData.is_billable === 2) {
@@ -68,6 +84,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
             audioRef,
             audioList,
             setAudioList,
+            handlePlay,
             handlePlayPause,
             setAudioSrc
         }}>
