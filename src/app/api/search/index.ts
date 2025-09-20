@@ -8,6 +8,6 @@ export const handleDefaultSearchApi = async () => {
 
 export const handleSearchApi = async (searchKey: any) => {
 
-    const res = await api.get(`/api/v1/feed/GetSearchResults/eb3fb92a88badce847f88fb8c9bb9be6/web/IN/pl/${searchKey}`);
+    const res = await api.get(`/api/v1/feed/GetSearchResults/eb3fb92a88badce847f88fb8c9bb9be6/web/IN/pl/${encodeURIComponent(searchKey)}`);
     return res.data;
 };

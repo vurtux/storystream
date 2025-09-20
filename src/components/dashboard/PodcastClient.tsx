@@ -75,7 +75,7 @@ export default function PodcastClient({ episode_id, title }: any) {
     const searchParams = useSearchParams();
     // const episode_id = searchParams?.get("episode_id");
 
-    const { audioRef, isPlaying, setIsPlaying, handlePlayPause, setAudioSrc, currentAudio, setCurrentAudio, audioList } = useAudio();
+    const { audioRef, isPlaying, setIsPlaying, handlePlayPause, handlePlay, setAudioSrc, currentAudio, setCurrentAudio, audioList } = useAudio();
     const [episodeData, setEpisodeData] = useState<Episode>(defaultEpisode);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -154,12 +154,9 @@ export default function PodcastClient({ episode_id, title }: any) {
                 setEpisodeData(ep);
                 localStorage.setItem("episodeData", JSON.stringify(ep));
                 setAudioSrc(ep?.stream_url);
-                // console.log(isPlaying, "isPlaying");
-                // if(!isPlaying) {
-                //     setTimeout(() => {
-                //       handlePlayPause(ep)
-                //     }, 200);
-                // }
+                setTimeout(() => {
+                    handlePlay(ep);
+                }, 1000);
             } catch (error) {
                 console.error("Failed to fetch podcast:", error);
             }

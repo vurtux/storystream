@@ -107,9 +107,9 @@ const OTPVerification: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log(authData, "authData");
-  }, [])
+  // useEffect(() => {
+  //   console.log(authData, "authData");
+  // }, [])
 
   return (
     <div className="min-h-screen bg-white relative px-4 pt-6">

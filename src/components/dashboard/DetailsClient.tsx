@@ -73,7 +73,7 @@ interface PodcastEpisodeDetail {
 const DetailsClient = ({ conId, title }: any) => {
     const router = useRouter();
 
-    const { setEpisodeId, detailData, setOpenPlayButton } = useDashboard();
+    const { setEpisodeId, detailData } = useDashboard();
     const { setCurrentAudio, setAudioList } = useAudio();
     const [bookDetails, setBookDetails] = useState<any>(null);
     const [podcastData, setPodcastData] = useState<PodcastDetail>();
@@ -82,7 +82,7 @@ const DetailsClient = ({ conId, title }: any) => {
     const [loading, setLoading] = useState(true);
 
     const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
-        console.log(item, "item");
+        // setIsPlaying(false);
         setCurrentAudio(index);
         setEpisodeId(item.episode_id);
         router.push(`/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`);
@@ -269,7 +269,7 @@ const DetailsClient = ({ conId, title }: any) => {
                 ) : (
                     episodeData?.map((item, index) => (
                         <div className="mt-1 bg-gray-100 rounded-xl p-4 flex items-center justify-between" key={index}>
-                            <div onClick={() => handleEpisode(item, index)} className="flex items-center gap-3">
+                            <div onClick={() => handleEpisode(item, index)} className="flex items-center gap-3 select-none">
                                 <div
                                     style={{ background: "linear-gradient(49.06deg, #6B0DFF 19.36%, #FF6B79 76.77%)" }}
                                     className="p-2 rounded-full"

@@ -53,7 +53,7 @@ const NowPlaying = () => {
     const router = useRouter();
     const { isPlaying, setIsPlaying, currentTrack, audioRef } = useAudio();
     const pathname = usePathname();
-    const { setEpisodeId } = useDashboard();
+    const { setEpisodeId, setOpenPlayButton } = useDashboard();
 
     // if (!isPlaying || !currentTrack || pathname?.includes('/episode')) {
     //     return null; // don't show if not playing OR on podcast page
@@ -76,18 +76,24 @@ const NowPlaying = () => {
     };
 
     const handleEpisode = (episode_id: any) => {
+        console.log(episode_id, "episode_id");
+        if(!episode_id) {
+            setOpenPlayButton(false);
+            router.push('/home');
+            return;
+        }
         setEpisodeId(episode_id);
         router.push(`/episode/${encodeURIComponent(episode_id)}/${slugify("1", { lower: true })}`);
         // router.push(`/episode?episode_id=${encodeURIComponent(episode_id)}`);
     }
 
     // useEffect(() => {
-    //     console.log(JSON.parse(localStorage.getItem('seeAllData') || ""), "seeAllDataadafs");
+    //     console.log(JSON.parse(localStorage.getItem('seeAllData') || "{}"), "seeAllDataadafs");
     // }, [])
 
     return (
         <div className="fixed bottom-18 left-1/2 transform -translate-x-1/2 max-w-md w-full m-auto bg-white shadow-xl rounded-xl p-3 flex items-center justify-between z-60">
-            <div className="flex items-center cursor-pointer" onClick={() => handleEpisode(JSON.parse(localStorage.getItem('seeAllData') || "")?.episode_id)}>
+            <div className="flex items-center cursor-pointer" onClick={() => handleEpisode(JSON.parse(localStorage.getItem('episodeData') || "{}")?.episode_id)}>
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                     <Image
                         src={JSON.parse(localStorage.getItem('episodeData') || "").img_local_uri || '/images/download.png'}
@@ -98,8 +104,8 @@ const NowPlaying = () => {
                     />
                 </div>
                 <div className="ml-3">
-                    <h3 className="text-sm font-semibold text-black truncate w-[150px]">{JSON.parse(localStorage.getItem('episodeData') || "")?.title}</h3>
-                    <p className="text-xs text-gray-500">{JSON.parse(localStorage.getItem('episodeData') || "")?.subtitle}</p>
+                    <h3 className="text-sm font-semibold text-black truncate w-[150px]">{JSON.parse(localStorage.getItem('episodeData') || "{}")?.title}</h3>
+                    <p className="text-xs text-gray-500">{JSON.parse(localStorage.getItem('episodeData') || "{}")?.subtitle}</p>
                 </div>
             </div>
             <button

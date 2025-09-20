@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import slugify from "slugify";
 import { handleDefaultSearchApi, handleSearchApi } from "../../app/api/search";
 import NotFoundPage from "../dashboard/NotFound";
+import { showSuccess } from "../../utils/toastService";
 
 export default function SearchClient() {
     const router = useRouter();
@@ -24,33 +25,37 @@ export default function SearchClient() {
     });
 
     const fetchData = async () => {
-            try {
-                setLoading(true);
-                const result = await handleDefaultSearchApi();
-                setDefaultSearchData({
-                    rankingSearch: result.response.result.result_ranking.podcasts_bucket.contents,
-                    popularSearch: result.response.result.result_popular.podcasts_bucket.contents
-                });
-                setLoading(false);
-            } catch (error) {
-                console.error("Failed to fetch podcast:", error);
-                setLoading(false);
-            }
-        };
-
-    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearch(value);
-        const result = await handleSearchApi(value);
-        setDefaultSearchData({
-            rankingSearch: result?.response?.result?.result_ranking?.podcasts_bucket?.contents,
-            popularSearch: result?.response?.result?.result_popular?.podcasts_bucket?.contents
-        });
+        try {
+            setLoading(true);
+            const result = await handleDefaultSearchApi();
+            setDefaultSearchData({
+                rankingSearch: result.response.result.result_ranking.podcasts_bucket.contents,
+                popularSearch: result.response.result.result_popular.podcasts_bucket.contents
+            });
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch podcast:", error);
+            setLoading(false);
+        }
     };
 
     const clearSearch = () => {
         setSearch("");
         fetchData();
+    };
+
+    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (!value) {
+            clearSearch();
+            return;
+        }
+        setSearch(value);
+        const result = await handleSearchApi(value);
+        setDefaultSearchData({
+            rankingSearch: [],
+            popularSearch: result?.response?.result?.podcasts_bucket?.contents
+        });
     };
 
     const handleDetail = (conId: number, conName: string) => {
@@ -71,7 +76,7 @@ export default function SearchClient() {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            alert("Speech recognition not supported in this browser.");
+            showSuccess('Speech recognition not supported in this browser.');
             return;
         }
 
@@ -89,7 +94,7 @@ export default function SearchClient() {
         };
 
         recognition.onerror = (event: any) => {
-            console.error("Speech recognition error:", event.error);
+            console.log("Speech recognition error:", event.error);
             setListening(false);
         };
 
@@ -106,44 +111,80 @@ export default function SearchClient() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-6">
                     <Image height={24} width={24} alt="search" src="/images/Search.png" />
                     <h1 className="text-xl font-semibold">Search</h1>
                 </div>
-                <div className="rounded-full cursor-pointer">
+                {/* <div className="rounded-full cursor-pointer">
                     <HiOutlineDotsCircleHorizontal className="w-7 h-7" />
-                </div>
+                </div> */}
             </div>
 
-            <div style={{ backgroundColor: "#F5F5F5" }} className="rounded-2xl px-4 py-1 flex items-center">
-                <IoIosSearch className="h-6 w-6 text-gray-500 cursor-pointer mr-1" />
-                <input
-                    type="text"
-                    value={search}
-                    onChange={handleSearch}
-                    placeholder="Search"
-                    className="w-full px-3 py-2 dark:bg-gray-100 text-black dark:text-black outline-none"
+            <div
+            style={{
+                background: "radial-gradient(92.09% 394.93% at 7.91% 50%, #F3E8FF 0%, #FFE4E8 100%)", // lighter version of gradient
+            }}
+            className="rounded-2xl px-4 py-1 flex items-center"
+            >
+            <IoIosSearch className="h-8 w-8 text-gray-500 cursor-pointer mr-1" />
+
+            <input
+                type="text"
+                value={search}
+                onChange={handleSearch}
+                placeholder="Search Shows, Books, Podcasts"
+                className="w-full px-3 py-2 bg-transparent text-black outline-none placeholder-gray-500 placeholder:text-sm"
+            />
+
+            {search && (
+                <X
+                className="h-8 w-8 text-gray-500 cursor-pointer mx-2"
+                style={{ color: "#6B0DFF" }} // mic always dark purple
+                onClick={clearSearch}
                 />
-                {search && (
-                    <X className="h-5 w-5 text-gray-500 cursor-pointer mx-2" onClick={clearSearch} />
-                )}
-                <Mic
-                    className={`h-5 w-5 cursor-pointer ${listening ? 'text-purple-600 animate-pulse' : 'text-gray-500'}`}
-                    onClick={startListening}
-                />
+            )}
+
+            <Mic
+                className={`h-8 w-8 cursor-pointer ${listening ? 'animate-pulse' : ''}`}
+                style={{ color: "#6B0DFF" }} // mic always dark purple
+                onClick={startListening}
+            />
             </div>
+
+
+            {/* Listening card */}
+            {listening && (
+                <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-2xl shadow-xl p-6 w-[320px] text-center relative border border-purple-200">
+                        <button
+                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                            onClick={() => setListening(false)}
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center animate-pulse">
+                                <Mic className="h-8 w-8 text-purple-600" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-700">
+                                Listening... Speak now
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {notFound ? <NotFoundPage /> : (
                 <>
                     <div>
-                        <div className="flex justify-between items-center mb-2">
+                        {defaultSearchData?.rankingSearch?.length !== 0 && <div className="flex justify-between items-center mb-2">
                             <h2 className="text-md font-semibold">Popular & Trending Authors</h2>
                             {!loading && (
                                 <button onClick={handleSeeAll1} className="text-sm text-purple-600 font-semibold cursor-pointer">
                                     See All
                                 </button>
                             )}
-                        </div>
+                        </div>}
 
                         <div
                             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -195,7 +236,7 @@ export default function SearchClient() {
                                         </div>
                                     </div>
                                 ))
-                                : defaultSearchData?.rankingSearch?.map((podcast: any) => (
+                                : defaultSearchData?.popularSearch?.map((podcast: any) => (
                                     <div key={podcast.conId} className="flex items-center gap-4">
                                         <Image
                                             src={podcast.imgIrl}

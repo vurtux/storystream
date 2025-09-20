@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { showSuccess } from '../../../../utils/toastService';
+import Image from 'next/image';
 
 export default function LanguageSelectPage() {
 
@@ -38,7 +39,13 @@ export default function LanguageSelectPage() {
 
       {/* Language Icon */}
       <div className="flex flex-col mt-6 ml-4">
-        <img src="/images/Language_photo.jpeg" alt="language" className="h-20 w-20 mb-4" />
+        {/* <img src="/images/Language_photo.jpeg" alt="language" className="h-20 w-20 mb-4" /> */}
+        <Image
+            src="/images/Language_photo.jpeg"
+            alt="language"
+            width={100}
+            height={100}
+        />
         <p className="font-bold text-lg">भाषा चुनें</p>
         <p className="text-lg">Please Select Language</p>
       </div>
