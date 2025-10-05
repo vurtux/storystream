@@ -39,8 +39,9 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     // }, []);
 
     const handlePlay = (episodeData: any) => {
-        if (episodeData.is_billable === 1) {
-            // confirm()
+        const isVip: any = localStorage.getItem('loginData');
+        console.log(JSON.parse(isVip).profile.vip, "isVip");
+        if (JSON.parse(isVip).profile.vip !== 1) {
             return;
         }
 

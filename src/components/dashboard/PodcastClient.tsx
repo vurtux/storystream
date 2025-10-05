@@ -193,6 +193,16 @@ export default function PodcastClient({ episode_id, title }: any) {
         return `${minutes}:${seconds}`;
     };
 
+    const handleCheck = async(episodeData: any) => {
+        const isVip: any = localStorage.getItem('loginData');
+        if(JSON.parse(isVip).profile.vip !== 1) {
+            confirm();
+        }
+        else {
+            handlePlayPause(episodeData);
+        }
+    }
+
     return (
         <main className="flex flex-col items-center justify-center">
             <div className="w-full flex items-center justify-between mb-4">
@@ -257,7 +267,7 @@ export default function PodcastClient({ episode_id, title }: any) {
                 <button
                     style={{ background: "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)" }}
                     className="p-4 rounded-full text-white shadow-lg"
-                    onClick={() => episodeData?.is_billable === 1 ? confirm() : handlePlayPause(episodeData)}
+                    onClick={() => handleCheck(episodeData)}
                 >
                     {isPlaying ? 
                     <FaPause className="text-2xl" /> 
