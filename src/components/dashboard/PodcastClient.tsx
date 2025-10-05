@@ -257,7 +257,7 @@ export default function PodcastClient({ episode_id, title }: any) {
                 <button
                     style={{ background: "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)" }}
                     className="p-4 rounded-full text-white shadow-lg"
-                    onClick={() => episodeData?.is_billable === 0 ? confirm() : handlePlayPause(episodeData)}
+                    onClick={() => episodeData?.is_billable === 1 ? confirm() : handlePlayPause(episodeData)}
                 >
                     {isPlaying ? 
                     <FaPause className="text-2xl" /> 

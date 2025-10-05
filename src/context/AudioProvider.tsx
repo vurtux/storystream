@@ -39,7 +39,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     // }, []);
 
     const handlePlay = (episodeData: any) => {
-        if (episodeData.is_billable === 2) {
+        if (episodeData.is_billable === 1) {
             // confirm()
             return;
         }
