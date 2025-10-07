@@ -64,12 +64,12 @@ export default function SearchClient() {
 
     const handleSeeAll1 = () => {
         localStorage.setItem('seeAllData', JSON.stringify(defaultSearchData?.rankingSearch));
-        router.push(`/home/seeall/${slugify("Ranking Podcast", { lower: true })}`);
+        router.push(`/home/see-all/${slugify("Ranking Podcast", { lower: true })}`);
     };
 
     const handleSeeAll2 = () => {
         localStorage.setItem('seeAllData', JSON.stringify(defaultSearchData?.popularSearch));
-        router.push(`/home/seeall/${slugify("Popular Podcast", { lower: true })}`);
+        router.push(`/home/see-all/${slugify("Popular Podcast", { lower: true })}`);
     };
 
     const startListening = () => {
