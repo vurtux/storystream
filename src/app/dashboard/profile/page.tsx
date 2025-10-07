@@ -99,10 +99,10 @@ export default function ProfilePage() {
                     <Image height={24} width={24} alt="banner" src="/images/Profile.png" />
                     <h1 className="text-2xl text font-semibold">Profile</h1>
                 </div>
-                <div className="rounded-full cursor-pointer">
-                    {/* <HiOutlineDotsCircleHorizontal className="text-black w-7 h-7" /> */}
+                {/* <div className="rounded-full cursor-pointer">
+                    <HiOutlineDotsCircleHorizontal className="text-black w-7 h-7" />
                     <Image height={28} width={28} alt="banner" src="/images/Auto Layout Horizontal.png" />
-                </div>
+                </div> */}
             </div>
 
             {/* Banner */}
@@ -136,7 +136,7 @@ export default function ProfilePage() {
                     label="Manage Subscription"
                     value={<IoIosArrowForward />}
                 />}
-                <MenuItem
+                {/* <MenuItem
                     icon={<IoLanguage />}
                     imgSrc="/profile/language.png"
                     label="Language"
@@ -146,9 +146,8 @@ export default function ProfilePage() {
                             <IoIosArrowForward />
                         </div>
                     }
-                    // onClick={() => setShowLanguageDialog(true)}
                     onClick={() => { router.push("/profile/language")}}
-                />
+                /> */}
                 <MenuItem
                     icon={<FaHeadset />}
                     imgSrc="/profile/Calling.png"
