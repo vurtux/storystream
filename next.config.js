@@ -51,8 +51,8 @@ module.exports = {
         destination: '/episode/:path*',
       },
       {
-        source: '/home/seeall/:path*',
-        destination: '/seeall/:path*',
+        source: '/home/see-all/:path*',
+        destination: '/see-all/:path*',
       },
     ]
     }

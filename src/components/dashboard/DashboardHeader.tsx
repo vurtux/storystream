@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
+// import 'swiper/css';
+// import 'swiper/css/pagination';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import slugify from 'slugify';
@@ -59,7 +59,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
                 spaceBetween={16}
                 slidesPerView={1}
                 loop={true}
-                autoplay={{ delay: 3500, disableOnInteraction: false }}
+                autoplay={{ delay: 2000, disableOnInteraction: false }}
                 pagination={{ clickable: true }}
                 modules={[Autoplay, Pagination]}
                 className="rounded-xl"

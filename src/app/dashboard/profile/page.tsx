@@ -118,7 +118,7 @@ export default function ProfilePage() {
                 </div>
             </div> */}
             <div className="w-full">
-                <Image height={251} width={380} alt="banner" src="/images/Promo & Discount.png" />
+                <Image height={251} width={380} alt="banner" src="/images/Promo_Discount.png" />
             </div>
 
             {/* Options */}

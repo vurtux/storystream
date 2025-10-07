@@ -92,8 +92,8 @@ export default function PodcastClient({ episode_id, title }: any) {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: episodeData.title,
-                    text: episodeData.subtitle || "Check out this podcast!",
+                    title: episodeData?.title,
+                    text: episodeData?.subtitle || "Check out this podcast!",
                     url: shareUrl,
                 });
             } catch (error) {
@@ -106,13 +106,13 @@ export default function PodcastClient({ episode_id, title }: any) {
     };
 
     const handleDownload = () => {
-        const fileUrl = episodeData.download_url || episodeData.stream_url;
+        const fileUrl = episodeData?.download_url || episodeData?.stream_url;
         const encoded = encodeURIComponent(fileUrl);
         const downloadUrl = `/api/download?url=${encoded}`;
 
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = `${episodeData.title || "podcast"}.mp3`;
+        link.download = `${episodeData?.title || "podcast"}.mp3`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -150,7 +150,7 @@ export default function PodcastClient({ episode_id, title }: any) {
             try {
                 const lang = localStorage.getItem("language")
                 const result = await getEpisodeDetail(Number(episode_id), lang);
-                const ep = result.response.podcast.podcast_episode_details[0];
+                const ep = result?.response?.podcast?.podcast_episode_details?.length > 0 ? result?.response?.podcast?.podcast_episode_details[0] : {};
                 setEpisodeData(ep);
                 localStorage.setItem("episodeData", JSON.stringify(ep));
                 setAudioSrc(ep?.stream_url);
@@ -218,7 +218,7 @@ export default function PodcastClient({ episode_id, title }: any) {
             <div className="w-full rounded-xl overflow-hidden shadow-lg">
                 {episodeData?.img_local_uri ? (
                     <Image
-                        src={episodeData.img_local_uri}
+                        src={episodeData?.img_local_uri || ""}
                         alt="Podcast Cover"
                         height={400}
                         width={1000}
@@ -232,7 +232,7 @@ export default function PodcastClient({ episode_id, title }: any) {
             </div>
 
             <div className="text-center mt-4">
-                <h2 className="font-bold text-lg">{episodeData.title || "No title"}</h2>
+                <h2 className="font-bold text-lg">{episodeData?.title || "No title"}</h2>
                 <p className="text-sm">{episodeData?.subtitle}</p>
             </div>
 

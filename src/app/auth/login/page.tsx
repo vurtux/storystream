@@ -73,7 +73,7 @@ export default function LoginPage() {
     };
 
     const moveToProfile = () => {
-        router.push('/profile');
+        router.push('/home');
         localStorage.setItem('menu', 'profile');
     }
 

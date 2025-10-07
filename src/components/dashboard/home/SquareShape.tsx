@@ -47,7 +47,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
     const handleSeeAll = (item: SquareContent[]) => {
         setSeeAllData(item);
         localStorage.setItem('seeAllData', JSON.stringify(item));
-        router.push(`/home/seeall/${slugify(data.bkName || "unknown", { lower: true })}`);
+        router.push(`/home/see-all/${slugify(data.bkName || "unknown", { lower: true })}`);
     };
 
     return (
