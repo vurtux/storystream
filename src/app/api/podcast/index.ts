@@ -11,7 +11,7 @@ interface PodcastPagingProps {
 
 export const handlePodcastPaging = async (params: PodcastPagingProps) => {
     return await requestApi({
-        url: `api/v1/feed/GetPodcastDetailPaging/eb3fb92a88badce847f88fb8c9bb9be6/web/${params.country}/${params?.lang}/${params?.conId}`,
+        url: `api/v1/feed/GetPodcastDetailPaging/eb3fb92a88badce847f88fb8c9bb9be6/web/${params.country || "IN"}/${params?.lang || "en"}/${params?.conId}`,
         method: 'GET',
         params: {
             page: params.page ?? 1,
