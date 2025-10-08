@@ -6,11 +6,12 @@ interface homeProps {
     langCode: string;
     mobileNo: string;
     isdCode: string;
+    country: string;
 }
 
 export const handleSearch = async (payload: homeProps) => {
 
-    const res = await api.post('/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/IN/en', payload);
+    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${payload?.country}/en`, payload);
     return res.data;
 };
 

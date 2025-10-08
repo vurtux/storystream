@@ -26,8 +26,9 @@ export default function SearchClient() {
 
     const fetchData = async () => {
         try {
+            const country = localStorage.getItem('country') || "";
             setLoading(true);
-            const result = await handleDefaultSearchApi();
+            const result = await handleDefaultSearchApi(country);
             setDefaultSearchData({
                 rankingSearch: result.response.result.result_ranking.podcasts_bucket.contents,
                 popularSearch: result.response.result.result_popular.podcasts_bucket.contents
@@ -51,7 +52,8 @@ export default function SearchClient() {
             return;
         }
         setSearch(value);
-        const result = await handleSearchApi(value);
+        const country = localStorage.getItem('country') || "";
+        const result = await handleSearchApi(value, country);
         setDefaultSearchData({
             rankingSearch: [],
             popularSearch: result?.response?.result?.podcasts_bucket?.contents

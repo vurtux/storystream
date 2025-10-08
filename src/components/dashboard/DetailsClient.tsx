@@ -115,12 +115,14 @@ const DetailsClient = ({ conId, title }: any) => {
     const fetchData = async () => {
         try {
             const lang: any = localStorage.getItem("language")
+            const country = localStorage.getItem('country') || "";
             const result = await handlePodcastPaging({
                 conId: Number(conId),
                 page: 1,
                 debug: false,
                 test: '1122',
-                lang: lang
+                lang: lang,
+                country
             });
             const podcast_details = result.response.podcast.podcast_details;
             setPodcastData(podcast_details);

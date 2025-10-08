@@ -1,7 +1,7 @@
 import api from '../../../lib/axios';
 
-export const handleHome = async (lang: any) => {
+export const handleHome = async (lang: any, country: any) => {
 
-    const res = await api.get(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/IN/${lang || 'en'}`);
+    const res = await api.get(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${country}/${lang || 'en'}`);
     return res.data;
 };

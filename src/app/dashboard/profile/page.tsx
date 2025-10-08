@@ -71,6 +71,7 @@ export default function ProfilePage() {
         router.push('/auth/login');
         localStorage.setItem('isLoggedIn', 'false');
         localStorage.setItem('loginData', '');
+        localStorage.setItem("authData", '');
     };
 
     const handleManageAccount = () => {
