@@ -101,14 +101,14 @@ const HomeClient = () => {
         if (res.response.status) {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('loginData', JSON.stringify(res.response));
-            router.push('/home');
             localStorage.setItem('menu', 'home');
+            router.push('/home');
             showSuccess('Login successfully!');
         } else {
             throw new Error("Verification failed");
         }
       } catch (error) {
-        console.error("Error validating user:", error);
+        console.log("Error validating user:", error);
       }
     };
 

@@ -104,7 +104,7 @@ const DetailsClient = ({ conId, title }: any) => {
                     url: shareUrl,
                 });
             } catch (error) {
-                console.error('Sharing failed:', error);
+                console.log('Sharing failed:', error);
             }
         } else {
             await navigator.clipboard.writeText(shareUrl);
@@ -131,7 +131,7 @@ const DetailsClient = ({ conId, title }: any) => {
             setAudioList(episodeIds);
             setEpisodeData(result.response.podcast.podcast_episode_details);
         } catch (error) {
-            console.error("Failed to fetch podcast:", error);
+            console.log("Failed to fetch podcast:", error);
         } finally {
             setLoading(false);
         }

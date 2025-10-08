@@ -35,7 +35,7 @@ export default function SearchClient() {
             });
             setLoading(false);
         } catch (error) {
-            console.error("Failed to fetch podcast:", error);
+            console.log("Failed to fetch podcast:", error);
             setLoading(false);
         }
     };

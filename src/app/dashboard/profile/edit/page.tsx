@@ -59,7 +59,7 @@ export default function EditProfilePage() {
                 setIsdCode(data?.isdCode || "91");
                 setGender(data?.gender || "M");
             } catch (error) {
-                console.error("Invalid JSON in localStorage loginData", error);
+                console.log("Invalid JSON in localStorage loginData", error);
             }
         }
     }, []);

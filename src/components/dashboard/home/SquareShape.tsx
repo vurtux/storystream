@@ -32,6 +32,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
     const { setDetailData, setSeeAllData } = useDashboard();
 
     const [loading, setLoading] = useState(true);
+    const [isVip, setIsVip] = useState(0);
 
     useEffect(() => {
         if (data?.contents?.length > 0) {
@@ -49,6 +50,11 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
         localStorage.setItem('seeAllData', JSON.stringify(item));
         router.push(`/home/see-all/${slugify(data.bkName || "unknown", { lower: true })}`);
     };
+
+    useEffect(() => {
+        const isVip: any = localStorage.getItem('loginData');
+        setIsVip(isVip);
+    }, [])
 
     return (
         <div>
@@ -101,7 +107,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
                                 /> : 
                                 <div className="min-w-[150px] h-[150px] rounded-lg bg-gray-300" />
                                 }
-                                <div className="absolute top-2 right-2">
+                                {!isVip && <div className="absolute top-2 right-2">
                                     <Image
                                         style={{ borderRadius: "20%" }}
                                         src="/images/myuze1.jpeg"
@@ -109,7 +115,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
                                         width={20}
                                         height={20}
                                     />
-                                </div>
+                                </div>}
                             </div>
                         ))}
                     </div>
