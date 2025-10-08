@@ -101,8 +101,8 @@ const HomeClient = () => {
         if (res.response.status) {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('loginData', JSON.stringify(res.response));
-            localStorage.setItem('menu', 'home');
             router.push('/home');
+            localStorage.setItem('menu', 'home');
             showSuccess('Login successfully!');
         } else {
             throw new Error("Verification failed");
