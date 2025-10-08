@@ -27,7 +27,7 @@ export const handlePodcastPaging = async (params: PodcastPagingProps) => {
 
 export const getEpisodeDetail = async (episode_id: number, lang: any, country: any) => {
     return await requestApi({
-        url: `api/v1/feed/GetEpisodeDetail/eb3fb92a88badce847f88fb8c9bb9be6/web/${country}/pl/${episode_id}`,
+        url: `api/v1/feed/GetEpisodeDetail/eb3fb92a88badce847f88fb8c9bb9be6/web/${country || "IN"}/pl/${episode_id}`,
         method: 'GET',
         // headers: {
         //     'device-os': 'web',
