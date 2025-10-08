@@ -1,13 +1,13 @@
 import api from '../../../lib/axios';
 
-export const handleDefaultSearchApi = async () => {
+export const handleDefaultSearchApi = async (country: any) => {
 
-    const res = await api.get('/api/v1/feed/GetSearchSuggestions/eb3fb92a88badce847f88fb8c9bb9be6/web/IN/en');
+    const res = await api.get(`/api/v1/feed/GetSearchSuggestions/eb3fb92a88badce847f88fb8c9bb9be6/web/${country}/en`);
     return res.data;
 };
 
-export const handleSearchApi = async (searchKey: any) => {
+export const handleSearchApi = async (searchKey: any, country: any) => {
 
-    const res = await api.get(`/api/v1/feed/GetSearchResults/eb3fb92a88badce847f88fb8c9bb9be6/web/IN/pl/${encodeURIComponent(searchKey)}`);
+    const res = await api.get(`/api/v1/feed/GetSearchResults/eb3fb92a88badce847f88fb8c9bb9be6/web/${country}/pl/${encodeURIComponent(searchKey)}`);
     return res.data;
 };

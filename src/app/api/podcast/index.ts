@@ -6,11 +6,12 @@ interface PodcastPagingProps {
     debug?: boolean;
     test?: string | number;
     lang?: string;
+    country: string;
 }
 
 export const handlePodcastPaging = async (params: PodcastPagingProps) => {
     return await requestApi({
-        url: `api/v1/feed/GetPodcastDetailPaging/eb3fb92a88badce847f88fb8c9bb9be6/web/in/${params?.lang}/${params?.conId}`,
+        url: `api/v1/feed/GetPodcastDetailPaging/eb3fb92a88badce847f88fb8c9bb9be6/web/${params.country}/${params?.lang}/${params?.conId}`,
         method: 'GET',
         params: {
             page: params.page ?? 1,
@@ -24,9 +25,9 @@ export const handlePodcastPaging = async (params: PodcastPagingProps) => {
     });
 };
 
-export const getEpisodeDetail = async (episode_id: number, lang: any) => {
+export const getEpisodeDetail = async (episode_id: number, lang: any, country: any) => {
     return await requestApi({
-        url: `api/v1/feed/GetEpisodeDetail/eb3fb92a88badce847f88fb8c9bb9be6/web/IN/pl/${episode_id}`,
+        url: `api/v1/feed/GetEpisodeDetail/eb3fb92a88badce847f88fb8c9bb9be6/web/${country}/pl/${episode_id}`,
         method: 'GET',
         // headers: {
         //     'device-os': 'web',

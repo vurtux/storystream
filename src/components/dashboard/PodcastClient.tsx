@@ -148,8 +148,9 @@ export default function PodcastClient({ episode_id, title }: any) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const lang = localStorage.getItem("language")
-                const result = await getEpisodeDetail(Number(episode_id), lang);
+                const lang = localStorage.getItem("language");
+                const country = localStorage.getItem('country') || "";
+                const result = await getEpisodeDetail(Number(episode_id), lang, country);
                 const ep = result?.response?.podcast?.podcast_episode_details?.length > 0 ? result?.response?.podcast?.podcast_episode_details[0] : {};
                 setEpisodeData(ep);
                 localStorage.setItem("episodeData", JSON.stringify(ep));
