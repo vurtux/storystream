@@ -21,8 +21,8 @@ const Menubar = () => {
     };
 
     useEffect(() => {
-        const currentDes: any = localStorage.getItem('menu');
-        setActiveMenu(currentDes);
+        const currentDes: any = typeof window !== 'undefined' ? localStorage.getItem('menu') : null;
+        setActiveMenu(currentDes || 'home');
     }, []);
 
     return (
