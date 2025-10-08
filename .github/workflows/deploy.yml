@@ -3,7 +3,7 @@ name: Deploy to GCE VM
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:   # <-- lets you trigger deploys manually from GitHub UI
+  workflow_dispatch:   # allow manual deploys from GitHub UI
 
 jobs:
   deploy:
@@ -57,14 +57,28 @@ jobs:
             tar xzf releases/app-release.tgz -C current_new
             mv current_new current
 
-            # ensure pm2 exists for this user
+            # Ensure PM2 is available for deploy user
+            export PATH=\$PATH:/home/deploy/.npm-global/bin
             command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
-            cd current
+            # Restart the app
             pm2 delete next-app >/dev/null 2>&1 || true
-            pm2 start npm --name next-app -- start -- -p 3000
+            pm2 start 'npx next start -p 3000' --name next-app --cwd $DEPLOY_PATH/current
             pm2 save
 
-            # cleanup old release
+            # Clean up old release
             rm -rf current_old || true
           "
+
+      - name: Health check
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          echo "Waiting for app to come online..."
+          sleep 10
+          if curl -fs http://$DEPLOY_HOST:3000 >/dev/null; then
+            echo "✅ Deployment verified successfully."
+          else
+            echo "❌ Deployment failed: app did not respond on port 3000."
+            exit 1
+          fi
