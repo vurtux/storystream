@@ -199,7 +199,7 @@ export default function PodcastClient({ episode_id, title }: any) {
         if(!isVip) {
             confirm();
         };
-        let parsedData = JSON.parse(isVip);
+        const parsedData = JSON.parse(isVip);
         if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
             confirm();
         }

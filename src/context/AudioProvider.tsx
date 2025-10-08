@@ -41,7 +41,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     const handlePlay = (episodeData: any) => {
         const isVip: any = localStorage.getItem('loginData');
         if(!isVip) return;
-        let parsedData = JSON.parse(isVip);
+        const parsedData = JSON.parse(isVip);
         if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
             return;
         }
