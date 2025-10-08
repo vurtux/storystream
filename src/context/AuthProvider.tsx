@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 const userInfo: UserInfo = JSON.parse(userInfoStr);
                 setAuth({ userInfo });
             } catch (err) {
-                console.error('Error parsing userInfo:', err);
+                console.log('Error parsing userInfo:', err);
             }
         }
     }, []);

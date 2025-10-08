@@ -30,9 +30,9 @@ export const requestApi = async ({
     } catch (error: unknown) {
         if (error && typeof error === 'object' && 'response' in error) {
             const err = error as { response: { data: unknown } };
-            console.error('API Error:', err.response.data);
+            console.log('API Error:', err.response.data);
         } else {
-            console.error('API Error:', (error as Error).message);
+            console.log('API Error:', (error as Error).message);
         }
         throw error;
     }

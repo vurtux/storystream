@@ -97,7 +97,7 @@ export default function PodcastClient({ episode_id, title }: any) {
                     url: shareUrl,
                 });
             } catch (error) {
-                console.error("Sharing failed:", error);
+                console.log("Sharing failed:", error);
             }
         } else {
             await navigator.clipboard.writeText(shareUrl);
@@ -159,7 +159,7 @@ export default function PodcastClient({ episode_id, title }: any) {
                     handlePlay(ep);
                 }, 1000);
             } catch (error) {
-                console.error("Failed to fetch podcast:", error);
+                console.log("Failed to fetch podcast:", error);
             }
         };
         fetchData();
@@ -196,7 +196,11 @@ export default function PodcastClient({ episode_id, title }: any) {
 
     const handleCheck = async(episodeData: any) => {
         const isVip: any = localStorage.getItem('loginData');
-        if(JSON.parse(isVip).profile.vip !== 1) {
+        if(!isVip) {
+            confirm();
+        };
+        let parsedData = JSON.parse(isVip);
+        if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
             confirm();
         }
         else {
