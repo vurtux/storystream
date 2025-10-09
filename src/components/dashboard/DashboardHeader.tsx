@@ -84,7 +84,10 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
               height={300}
               className="w-[336px] h-[300px] object-cover rounded-xl px-1"
             />
-            <div className="absolute inset-0 flex items-center justify-center mt-[80%]">
+            <div className="
+            absolute inset-0 flex items-center justify-center
+            mt-[75%] sm:mt-[60%] md:mt-[60%] lg:mt-[60%] xl:mt-[60%]
+            ">
               <button
                 onClick={() => handleDetail(slide.conId, slide.conName)}
                 className="bg-white text-black font-semibold px-5 py-2 shadow-sm hover:shadow-md rounded-md cursor-pointer"
