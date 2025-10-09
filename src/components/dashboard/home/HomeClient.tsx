@@ -119,12 +119,12 @@ const HomeClient = () => {
     }
 
     if (popupParam === "0") {
-      setPopupTitle("Title 0");
-      setPopupBody("This is the body text for popup 0.");
+      setPopupTitle("Title(0)");
+      setPopupBody("Click on ok to proceed for home page.");
       setShowPopup(true);
     } else if (popupParam === "1") {
-      setPopupTitle("Title 1");
-      setPopupBody("This is the body text for popup 1.");
+      setPopupTitle("Title(1)");
+      setPopupBody("Click on ok to proceed for home page.");
       setShowPopup(true);
     }
 
@@ -160,21 +160,59 @@ const HomeClient = () => {
 
       {/* Centered Popup (No background overlay) */}
       {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-white border border-gray-200 shadow-2xl rounded-2xl px-8 py-6 max-w-sm text-center pointer-events-auto">
-            <h2 className="text-lg font-semibold mb-3 text-gray-800">
-              {popupTitle}
-            </h2>
-            <p className="text-gray-600 mb-5 text-sm">{popupBody}</p>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="bg-blue-500 text-white px-5 py-2 text-sm rounded-md hover:bg-blue-600"
-            >
-              OK
-            </button>
-          </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md">
+    <div className="relative w-full max-w-md mx-4 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-2xl border border-gray-100">
+      
+      {/* Close Button */}
+      <button
+        onClick={() => setShowPopup(false)}
+        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+
+      {/* Content */}
+      <div className="p-8 text-center">
+        {/* Icon */}
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 text-white shadow-md">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-7 w-7"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M12 9v.01M12 3a9 9 0 100 18 9 9 0 000-18z"
+            />
+          </svg>
         </div>
-      )}
+
+        {/* Title */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+          {popupTitle}
+        </h2>
+
+        {/* Body */}
+        <p className="text-gray-600 text-sm leading-relaxed mb-6">
+          {popupBody}
+        </p>
+
+        {/* Button */}
+        <button
+          onClick={() => setShowPopup(false)}
+          className="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow-md hover:shadow-lg hover:brightness-110 transition-all duration-150"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
