@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
@@ -58,11 +58,8 @@ const HomeClient = () => {
   const searchParams: any = useSearchParams();
   const { setAuth } = useAuth();
   const [homeData, setHomeData] = useState<HomeData>();
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupTitle, setPopupTitle] = useState("");
-  const [popupBody, setPopupBody] = useState("");
+  const [showPopup, setShowPopup] = useState(false); // popup state
 
-  // Fetch home data
   const getHomeData = async () => {
     try {
       const lang = localStorage.getItem("language");
@@ -70,27 +67,32 @@ const HomeClient = () => {
       const res = await handleHome(lang, country);
       setHomeData(res.response.home);
     } catch (error) {
-      console.log("Error fetching home data:", error);
+      console.log("Error in login api", error);
     }
   };
 
-  // Initial auth validation if `sid` exists
+  useEffect(() => {
+    getHomeData();
+  }, []);
+
   useEffect(() => {
     const sid = searchParams.get("sid");
-    const countryParam = searchParams.get("country");
-
-    if (countryParam) {
-      localStorage.setItem("country", countryParam);
-    }
+    const country = searchParams.get("country");
 
     if (!sid) return;
+
+    if (country) {
+      localStorage.setItem("country", country);
+    }
 
     const validateUser = async () => {
       try {
         const payload = { sid };
         const res = await handleValidate(payload);
 
-        setAuth({ userInfo: res.response.profile });
+        setAuth({
+          userInfo: res.response.profile,
+        });
 
         if (res.response.status) {
           localStorage.setItem("isLoggedIn", "true");
@@ -107,32 +109,16 @@ const HomeClient = () => {
     };
 
     validateUser();
-  }, [searchParams, router, setAuth]);
+  }, [searchParams, router]);
 
-  // Handle country change & popup display
+  // Detect ?popup=0
   useEffect(() => {
     const popupParam = searchParams.get("popup");
-    const countryParam = searchParams.get("country");
-
-    if (countryParam) {
-      localStorage.setItem("country", countryParam);
-    }
-
     if (popupParam === "0") {
-      setPopupTitle("Title 0");
-      setPopupBody("This is the body text for popup 0.");
-      setShowPopup(true);
-    } else if (popupParam === "1") {
-      setPopupTitle("Title 1");
-      setPopupBody("This is the body text for popup 1.");
       setShowPopup(true);
     }
-
-    // Fetch home data after updating country
-    getHomeData();
   }, [searchParams]);
 
-  // Render home blocks
   const renderBlocks = () => {
     if (!homeData) return null;
 
@@ -158,19 +144,21 @@ const HomeClient = () => {
     <div className="relative">
       {renderBlocks()}
 
-      {/* Centered Popup (No background overlay) */}
+      {/* Centered Popup Card */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="bg-white border border-gray-200 shadow-2xl rounded-2xl px-8 py-6 max-w-sm text-center pointer-events-auto">
             <h2 className="text-lg font-semibold mb-3 text-gray-800">
-              {popupTitle}
+              Welcome!
             </h2>
-            <p className="text-gray-600 mb-5 text-sm">{popupBody}</p>
+            <p className="text-gray-600 mb-5 text-sm">
+              This popup is triggered by <b>?popup=0</b> in your URL.
+            </p>
             <button
               onClick={() => setShowPopup(false)}
               className="bg-blue-500 text-white px-5 py-2 text-sm rounded-md hover:bg-blue-600"
             >
-              OK
+              Close
             </button>
           </div>
         </div>

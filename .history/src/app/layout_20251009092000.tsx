@@ -38,8 +38,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no"
         />
-        <link rel="icon" href="/images/loginLogo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/loginLogo.png" />
+        <link rel="icon" href="/loginLogo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/loginLogo.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
 

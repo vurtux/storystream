@@ -31,15 +31,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           content="storystream, audio shows, audiobooks, podcasts, streaming audio, iOS, Android"
         />
         <meta name="author" content="StoryStream" />
-        <link rel="canonical" href="https://www.storystream.mobi" />
+        <link rel="canonical" href="https://www.storystream.app" />
         <meta name="robots" content="index, follow" />
         <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no"
         />
-        <link rel="icon" href="/images/loginLogo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/loginLogo.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
 

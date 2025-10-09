@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
@@ -62,7 +62,6 @@ const HomeClient = () => {
   const [popupTitle, setPopupTitle] = useState("");
   const [popupBody, setPopupBody] = useState("");
 
-  // Fetch home data
   const getHomeData = async () => {
     try {
       const lang = localStorage.getItem("language");
@@ -70,27 +69,32 @@ const HomeClient = () => {
       const res = await handleHome(lang, country);
       setHomeData(res.response.home);
     } catch (error) {
-      console.log("Error fetching home data:", error);
+      console.log("Error in login api", error);
     }
   };
 
-  // Initial auth validation if `sid` exists
+  useEffect(() => {
+    getHomeData();
+  }, []);
+
   useEffect(() => {
     const sid = searchParams.get("sid");
-    const countryParam = searchParams.get("country");
-
-    if (countryParam) {
-      localStorage.setItem("country", countryParam);
-    }
+    const country = searchParams.get("country");
 
     if (!sid) return;
+
+    if (country) {
+      localStorage.setItem("country", country);
+    }
 
     const validateUser = async () => {
       try {
         const payload = { sid };
         const res = await handleValidate(payload);
 
-        setAuth({ userInfo: res.response.profile });
+        setAuth({
+          userInfo: res.response.profile,
+        });
 
         if (res.response.status) {
           localStorage.setItem("isLoggedIn", "true");
@@ -107,16 +111,11 @@ const HomeClient = () => {
     };
 
     validateUser();
-  }, [searchParams, router, setAuth]);
+  }, [searchParams, router]);
 
-  // Handle country change & popup display
+  // Detect ?popup=0 or ?popup=1
   useEffect(() => {
     const popupParam = searchParams.get("popup");
-    const countryParam = searchParams.get("country");
-
-    if (countryParam) {
-      localStorage.setItem("country", countryParam);
-    }
 
     if (popupParam === "0") {
       setPopupTitle("Title 0");
@@ -127,12 +126,8 @@ const HomeClient = () => {
       setPopupBody("This is the body text for popup 1.");
       setShowPopup(true);
     }
-
-    // Fetch home data after updating country
-    getHomeData();
   }, [searchParams]);
 
-  // Render home blocks
   const renderBlocks = () => {
     if (!homeData) return null;
 
