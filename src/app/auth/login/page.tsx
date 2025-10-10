@@ -74,9 +74,8 @@ export default function LoginPage() {
 
     const moveToProfile = () => {
         router.push('/home');
-        localStorage.setItem('menu', 'profile');
+        localStorage.setItem('menu', 'home');
     }
-
 
     return (
         <div className="overFlowscroll">
