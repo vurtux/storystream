@@ -92,14 +92,14 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
         {data.contents.map((slide, idx) => (
           <div
   key={idx}
-  className={`relative overflow-hidden rounded-xl ${isSingleSlide ? 'w-full' : 'w-[336px]'}`}
+  className={`relative overflow-hidden ${isSingleSlide ? 'w-full' : 'w-[336px]'}`}
 >
   <Image
     src={slide.imgIrl}
     alt={slide.conName || 'headerimg'}
     height={336}
     width={336}
-    className="object-cover px-1.5"
+    className="object-cover px-1 rounded-2xl"
     priority={idx === 0}
   />
 
