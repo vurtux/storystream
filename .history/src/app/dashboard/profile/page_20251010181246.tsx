@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { FaUser, FaHeadset, FaFileAlt, FaSignOutAlt } from "react-icons/fa";
+import { MdSubscriptions } from "react-icons/md";
+import { BsShieldLock } from "react-icons/bs";
 import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 type MenuItemProps = {
+  icon?: React.ReactNode;
   imgSrc?: string;
   label: React.ReactNode | string;
   value?: React.ReactNode | string;
@@ -13,14 +17,18 @@ type MenuItemProps = {
   onClick?: () => void;
 };
 
-function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }: MenuItemProps) {
+function MenuItem({ icon, imgSrc, label, value, textColor = "text-gray-900", onClick }: MenuItemProps) {
   return (
     <div
       onClick={onClick}
       className="flex items-center justify-between py-3 cursor-pointer px-2 rounded select-none"
     >
       <div className="flex items-center space-x-3">
-        {imgSrc && <Image src={imgSrc} alt="icon" width={24} height={24} />}
+        {imgSrc && (
+          <div>
+            <Image src={imgSrc} alt="icon" width={24} height={24} />
+          </div>
+        )}
         <span
           style={{
             fontWeight: 600,
@@ -54,7 +62,6 @@ function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }
 export default function ProfilePage() {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [country, setCountry] = useState("ZA"); // default country
 
   const handleLogout = () => {
     localStorage.setItem('isLoggedIn', 'false');
@@ -75,13 +82,10 @@ export default function ProfilePage() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     setLoggedIn(isLoggedIn);
-
-    const savedCountry = localStorage.getItem('country');
-    if (savedCountry) setCountry(savedCountry);
   }, []);
 
   return (
-    <div className="p-4 flex flex-col min-h-screen">
+    <div className="p-4">
       {/* Top Bar */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
@@ -96,7 +100,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Menu Options */}
-      <div className="space-y-4 flex-1">
+      <div className="space-y-4">
         {/* Logged out only */}
         {!loggedIn && (
           <MenuItem
@@ -150,11 +154,6 @@ export default function ProfilePage() {
             textColor="text-red-500"
           />
         )}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-8 text-center text-gray-500 text-sm">
-        Version: 1.0.0 ({country})
       </div>
     </div>
   );
