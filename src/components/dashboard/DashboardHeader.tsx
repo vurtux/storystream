@@ -66,7 +66,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
     slidesToScroll: 1,
     speed: 500,
     autoplay: slideCount >= 3, // Autoplay only for 3+ slides
-    autoplaySpeed: slideCount === 2 ? 3000 : 2000, // Slower for 2 slides
+    autoplaySpeed: slideCount === 2 ? 4000 : 4000, // Slower for 2 slides
     responsive: [
       {
         breakpoint: 768, // Mobile
@@ -91,31 +91,28 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
       <Slider {...settings}>
         {data.contents.map((slide, idx) => (
           <div
-            key={idx}
-            className={`relative ${isSingleSlide ? 'w-full' : 'w-[336px]'} h-[300px]`}
-          >
-            <Image
-              src={slide.imgIrl}
-              alt={slide.conName || 'headerimg'}
-              width={336}
-              height={300}
-              className="w-full h-[300px] object-cover rounded-xl px-1"
-              priority={idx === 0} // Optimize first image
-            />
-            <div
-              className="
-                absolute inset-0 bottom-4 flex items-center justify-center
-                mt-[75%] sm:mt-[60%] md:mt-[60%] lg:mt-[60%] xl:mt-[60%]
-              "
-            >
-              <button
-                onClick={() => handleDetail(slide.conId, slide.conName)}
-                className="bg-white text-black font-semibold px-5 py-2 shadow-sm hover:shadow-md rounded-md cursor-pointer"
-              >
-                Listen Now
-              </button>
-            </div>
-          </div>
+  key={idx}
+  className={`relative overflow-hidden rounded-xl ${isSingleSlide ? 'w-full' : 'w-[336px]'}`}
+>
+  <Image
+    src={slide.imgIrl}
+    alt={slide.conName || 'headerimg'}
+    height={336}
+    width={336}
+    className="object-cover px-1.5"
+    priority={idx === 0}
+  />
+
+  {/* Button container positioned 10% above bottom */}
+  <div className="absolute bottom-[10%] inset-x-0 flex justify-center z-10">
+    <button
+      onClick={() => handleDetail(slide.conId, slide.conName)}
+      className="bg-white/90 text-black font-semibold px-5 py-2 rounded-md shadow-md hover:bg-white hover:shadow-lg transition-all cursor-pointer"
+    >
+      Listen Now
+    </button>
+  </div>
+</div>
         ))}
       </Slider>
     </div>
