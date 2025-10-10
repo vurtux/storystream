@@ -34,6 +34,10 @@ export interface DashboardContextType {
     setEpisodeId: Dispatch<SetStateAction<number>>;
     detailData: DetailProps;
     setDetailData: Dispatch<SetStateAction<DetailProps>>;
+    showSubscriptionDialog: boolean,
+    setShowSubscriptionDialog:  Dispatch<SetStateAction<boolean>>,
+    timer: number,
+    setTimer:  Dispatch<SetStateAction<number>>,
     seeAllData: ContentProps[];
     setSeeAllData: Dispatch<SetStateAction<ContentProps[]>>;
 }
@@ -54,6 +58,10 @@ const DashboardContext = createContext<DashboardContextType>({
     setEpisodeId: () => { },
     detailData: defaultDetailData,
     setDetailData: () => { },
+    showSubscriptionDialog: false,
+    setShowSubscriptionDialog: () => { },
+    timer: 5,
+    setTimer: () => { },
     seeAllData: [{
         conId: 0,
         conName: "",
@@ -84,6 +92,8 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
         is_billable: 0,
         ptype: ""
     }]);
+    const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
+    const [timer, setTimer] = useState(5);
 
     return (
         <DashboardContext.Provider
@@ -96,8 +106,12 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
                 setEpisodeId,
                 detailData,
                 setDetailData,
+                showSubscriptionDialog,
+                setShowSubscriptionDialog,
                 seeAllData,
-                setSeeAllData
+                setSeeAllData,
+                timer,
+                setTimer
             }}
         >
             {children}

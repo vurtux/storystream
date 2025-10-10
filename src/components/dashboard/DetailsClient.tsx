@@ -17,6 +17,7 @@ import useDashboard from '../../hooks/useDashboard';
 import { handlePodcastPaging } from '../../app/api/podcast';
 import { useAudio } from '../../hooks/useAudio';
 import slugify from 'slugify';
+import SubscribePage from './SubscribePage';
 
 interface PodcastDetail {
     podcast_id: number;
@@ -73,7 +74,7 @@ interface PodcastEpisodeDetail {
 const DetailsClient = ({ conId, title }: any) => {
     const router = useRouter();
 
-    const { setEpisodeId, detailData } = useDashboard();
+    const { setEpisodeId, detailData, setShowSubscriptionDialog } = useDashboard();
     const { setCurrentAudio, setAudioList } = useAudio();
     const [bookDetails, setBookDetails] = useState<any>(null);
     const [podcastData, setPodcastData] = useState<PodcastDetail>();
@@ -81,12 +82,31 @@ const DetailsClient = ({ conId, title }: any) => {
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
+    //     // setIsPlaying(false);
+    //     setCurrentAudio(index);
+    //     setEpisodeId(item.episode_id);
+    //     router.push(`/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`);
+    //     // router.push(`/episode?episode_id=${encodeURIComponent(item.episode_id)}`);
+    // }
+
+    const confirm = () => {
+       setShowSubscriptionDialog(true);
+    };
+
     const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
-        // setIsPlaying(false);
-        setCurrentAudio(index);
-        setEpisodeId(item.episode_id);
-        router.push(`/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`);
-        // router.push(`/episode?episode_id=${encodeURIComponent(item.episode_id)}`);
+        const isVip: any = localStorage.getItem("loginData");
+        if (!isVip) {
+        confirm();
+        }
+        const parsedData = JSON.parse(isVip);
+        if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+            confirm();
+        } else {
+            setCurrentAudio(index);
+            setEpisodeId(item.episode_id);
+            router.push(`/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`);
+        }
     }
 
     const handlePlayButton = () => {
@@ -169,11 +189,26 @@ const DetailsClient = ({ conId, title }: any) => {
             );
     };
 
+    // const handleDownload = (item: any) => {
+    //     const link = document.createElement("a");
+    //     link.href = item.download_url || item.stream_url;
+    //     link.download = `${item.title || "podcast"}.mp3`;
+    //     link.click();
+    // };
     const handleDownload = (item: any) => {
-        const link = document.createElement("a");
-        link.href = item.download_url || item.stream_url;
-        link.download = `${item.title || "podcast"}.mp3`;
-        link.click();
+        const isVip: any = localStorage.getItem("loginData");
+        if (!isVip) {
+        confirm();
+        }
+        const parsedData = JSON.parse(isVip);
+        if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+            confirm();
+        } else {
+            const link = document.createElement("a");
+            link.href = item.download_url || item.stream_url;
+            link.download = `${item.title || "podcast"}.mp3`;
+            link.click();
+        }
     };
 
     return (
@@ -304,6 +339,8 @@ const DetailsClient = ({ conId, title }: any) => {
                     </ul>
                 </div>
             )}
+
+            <SubscribePage />
         </div>
     );
 };
