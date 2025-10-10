@@ -17,7 +17,7 @@ export default function EditProfilePage() {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [countryCode, setCountryCode] = useState("ZA");
+    const [countryCode, setCountryCode] = useState("in");
     const [isdCode, setIsdCode] = useState("91");
     const [gender, setGender] = useState("M");
 
@@ -55,7 +55,7 @@ export default function EditProfilePage() {
                 setLastName(data?.lastname || "");
                 setEmail(data?.email || "");
                 setPhone(data?.mobileNo || "");
-                setCountryCode(data?.country || "ZA");
+                setCountryCode(data?.country || "in");
                 setIsdCode(data?.isdCode || "91");
                 setGender(data?.gender || "M");
             } catch (error) {

@@ -11,7 +11,7 @@ interface homeProps {
 
 export const handleSearch = async (payload: homeProps) => {
 
-    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${payload?.country || "ZA"}/en`, payload);
+    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${payload?.country || "IN"}/en`, payload);
     return res.data;
 };
 
