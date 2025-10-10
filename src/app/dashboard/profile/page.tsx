@@ -124,6 +124,12 @@ export default function ProfilePage() {
 
             {/* Options */}
             <div className="space-y-4">
+                {loggedIn === "false" && <MenuItem
+                    icon={<FaSignOutAlt />}
+                    imgSrc="/profile/Logout.png"
+                    label={<div onClick={handleLogout} className="font-semibold">Login</div>}
+                    textColor="text-red-500"
+                />}
                 {loggedIn === "true" && <MenuItem
                     icon={<FaUser />}
                     imgSrc="/profile/Profile.png"
@@ -169,12 +175,12 @@ export default function ProfilePage() {
                     value={<IoIosArrowForward />}
                     onClick={() => window.open("https://www.myuzeplay.com/static/tnc", "_self")}
                 />
-                <MenuItem
+                {loggedIn === "true" && <MenuItem
                     icon={<FaSignOutAlt />}
                     imgSrc="/profile/Logout.png"
-                    label={<div onClick={handleLogout} className="font-semibold">{loggedIn === "true" ? 'Logout' : 'Login'}</div>}
+                    label={<div onClick={handleLogout} className="font-semibold">Logout</div>}
                     textColor="text-red-500"
-                />
+                />}
             </div>
 
             {/* Language Dialog */}
