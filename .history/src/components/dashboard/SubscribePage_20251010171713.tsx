@@ -23,7 +23,7 @@ const SubscribePage = () => {
     isdCode: "",
     mobileNo: "",
     vip: 0,
-    country: "ZA",
+    country: "IN",
   });
 
   const handleSubscribe = async () => {

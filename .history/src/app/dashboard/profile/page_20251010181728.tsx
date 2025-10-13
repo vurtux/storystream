@@ -54,7 +54,6 @@ function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }
 export default function ProfilePage() {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [country, setCountry] = useState("ZA"); // default country
 
   const handleLogout = () => {
     localStorage.setItem('isLoggedIn', 'false');
@@ -74,10 +73,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const country = localStorage.getItem('country') || 'ZA';
     setLoggedIn(isLoggedIn);
-
-    const savedCountry = localStorage.getItem('country');
-    if (savedCountry) setCountry(savedCountry);
   }, []);
 
   return (
