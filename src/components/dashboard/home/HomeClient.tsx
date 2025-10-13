@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
@@ -7,6 +7,7 @@ import { handleValidate } from "../../../app/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
+import Image from "next/image";
 
 type SpotlightContent = {
   conId: number;
@@ -156,63 +157,79 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
+      <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-4 w-full max-w-[728px] mx-auto">
+        <div className="flex items-center space-x-3">
+          <span className="font-semibold text-sm">
+            <Image
+              src="/images/loginLogo.png"
+              alt={"icon"}
+              width={30}
+              height={30}
+              className="w-12 h-12 rounded-lg object-cover"
+            />
+          </span>
+          {/* <h1 className="text-center text-2xl sm:text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent drop-shadow-md">
+            Story Stream
+          </h1> */}
+        </div>
+      </div>
+      {/* Fixed Header */}
       {renderBlocks()}
 
       {/* Centered Popup (No background overlay) */}
       {showPopup && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md">
-    <div className="relative w-full max-w-md mx-4 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-2xl border border-gray-100">
-      
-      {/* Close Button */}
-      <button
-        onClick={() => setShowPopup(false)}
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
-        aria-label="Close"
-      >
-        ✕
-      </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md">
+          <div className="relative w-full max-w-md mx-4 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-2xl border border-gray-100">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+              aria-label="Close"
+            >
+              ✕
+            </button>
 
-      {/* Content */}
-      <div className="p-8 text-center">
-        {/* Icon */}
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 text-white shadow-md">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="h-7 w-7"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13 16h-1v-4h-1m1-4h.01M12 9v.01M12 3a9 9 0 100 18 9 9 0 000-18z"
-            />
-          </svg>
+            {/* Content */}
+            <div className="p-8 text-center">
+              {/* Icon */}
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 text-white shadow-md">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="h-7 w-7"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 16h-1v-4h-1m1-4h.01M12 9v.01M12 3a9 9 0 100 18 9 9 0 000-18z"
+                  />
+                </svg>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                {popupTitle}
+              </h2>
+
+              {/* Body */}
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                {popupBody}
+              </p>
+
+              {/* Button */}
+              <button
+                onClick={() => setShowPopup(false)}
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow-md hover:shadow-lg hover:brightness-110 transition-all duration-150"
+              >
+                OK
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* Title */}
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">
-          {popupTitle}
-        </h2>
-
-        {/* Body */}
-        <p className="text-gray-600 text-sm leading-relaxed mb-6">
-          {popupBody}
-        </p>
-
-        {/* Button */}
-        <button
-          onClick={() => setShowPopup(false)}
-          className="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow-md hover:shadow-lg hover:brightness-110 transition-all duration-150"
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };
