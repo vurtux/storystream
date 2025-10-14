@@ -94,16 +94,3 @@ body {
   height: 0 !important;
 }
 
-
-@keyframes scroll-x {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-scroll-x {
-  animation: scroll-x 25s linear infinite;
-}

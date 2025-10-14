@@ -291,16 +291,14 @@ export default function PodcastClient({ episode_id, title }: any) {
 
   const handleSubscribe = async() => {
         if(!userData?.userId || userData?.userId === null || userData?.userId === "") {
-            // router.push('/auth/login');
-            router.push('/dashboard/buysubscription');
-
+            router.push('/auth/login');
+            
         }
         else {
-          router.push('/dashboard/buysubscription');
-          //  window.open(
-          //   `https://payment.myuze.app/p/index.php?&userid=${userData.userId}&deviceId=${20030107}&country=${userData?.country}&mobileNo=${userData?.mobileNo}&isdCode=${userData?.isdCode}&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
-          //   "_self"
-          //  );
+           window.open(
+            `https://payment.myuze.app/p/index.php?&userid=${userData.userId}&deviceId=${20030107}&country=${userData?.country}&mobileNo=${userData?.mobileNo}&isdCode=${userData?.isdCode}&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
+            "_self"
+           );
         }
         setShowSubscriptionDialog(false);
   }

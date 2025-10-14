@@ -61,8 +61,7 @@ export default function ProfilePage() {
     localStorage.removeItem('loginData');
     localStorage.removeItem('authData');
     setLoggedIn(false);
-    // router.push('/auth/login');
-    router.push('/dashboard/buysubscription');
+    router.push('/auth/login');
   };
 
   const handleLogin = () => {

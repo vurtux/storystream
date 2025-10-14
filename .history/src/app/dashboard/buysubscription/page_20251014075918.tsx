@@ -100,7 +100,7 @@ const SubscriptionPage: React.FC = () => {
         </div>
 
         {/* 🌟 Content Section */}
-        <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
+        <div className="flex-1 w-full max-w-2xl mx-auto pb-32">
           {/* Header */}
           <div className="p-4 pt-6 text-center">
             <div className="flex justify-center mb-2">
@@ -187,14 +187,12 @@ const SubscriptionPage: React.FC = () => {
         </div>
 
         {/* Bottom CTA - Fixed with Selected Plan */}
-        <div className="fixed bottom-0 left-0 right-0 p-5 bg-white shadow-2xl">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl w-full text-center shadow-2xl border-t-2 border-purple-200">
           <div className="max-w-md mx-auto">
-            <div className="mb-3 text-center">
-              <span className="text-sm font-bold text-purple-700">{plans[selectedPlan].period} Plan</span>
+            <div className="mb-3 text-sm text-gray-600">
+              <span className="font-semibold text-purple-700">{plans[selectedPlan].period} Plan</span>
               {plans[selectedPlan].savings && (
-                <span className="ml-2 text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full">
-                  Save {plans[selectedPlan].savings}
-                </span>
+                <span className="ml-2 text-green-600 font-bold">• Save {plans[selectedPlan].savings}</span>
               )}
             </div>
             <button
@@ -206,7 +204,7 @@ const SubscriptionPage: React.FC = () => {
             >
               CONTINUE FOR <span className="ml-2 font-extrabold text-2xl">{plans[selectedPlan].price}</span>
             </button>
-            <p className="text-xs mt-3 text-center text-gray-600 font-semibold">
+            <p className="text-xs mt-3 text-gray-600 font-semibold">
               Then {plans[selectedPlan].billing}. Cancel anytime.
             </p>
           </div>

@@ -35,17 +35,16 @@ const SubscribePage = () => {
       // router.push("/auth/login");
       router.push('/dashboard/buysubscription');
     } else {
-      // window.open(
-      //   `https://payment.myuze.app/p/index.php?&userid=${
-      //     userData.userId
-      //   }&deviceId=${20030107}&country=${userData?.country}&mobileNo=${
-      //     userData?.mobileNo
-      //   }&isdCode=${
-      //     userData?.isdCode
-      //   }&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
-      //   "_self"
-      // );
-      router.push('/dashboard/buysubscription');
+      window.open(
+        `https://payment.myuze.app/p/index.php?&userid=${
+          userData.userId
+        }&deviceId=${20030107}&country=${userData?.country}&mobileNo=${
+          userData?.mobileNo
+        }&isdCode=${
+          userData?.isdCode
+        }&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
+        "_self"
+      );
     }
     setShowSubscriptionDialog(false);
   };

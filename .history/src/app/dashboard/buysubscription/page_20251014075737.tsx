@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import banner from './../../../../public/images/subbanner.png';
 
@@ -10,16 +10,16 @@ interface FeatureRowProps {
 }
 
 const FeatureRow: React.FC<FeatureRowProps> = ({ name, freeIcon, playIcon }) => {
-  const freeIconColor = freeIcon === '✗' ? 'text-red-400' : 'text-blue-700';
-  const playIconColor = playIcon === '✓' ? 'text-green-500' : 'text-gray-400';
+  const freeIconColor = freeIcon === 'x' ? 'text-gray-400' : 'text-blue-700';
+  const playIconColor = playIcon === '✓' ? 'text-purple-700' : 'text-gray-400';
 
   return (
-    <div className="flex items-center py-3 border-b border-gray-200 last:border-b-0 hover:bg-purple-50 transition-colors">
+    <div className="flex items-center py-3 border-b border-gray-200 last:border-b-0">
       <div className="flex-1 pr-4 text-sm text-gray-800 font-medium">{name}</div>
-      <div className={`w-[20%] text-center text-xl font-bold ${freeIconColor}`}>
+      <div className={`w-[20%] text-center text-lg font-bold ${freeIconColor}`}>
         {freeIcon}
       </div>
-      <div className={`w-[20%] text-center text-xl font-bold ${playIconColor}`}>
+      <div className={`w-[20%] text-center text-lg font-bold ${playIconColor}`}>
         {playIcon}
       </div>
     </div>
@@ -28,13 +28,11 @@ const FeatureRow: React.FC<FeatureRowProps> = ({ name, freeIcon, playIcon }) => 
 
 const SubscriptionPage: React.FC = () => {
   const plans = [
-    { price: '₹75', period: 'Weekly', billing: '₹75/week', savings: null },
-    { price: '₹99', period: 'Monthly', billing: '₹99/month', savings: null },
-    { price: '₹249', period: 'Quarterly', billing: '₹83/month', savings: '16%' },
-    { price: '₹599', period: 'Yearly', billing: '₹50/month', savings: '50%' },
+    { price: '₹75', period: 'Weekly' },
+    { price: '₹99', period: 'Monthly' },
+    { price: '₹249', period: 'Quarterly' },
+    { price: '₹599', period: 'Yearly' },
   ];
-
-  const [selectedPlan, setSelectedPlan] = useState(0);
 
   const features = [
     'All Shows Unlocked',
@@ -61,17 +59,6 @@ const SubscriptionPage: React.FC = () => {
           .animate-scroll-x {
             animation: scroll-x 40s linear infinite;
             will-change: transform;
-          }
-          @keyframes pulse-glow {
-            0%, 100% {
-              box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
-            }
-            50% {
-              box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
-            }
-          }
-          .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
           }
         `
       }} />
@@ -100,7 +87,7 @@ const SubscriptionPage: React.FC = () => {
         </div>
 
         {/* 🌟 Content Section */}
-        <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
+        <div className="flex-1 w-full max-w-2xl mx-auto">
           {/* Header */}
           <div className="p-4 pt-6 text-center">
             <div className="flex justify-center mb-2">
@@ -115,40 +102,15 @@ const SubscriptionPage: React.FC = () => {
 
             {/* Plans */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-2">
-              {plans.map((plan, i) => (
+              {plans.map(({ price, period }, i) => (
                 <div
                   key={i}
-                  onClick={() => setSelectedPlan(i)}
-                  className={`p-4 rounded-2xl bg-white shadow-lg border-2 text-center 
-                  cursor-pointer transition-all duration-300 relative overflow-hidden
-                  ${selectedPlan === i 
-                    ? 'border-purple-600 scale-105 shadow-2xl pulse-glow' 
-                    : 'border-purple-200 hover:border-purple-400 hover:scale-102'
-                  }`}
+                  className="p-5 rounded-2xl bg-white shadow-xl border-2 text-center border-purple-200 
+                  cursor-pointer transition-all duration-300 hover:scale-105 hover:border-purple-500 hover:shadow-2xl
+                  active:scale-95"
                 >
-                  {plan.savings && (
-                    <div className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-xl">
-                      SAVE {plan.savings}
-                    </div>
-                  )}
-                  {selectedPlan === i && (
-                    <div className="absolute -top-1 -right-1 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                      ✓
-                    </div>
-                  )}
-                  <span className={`text-2xl font-extrabold block transition-colors ${
-                    selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
-                  }`}>
-                    {plan.price}
-                  </span>
-                  <span className="text-xs text-gray-600 font-semibold mt-1 block">
-                    {plan.period}
-                  </span>
-                  {plan.billing !== `${plan.price}/${plan.period.toLowerCase()}` && (
-                    <span className="text-[10px] text-purple-600 font-bold mt-1 block">
-                      {plan.billing}
-                    </span>
-                  )}
+                  <span className="text-2xl font-extrabold block text-purple-700">{price}</span>
+                  <span className="text-xs text-gray-600 font-semibold mt-1 block">{period}</span>
                 </div>
               ))}
             </div>
@@ -186,30 +148,20 @@ const SubscriptionPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom CTA - Fixed with Selected Plan */}
-        <div className="fixed bottom-0 left-0 right-0 p-5 bg-white shadow-2xl">
-          <div className="max-w-md mx-auto">
-            <div className="mb-3 text-center">
-              <span className="text-sm font-bold text-purple-700">{plans[selectedPlan].period} Plan</span>
-              {plans[selectedPlan].savings && (
-                <span className="ml-2 text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full">
-                  Save {plans[selectedPlan].savings}
-                </span>
-              )}
-            </div>
-            <button
-              className="w-full h-16 rounded-2xl text-white font-bold uppercase text-lg
-                         bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 
-                         flex items-center justify-center transition-all duration-300 
-                         hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
-                         shadow-xl"
-            >
-              CONTINUE FOR <span className="ml-2 font-extrabold text-2xl">{plans[selectedPlan].price}</span>
-            </button>
-            <p className="text-xs mt-3 text-center text-gray-600 font-semibold">
-              Then {plans[selectedPlan].billing}. Cancel anytime.
-            </p>
-          </div>
+        {/* Bottom CTA */}
+        <div className="p-4 pt-6 sticky bottom-0 bg-white/95 backdrop-blur-xl w-full text-center shadow-2xl border-t-2 border-purple-200">
+          <button
+            className="w-full max-w-md mx-auto h-16 rounded-2xl text-white font-bold uppercase text-lg
+                       bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 
+                       flex items-center justify-center transition-all duration-300 
+                       hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
+                       shadow-xl"
+          >
+            CONTINUE FOR <span className="ml-2 font-extrabold text-2xl">₹75</span>
+          </button>
+          <p className="text-xs mt-3 text-gray-600 font-semibold">
+            Then ₹75/weekly. Cancel anytime.
+          </p>
         </div>
       </div>
     </>
