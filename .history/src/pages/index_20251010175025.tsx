@@ -7,16 +7,15 @@ import Image from "next/image";
 
 const LandingPage = () => {
   return (
-    <div className="relative w-full h-screen block md:hidden overflow-hidden">
+    <div className="relative w-full h-screen block md:hidden">
       {/* Only visible on mobile (md:hidden) */}
-      <div className="relative w-full h-full">
+      <div className="relative mx-auto h-full w-full">
         <Image
           src="/images/landing.png"
           alt="Landing Background"
           fill
-          className="object-contain"
+          className="object-cover"
           priority
-          quality={100}
         />
       </div>
     </div>

@@ -118,8 +118,7 @@ export default function SubscriptionClient() {
         }}
       >
         {/* Auto-scrolling Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 mt-0 pt-0">
-
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (

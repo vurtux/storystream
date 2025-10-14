@@ -28,24 +28,24 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
 
 export default function SubscriptionClient() {
   const plans = [
-    {
-      price: 'R 5',
-      period: 'Daily',
-      billing: 'R 5/day',
+    { 
+      price: 'R 5', 
+      period: 'Daily', 
+      billing: 'R 5/day', 
       savings: null,
       link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t'
     },
-    {
-      price: 'R 25',
-      period: 'Weekly',
-      billing: 'R 25/week',
+    { 
+      price: 'R 25', 
+      period: 'Weekly', 
+      billing: 'R 25/week', 
       savings: null,
       link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t'
     },
-    {
-      price: 'R 80',
-      period: 'Monthly',
-      billing: 'R 80/month',
+    { 
+      price: 'R 80', 
+      period: 'Monthly', 
+      billing: 'R 80/month', 
       savings: '36%',
       link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t'
     },
@@ -110,7 +110,7 @@ export default function SubscriptionClient() {
           }
         `
       }} />
-
+      
       <div
         className="min-h-screen w-full flex flex-col text-gray-800"
         style={{
@@ -118,20 +118,19 @@ export default function SubscriptionClient() {
         }}
       >
         {/* Auto-scrolling Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 mt-0 pt-0">
-
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
                 <div key={i} className="flex-shrink-0" style={{ marginLeft: i === 0 ? '0' : '-2px' }}>
                   <Image
-                    src="/images/subbanner.png"
-                    alt="banner"
-                    width={300}
-                    height={160}
-                    className="h-[160px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
-                    unoptimized
-                  />
+  src="/images/subbanner.png"
+  alt="banner"
+  width={300}
+  height={160}
+  className="h-[160px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
+  unoptimized
+/>
 
                 </div>
               ))}
@@ -161,10 +160,10 @@ export default function SubscriptionClient() {
                   onClick={() => setSelectedPlan(i)}
                   className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center 
                   cursor-pointer transition-all duration-300 relative overflow-hidden
-                  ${selectedPlan === i
-                      ? 'border-purple-600 scale-105 shadow-2xl pulse-glow'
-                      : 'border-purple-200 hover:border-purple-400 hover:scale-102'
-                    }`}
+                  ${selectedPlan === i 
+                    ? 'border-purple-600 scale-105 shadow-2xl pulse-glow' 
+                    : 'border-purple-200 hover:border-purple-400 hover:scale-102'
+                  }`}
                 >
                   {plan.savings && (
                     <div className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-xl">
@@ -176,8 +175,9 @@ export default function SubscriptionClient() {
                       ✓
                     </div>
                   )}
-                  <span className={`text-xl font-extrabold block transition-colors ${selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
-                    }`}>
+                  <span className={`text-xl font-extrabold block transition-colors ${
+                    selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
+                  }`}>
                     {plan.price}
                   </span>
                   <span className="text-[11px] text-gray-600 font-semibold mt-0.5 block">
