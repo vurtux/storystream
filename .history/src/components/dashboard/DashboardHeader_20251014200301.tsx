@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import slugify from 'slugify';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import './HeaderSlider.css'; // custom dots styles
+import './HeaderSlider.css'; // your custom dots styles
 
 interface SpotlightContent {
   conId: number;
@@ -38,9 +38,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
 
   const handleDetail = (conId: number, conName: string) => {
     router.push(
-      `/home/podcast/${encodeURIComponent(conId)}/${slugify(conName || 'unknown', {
-        lower: true,
-      })}`
+      `/home/podcast/${encodeURIComponent(conId)}/${slugify(conName || 'unknown', { lower: true })}`
     );
   };
 
@@ -57,9 +55,9 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
   const slideCount = data.contents.length;
 
   const settings = {
-    dots: true, // ✅ Always show dots
+    dots: slideCount > 1,
     arrows: false,
-    infinite: slideCount>1?true:false, // Always scroll infinitely (even one slide)
+    infinite:slideCount? false:true,
     centerMode: true,
     centerPadding: '10%',
     slidesToShow: 1,
@@ -67,24 +65,15 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
     speed: 600,
     autoplay: true,
     autoplaySpeed: 4000,
-    adaptiveHeight: false,
     responsive: [
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 1,
-          centerPadding: '8%',
+          centerPadding: '10%',
         },
       },
     ],
-    appendDots: (dots: any) => (
-      <div style={{ bottom: '-25px' }}>
-        <ul className="!m-0 flex justify-center gap-1">{dots}</ul>
-      </div>
-    ),
-    customPaging: () => (
-      <div className="custom-dot w-2 h-2 rounded-full bg-purple-500 pt-2" />
-    ),
   };
 
   return (

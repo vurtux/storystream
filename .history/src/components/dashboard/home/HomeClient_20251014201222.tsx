@@ -167,7 +167,7 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-1 w-full max-w-[728px] mx-auto">
+      <div className="sticky top-20 z-40 flex items-center justify-between text-dark py-4 w-full max-w-[728px] mx-auto">
         <div className="flex items-center space-x-3">
           <span className="font-semibold text-sm">
             <Image
@@ -180,7 +180,6 @@ const HomeClient = () => {
           </span>
         </div>
       </div>
-      
 
       {/* Render home sections */}
       {renderBlocks()}

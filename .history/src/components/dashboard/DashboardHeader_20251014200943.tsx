@@ -59,7 +59,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
   const settings = {
     dots: true, // ✅ Always show dots
     arrows: false,
-    infinite: slideCount>1?true:false, // Always scroll infinitely (even one slide)
+    infinite: slideCount>1?true, // Always scroll infinitely (even one slide)
     centerMode: true,
     centerPadding: '10%',
     slidesToShow: 1,

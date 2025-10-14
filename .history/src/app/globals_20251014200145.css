@@ -101,3 +101,7 @@ html, body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+div {
+  display: block;
+  flex-direction: column;
+}

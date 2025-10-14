@@ -82,9 +82,9 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
         <ul className="!m-0 flex justify-center gap-1">{dots}</ul>
       </div>
     ),
-    customPaging: () => (
-      <div className="custom-dot w-2 h-2 rounded-full bg-purple-500 pt-2" />
-    ),
+    // customPaging: () => (
+    //   <div className="custom-dot w-2 h-2 rounded-full bg-purple-500 pt-2" />
+    // ),
   };
 
   return (

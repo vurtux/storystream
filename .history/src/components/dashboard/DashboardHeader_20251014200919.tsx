@@ -79,7 +79,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
     ],
     appendDots: (dots: any) => (
       <div style={{ bottom: '-25px' }}>
-        <ul className="!m-0 flex justify-center gap-1">{dots}</ul>
+        <ul className="!m-0 flex justify-center gap-0">{dots}</ul>
       </div>
     ),
     customPaging: () => (

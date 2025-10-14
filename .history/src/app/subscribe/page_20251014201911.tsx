@@ -15,22 +15,43 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
 
   return (
     <div className="flex items-center py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-purple-50 transition-colors">
-      <div className="flex-1 pr-3 text-[13px] text-gray-800 font-medium">{name}</div>
-      <div className={`w-[20%] text-center text-lg font-bold ${freeIconColor}`}>{freeIcon}</div>
-      <div className={`w-[20%] text-center text-lg font-bold ${playIconColor}`}>{playIcon}</div>
+      {/* <div className="flex-1 pr-3 text-[13px] text-gray-800 font-medium">{name}</div>
+      <div className={`w-[20%] text-center text-lg font-bold ${freeIconColor}`}>
+        {freeIcon}
+      </div>
+      <div className={`w-[20%] text-center text-lg font-bold ${playIconColor}`}>
+        {playIcon}
+      </div> */}
     </div>
   );
 };
 
 export default function SubscriptionClient() {
   const plans = [
-    { price: 'R 5', period: 'Daily', billing: 'R 5/day', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t' },
-    { price: 'R 25', period: 'Weekly', billing: 'R 25/week', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t' },
-    { price: 'R 80', period: 'Monthly', billing: 'R 80/month', savings: '36%', link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t' },
+    {
+      price: 'R 5',
+      period: 'Daily',
+      billing: 'R 5/day',
+      savings: null,
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t'
+    },
+    {
+      price: 'R 25',
+      period: 'Weekly',
+      billing: 'R 25/week',
+      savings: null,
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t'
+    },
+    {
+      price: 'R 80',
+      period: 'Monthly',
+      billing: 'R 80/month',
+      savings: '36%',
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t'
+    },
   ];
 
   const [selectedPlan, setSelectedPlan] = useState(0);
-  const [loading, setLoading] = useState(false);
 
   const features = [
     'All Shows Unlocked',
@@ -43,12 +64,9 @@ export default function SubscriptionClient() {
   ];
 
   const handleContinue = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.location.href = plans[selectedPlan].link;
-      }
-    }, 1800);
+    if (typeof window !== 'undefined') {
+      window.location.href = plans[selectedPlan].link;
+    }
   };
 
   return (
@@ -62,119 +80,46 @@ export default function SubscriptionClient() {
             font-style: normal;
             font-display: swap;
           }
+          
           * {
             font-family: 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           }
-          @keyframes scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-          .animate-scroll-x { animation: scroll-x 40s linear infinite; will-change: transform; }
           
-          @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
+          @keyframes scroll-x {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
           }
-          
-          @keyframes pulse-ring { 
-            0% { transform: scale(0.8); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.3; }
-            100% { transform: scale(0.8); opacity: 1; }
+          .animate-scroll-x {
+            animation: scroll-x 40s linear infinite;
+            will-change: transform;
           }
-          
-          @keyframes bounce-loader {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+          @keyframes pulse-glow {
+            0%, 100% {
+              box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+            }
+            50% {
+              box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
+            }
           }
-          
-          .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-          }
-          
-          .loader-spinner {
-            width: 70px;
-            height: 70px;
-            border: 6px solid rgba(255, 255, 255, 0.2);
-            border-top: 6px solid #9333ea;
-            border-right: 6px solid #ec4899;
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
-          }
-          
-          .loader-ring {
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            border: 3px solid rgba(147, 51, 234, 0.3);
-            border-radius: 50%;
-            animation: pulse-ring 2s ease-in-out infinite;
-          }
-          
-          .loader-dots {
-            display: flex;
-            gap: 8px;
-          }
-          
-          .loader-dot {
-            width: 12px;
-            height: 12px;
-            background: linear-gradient(135deg, #9333ea, #ec4899);
-            border-radius: 50%;
-            animation: bounce-loader 1s ease-in-out infinite;
-            box-shadow: 0 0 15px rgba(147, 51, 234, 0.6);
-          }
-          
-          .loader-dot:nth-child(2) {
-            animation-delay: 0.2s;
-          }
-          
-          .loader-dot:nth-child(3) {
-            animation-delay: 0.4s;
-          }
-          
-          .loader-text {
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(147, 51, 234, 0.8);
+          .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
           }
         `
       }} />
 
       <div
         className="min-h-screen w-full flex flex-col text-gray-800"
-        style={{ background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)' }}
+        style={{
+          background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)',
+        }}
       >
-        {/* Full Screen Loader */}
-        {loading && (
-          <div className="loader-container">
-            <div style={{ position: 'relative' }}>
-              <div className="loader-ring"></div>
-              <div className="loader-spinner"></div>
-            </div>
-            <div className="loader-dots">
-              <div className="loader-dot"></div>
-              <div className="loader-dot"></div>
-              <div className="loader-dot"></div>
-            </div>
-            <div className="loader-text">Processing...</div>
-          </div>
-        )}
+        {/* Auto-scrolling Banner */}
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 mt-0 pt-0">
 
-        {/* Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 m-0 p-0">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
@@ -184,7 +129,7 @@ export default function SubscriptionClient() {
                     alt="banner"
                     width={300}
                     height={160}
-                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
+                    className="h-[160px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
                     unoptimized
                   />
                 </div>
@@ -193,10 +138,13 @@ export default function SubscriptionClient() {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content Section */}
         <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
-          <div className="p-4 pt-3 text-center">
-            <div className="flex justify-center mb-1.5"><span className="text-3xl">⚡</span></div>
+          {/* Header */}
+          <div className="p-4 pt-4 text-center">
+            <div className="flex justify-center mb-1.5">
+              <span className="text-3xl">⚡</span>
+            </div>
             <h1 className="text-2xl font-bold mb-1.5 text-gray-900">
               Subscribe to <span className="text-purple-700">storyStream</span>
             </h1>
@@ -210,8 +158,9 @@ export default function SubscriptionClient() {
                 <div
                   key={i}
                   onClick={() => setSelectedPlan(i)}
-                  className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center cursor-pointer transition-all duration-300 relative overflow-hidden
-                    ${selectedPlan === i
+                  className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center 
+                  cursor-pointer transition-all duration-300 relative overflow-hidden
+                  ${selectedPlan === i
                       ? 'border-purple-600 scale-105 shadow-2xl pulse-glow'
                       : 'border-purple-200 hover:border-purple-400 hover:scale-102'
                     }`}
@@ -226,7 +175,8 @@ export default function SubscriptionClient() {
                       ✓
                     </div>
                   )}
-                  <span className={`text-xl font-extrabold block transition-colors ${selectedPlan === i ? 'text-purple-700' : 'text-gray-800'}`}>
+                  <span className={`text-xl font-extrabold block transition-colors ${selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
+                    }`}>
                     {plan.price}
                   </span>
                   <span className="text-[11px] text-gray-600 font-semibold mt-0.5 block">
@@ -237,26 +187,42 @@ export default function SubscriptionClient() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* Premium Features */}
           <div className="mt-5 p-5 pb-3 mx-4 bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-purple-100">
             <h2 className="text-lg font-bold text-center mb-4 text-gray-900">
               Premium features with <span className="text-purple-700">storyStream</span>
             </h2>
+
             <div className="flex items-center mb-2.5 text-xs font-bold border-b-2 border-purple-300 pb-2.5">
               <div className="flex-1 pr-3"></div>
               <div className="w-[20%] text-center font-bold text-gray-500">Free</div>
               <div className="w-[20%] text-center font-extrabold text-purple-700">Pro</div>
             </div>
-            {features.map((f, i) => (
-              <FeatureRow key={i} name={f} freeIcon="✗" playIcon="✓" />
+
+            {features.map((feature, i) => (
+              <FeatureRow key={i} name={feature} freeIcon="✗" playIcon="✓" />
             ))}
+          </div>
+
+          {/* Offer Terms */}
+          <div className="p-4 pt-5 mx-4 text-left">
+            <h3 className="text-[13px] font-bold mb-2.5 text-gray-900">
+              Promotional Offer Terms
+            </h3>
+            <ul className="list-disc pl-4 text-[11px] text-gray-700 space-y-1.5 leading-relaxed">
+              <li>
+                Subscriptions at the offer price remain valid at renewal unless changed.
+              </li>
+              <li>Cancel anytime via Profile → Manage storyStream.</li>
+              <li>Free Trials (if any) are limited to one per user.</li>
+            </ul>
           </div>
         </div>
 
         {/* Bottom CTA */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-2xl">
-          <div className="max-w-md mx-auto text-center">
-            <div className="mb-2.5">
+          <div className="max-w-md mx-auto">
+            <div className="mb-2.5 text-center">
               <span className="text-[13px] font-bold text-purple-700">{plans[selectedPlan].period} Plan</span>
               {plans[selectedPlan].savings && (
                 <span className="ml-1.5 text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">
@@ -266,16 +232,15 @@ export default function SubscriptionClient() {
             </div>
             <button
               onClick={handleContinue}
-              disabled={loading}
               className="w-full h-14 rounded-2xl text-white font-bold uppercase text-base
                          bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 
                          flex items-center justify-center transition-all duration-300 
                          hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
-                         shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                         shadow-xl"
             >
               CONTINUE FOR <span className="ml-2 font-extrabold text-xl">{plans[selectedPlan].price}</span>
             </button>
-            <p className="text-[10px] mt-2.5 text-gray-600 font-semibold">
+            <p className="text-[10px] mt-2.5 text-center text-gray-600 font-semibold">
               Then {plans[selectedPlan].billing}. Cancel anytime.
             </p>
           </div>

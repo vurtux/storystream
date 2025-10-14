@@ -5,9 +5,7 @@ import Slider from 'react-slick';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import slugify from 'slugify';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import './HeaderSlider.css'; // custom dots styles
+import './HeaderSlider.css'; // Custom styles for dots
 
 interface SpotlightContent {
   conId: number;
@@ -38,9 +36,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
 
   const handleDetail = (conId: number, conName: string) => {
     router.push(
-      `/home/podcast/${encodeURIComponent(conId)}/${slugify(conName || 'unknown', {
-        lower: true,
-      })}`
+      `/home/podcast/${encodeURIComponent(conId)}/${slugify(conName || 'unknown', { lower: true })}`
     );
   };
 
@@ -56,24 +52,24 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
 
   const slideCount = data.contents.length;
 
+  // ✅ Corrected slider settings (always horizontal)
   const settings = {
-    dots: true, // ✅ Always show dots
+    dots: slideCount > 1,
     arrows: false,
-    infinite: slideCount>1?true:false, // Always scroll infinitely (even one slide)
+    infinite: true,
     centerMode: true,
-    centerPadding: '10%',
-    slidesToShow: 1,
+    centerPadding: slideCount === 1 ? '0px' : '8%',
+    slidesToShow: 1, // Always show 1 at a time (prevents vertical stacking)
     slidesToScroll: 1,
     speed: 600,
     autoplay: true,
     autoplaySpeed: 4000,
-    adaptiveHeight: false,
     responsive: [
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 1,
-          centerPadding: '8%',
+          centerPadding: '10%',
         },
       },
     ],
@@ -100,6 +96,8 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
               className="object-cover rounded-2xl"
               priority={idx === 0}
             />
+
+            {/* Button container */}
             <div className="absolute bottom-[10%] inset-x-0 flex justify-center z-10">
               <button
                 onClick={() => handleDetail(slide.conId, slide.conName)}

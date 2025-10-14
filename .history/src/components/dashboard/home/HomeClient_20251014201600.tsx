@@ -167,20 +167,21 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-1 w-full max-w-[728px] mx-auto">
-        <div className="flex items-center space-x-3">
-          <span className="font-semibold text-sm">
-            <Image
-              src="/images/loginLogo.png"
-              alt={"icon"}
-              width={10}
-              height={10}
-              className="w-10 h-10 rounded-lg object-cover"
-            />
-          </span>
-        </div>
-      </div>
-      
+    <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-2 w-full max-w-[728px] mx-auto">
+    <div className="flex items-center space-x-3">
+      <span className="font-semibold text-sm">
+        <Image
+          src="/images/loginLogo.png"
+          alt="icon"
+          width={10}
+          height={10}
+          className="w-10 h-10 rounded-lg object-cover"
+        />
+      </span>
+    </div>
+  </div>
+</div>
+
 
       {/* Render home sections */}
       {renderBlocks()}

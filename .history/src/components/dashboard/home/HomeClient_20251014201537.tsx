@@ -167,12 +167,12 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-1 w-full max-w-[728px] mx-auto">
+      <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-2 w-full max-w-[728px] mx-auto">
         <div className="flex items-center space-x-3">
           <span className="font-semibold text-sm">
             <Image
               src="/images/loginLogo.png"
-              alt={"icon"}
+              alt="icon"
               width={10}
               height={10}
               className="w-10 h-10 rounded-lg object-cover"
@@ -180,31 +180,34 @@ const HomeClient = () => {
           </span>
         </div>
       </div>
-      
+    </div>
 
-      {/* Render home sections */}
-      {renderBlocks()}
 
-      {/* Simple Centered Popup with transparent background */}
-      {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
-          <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
-            <div className="p-6 text-center">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                {popupTitle}
-              </h2>
-              <p className="text-gray-600 text-sm mb-5">{popupBody}</p>
-              <button
-                onClick={handlePopupClose}
-                className="px-6 py-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow hover:brightness-110 transition"
-              >
-                {popupButton}
-              </button>
-            </div>
+      {/* Render home sections */ }
+  { renderBlocks() }
+
+  {/* Simple Centered Popup with transparent background */ }
+  {
+    showPopup && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+        <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="p-6 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              {popupTitle}
+            </h2>
+            <p className="text-gray-600 text-sm mb-5">{popupBody}</p>
+            <button
+              onClick={handlePopupClose}
+              className="px-6 py-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow hover:brightness-110 transition"
+            >
+              {popupButton}
+            </button>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    )
+  }
+    </div >
   );
 };
 
