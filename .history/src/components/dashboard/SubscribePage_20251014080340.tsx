@@ -33,7 +33,7 @@ const SubscribePage = () => {
       userData?.userId === ""
     ) {
       // router.push("/auth/login");
-      router.push('/dashboard/buysubscription');
+      router.push('/subscribe');
     } else {
       // window.open(
       //   `https://payment.myuze.app/p/index.php?&userid=${
@@ -45,7 +45,7 @@ const SubscribePage = () => {
       //   }&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
       //   "_self"
       // );
-      router.push('/dashboard/buysubscription');
+      router.push('/subscribe');
     }
     setShowSubscriptionDialog(false);
   };

@@ -67,7 +67,7 @@ export default function ProfilePage() {
 
   const handleLogin = () => {
     // router.push('/auth/login');
-    router.push('/subscribe');
+    router.push('/dashboard/buysubscription');
   };
 
   const handleManageAccount = () => {

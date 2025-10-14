@@ -83,7 +83,7 @@ const Menubar = () => {
                     </div>
 
                     {/* Library (no route in your code, so left inactive) */}
-                    {/* <div
+                    <div
                         onClick={() => handleMenuBar('library')}
                         className="flex flex-col items-center cursor-pointer"
                     >
@@ -96,7 +96,7 @@ const Menubar = () => {
                         <span className={`text-[13px]  ${activeMenu === 'library' ? 'font-semibold text-black' : 'text-gray-500'}`}>
                             Library
                         </span>
-                    </div> */}
+                    </div>
 
                     {/* Profile */}
                     <div

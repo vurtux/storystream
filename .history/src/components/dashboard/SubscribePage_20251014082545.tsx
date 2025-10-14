@@ -45,7 +45,7 @@ const SubscribePage = () => {
       //   }&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
       //   "_self"
       // );
-      router.push('/subscribe');
+      router.push('/dashboard/buysubscription');
     }
     setShowSubscriptionDialog(false);
   };

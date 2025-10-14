@@ -34,10 +34,10 @@ module.exports = {
         source: '/category',
         destination: '/dashboard/category',
       },
-      // {
-      //   source: '/library',
-      //   destination: '/dashboard/library',
-      // },
+      {
+        source: '/library',
+        destination: '/dashboard/library',
+      },
       {
         source: '/profile/language',
         destination: '/dashboard/profile/language',
