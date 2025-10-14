@@ -1,7 +1,7 @@
 'use client';
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
+import banner from './../../../public/images/subbanner.png';
 
 interface FeatureRowProps {
   name: string;
@@ -9,7 +9,7 @@ interface FeatureRowProps {
   playIcon: string;
 }
 
-const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
+const FeatureRow: React.FC<FeatureRowProps> = ({ name, freeIcon, playIcon }) => {
   const freeIconColor = freeIcon === '✗' ? 'text-red-400' : 'text-blue-700';
   const playIconColor = playIcon === '✓' ? 'text-green-500' : 'text-gray-400';
 
@@ -64,9 +64,8 @@ export default function SubscriptionPage() {
   ];
 
   const handleContinue = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = plans[selectedPlan].link;
-    }
+    const selectedLink = plans[selectedPlan].link;
+    window.location.href = selectedLink;
   };
 
   return (
@@ -105,19 +104,17 @@ export default function SubscriptionPage() {
           background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)',
         }}
       >
-        {/* Auto-scrolling Banner */}
+        {/* 🎞️ Auto-scrolling Banner - NO GAP */}
         <div className="w-full overflow-hidden relative h-[200px] bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
                 <div key={i} className="flex-shrink-0" style={{ marginLeft: i === 0 ? '0' : '-2px' }}>
                   <Image
-                    src="/images/subbanner.png"
+                    src={banner}
                     alt="banner"
-                    width={320}
-                    height={180}
                     className="h-[180px] w-auto object-cover rounded-2xl shadow-xl"
-                    unoptimized
+                    priority={i < 3}
                   />
                 </div>
               ))}
@@ -125,7 +122,7 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Content Section */}
+        {/* 🌟 Content Section */}
         <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
           {/* Header */}
           <div className="p-4 pt-6 text-center">
@@ -207,7 +204,7 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Bottom CTA */}
+        {/* Bottom CTA - Fixed with Selected Plan */}
         <div className="fixed bottom-0 left-0 right-0 p-5 bg-white shadow-2xl">
           <div className="max-w-md mx-auto">
             <div className="mb-3 text-center">

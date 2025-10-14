@@ -28,7 +28,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-, "src/app/subscribe/page.jsx"  ],
+, "src/app/dashboard/subscription/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]
