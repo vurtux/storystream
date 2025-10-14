@@ -75,7 +75,6 @@ const NowPlaying = () => {
         }
     };
 
-    
     const handleEpisode = (episode_id: any) => {
         console.log(episode_id, "episode_id");
         if(!episode_id) {
