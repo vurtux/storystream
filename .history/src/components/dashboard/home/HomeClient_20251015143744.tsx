@@ -167,14 +167,14 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-50 w-full bg-white">
-        <div className="flex items-center py-2 px-3 max-w-[728px] mx-auto">
+      <div className="sticky top-0 z-50 w-full">
+        <div className="flex items-center py-4 px-4">
           <Image
-            src="/images/android-chrome-512x512.png"
+            src="/images/android-chrome-192x192.png"
             alt="App Logo"
-            width={48}
-            height={48}
-            className="w-12 h-12 object-cover"
+            width={30}
+            height={30}
+            className="w-10 h-16 rounded-xl object-cover shadow-lg"
           />
         </div>
       </div>

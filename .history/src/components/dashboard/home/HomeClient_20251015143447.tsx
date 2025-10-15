@@ -167,19 +167,27 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-50 w-full bg-white">
-        <div className="flex items-center py-2 px-3 max-w-[728px] mx-auto">
-          <Image
-            src="/images/android-chrome-512x512.png"
-            alt="App Logo"
-            width={48}
-            height={48}
-            className="w-12 h-12 object-cover"
-          />
-        </div>
-      </div>
+      <div className="sticky top-0 z-50 bg-white shadow-md flex items-center justify-between w-full max-w-[728px] mx-auto px-4 py-3 rounded-b-2xl">
+  <div className="flex items-center space-x-3">
+    <Image
+      src="/images/android-chrome-192x192.png"
+      alt="icon"
+      width={50}
+      height={50}
+      className="w-12 h-12 rounded-lg object-cover shadow-sm"
+    />
+    <div>
+      <h1 className="text-lg font-bold text-purple-700">storyStream</h1>
+      <p className="text-xs text-gray-500">All Stories in One App</p>
+    </div>
+  </div>
+  <div className="flex items-center space-x-3">
+    <button className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-purple-700 transition">Subscribe</button>
+    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-300 transition">Login</button>
+  </div>
+</div>
 
-
+      
 
       {/* Render home sections */}
       {renderBlocks()}

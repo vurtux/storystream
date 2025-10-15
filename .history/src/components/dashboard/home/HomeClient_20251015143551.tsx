@@ -167,19 +167,19 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-50 w-full bg-white">
-        <div className="flex items-center py-2 px-3 max-w-[728px] mx-auto">
-          <Image
-            src="/images/android-chrome-512x512.png"
-            alt="App Logo"
-            width={48}
-            height={48}
-            className="w-12 h-12 object-cover"
-          />
-        </div>
-      </div>
+      <div className="sticky top-0 z-50 w-full bg-white shadow-md">
+  <div className="flex items-center justify-center py-4">
+    <Image
+      src="/images/android-chrome-192x192.png"
+      alt="App Logo"
+      width={80}
+      height={80}
+      className="w-20 h-20 rounded-xl object-cover shadow-lg"
+    />
+  </div>
+</div>
 
-
+      
 
       {/* Render home sections */}
       {renderBlocks()}
