@@ -168,7 +168,7 @@ const HomeClient = () => {
   return (
     <div className="relative">
       <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-1 w-full max-w-[728px] mx-auto">
-        <div className="flex items-center space-x-3 pl-3">
+        <div className="flex items-center space-x-3">
           <span className="font-semibold text-sm">
             <Image
               src="/images/loginLogo.png"

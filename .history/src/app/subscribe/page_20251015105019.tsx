@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 interface FeatureRowProps {
   name: string;
@@ -42,19 +41,20 @@ export default function SubscriptionClient() {
     'High Quality Audio',
   ];
 
+  // Reset loader on component mount (when returning to page)
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   const handleContinue = () => {
     setLoading(true);
     
-    // Set a flag in sessionStorage to prevent loader on return
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('redirecting', 'true');
-    }
-    
+    // Redirect after a short delay
     setTimeout(() => {
       if (typeof window !== 'undefined') {
         window.location.href = plans[selectedPlan].link;
       }
-    }, 1800);
+    }, 1500);
   };
 
   return (
@@ -179,20 +179,15 @@ export default function SubscriptionClient() {
           </div>
         )}
 
-        {/* Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 m-0 p-0">
+        {/* Banner - Using placeholder since image path may not exist */}
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-200 via-pink-200 to-purple-200 m-0 p-0">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
-                <div key={i} className="flex-shrink-0" style={{ marginLeft: i === 0 ? '0' : '-2px' }}>
-                  <Image
-                    src="/images/subbanner.png"
-                    alt="banner"
-                    width={300}
-                    height={160}
-                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
-                    unoptimized
-                  />
+                <div key={i} className="flex-shrink-0 mx-1">
+                  <div className="h-[160px] w-[280px] bg-gradient-to-br from-orange-400 via-purple-500 to-pink-500 rounded-2xl shadow-xl flex items-center justify-center text-white font-bold text-2xl">
+                    Podcast {i + 1}
+                  </div>
                 </div>
               ))}
             </div>
@@ -218,7 +213,7 @@ export default function SubscriptionClient() {
                   onClick={() => setSelectedPlan(i)}
                   className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center cursor-pointer transition-all duration-300 relative overflow-hidden
                     ${selectedPlan === i
-                      ? 'border-purple-600 scale-105 shadow-2xl pulse-glow'
+                      ? 'border-purple-600 scale-105 shadow-2xl'
                       : 'border-purple-200 hover:border-purple-400 hover:scale-102'
                     }`}
                 >
@@ -256,6 +251,27 @@ export default function SubscriptionClient() {
             {features.map((f, i) => (
               <FeatureRow key={i} name={f} freeIcon="✗" playIcon="✓" />
             ))}
+          </div>
+
+          {/* Promotional Offer Terms */}
+          <div className="mt-5 p-5 mx-4 bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-purple-100">
+            <h2 className="text-base font-bold mb-3 text-gray-900">
+              Promotional Offer Terms
+            </h2>
+            <ul className="space-y-2.5 text-[13px] text-gray-700">
+              <li className="flex items-start">
+                <span className="mr-2 mt-0.5">•</span>
+                <span>Subscriptions purchased on the offer price above are recurred on the same price as the purchase.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2 mt-0.5">•</span>
+                <span>Subscriptions can be cancelled anytime from within the App by visiting Profile &gt; Manage storystream pro section</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2 mt-0.5">•</span>
+                <span>Free Trials (if any) are applicable only once in a lifetime to a user</span>
+              </li>
+            </ul>
           </div>
         </div>
 

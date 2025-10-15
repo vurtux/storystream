@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AudioProvider>
             <main
               style={{ backgroundColor: "#FFFFFF" }}
-              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
+              className={`flex-1 min-h-screen max-w-md w-full m-auto p-3 overflow-y-auto thin-scrollbar ${
                 shouldShowNavbar ? 'pb-16' : ''
               }`}
             >

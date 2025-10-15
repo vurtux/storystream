@@ -44,12 +44,6 @@ export default function SubscriptionClient() {
 
   const handleContinue = () => {
     setLoading(true);
-    
-    // Set a flag in sessionStorage to prevent loader on return
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('redirecting', 'true');
-    }
-    
     setTimeout(() => {
       if (typeof window !== 'undefined') {
         window.location.href = plans[selectedPlan].link;
