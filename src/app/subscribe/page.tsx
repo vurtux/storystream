@@ -260,9 +260,9 @@ export default function SubscriptionClient() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-2xl">
-          <div className="max-w-md mx-auto text-center">
-            <div className="mb-2.5">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md p-2 bg-white shadow-2xl rounded-xl">
+          <div className="max-w-md mx-auto">
+            <div className="mb-2 text-center">
               <span className="text-[13px] font-bold text-purple-700">{plans[selectedPlan].period} Plan</span>
               {plans[selectedPlan].savings && (
                 <span className="ml-1.5 text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">

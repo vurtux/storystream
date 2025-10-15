@@ -53,7 +53,8 @@ const SubscribePage = () => {
   useEffect(() => {
     if (typeof window === "undefined") return; // SSR safe
 
-    const rawData = localStorage.getItem("loginData");
+    // const rawData = localStorage.getItem("loginData");
+    const rawData = JSON.parse(localStorage.getItem("loginData") || "{}");
 
     if (!rawData) {
       // no login data, keep default
@@ -74,7 +75,7 @@ const SubscribePage = () => {
         });
       }
     } catch (error) {
-      console.error("Failed to parse loginData:", error);
+      console.log("Failed to parse loginData:", error);
       // Keep default safe values
       setUserData({
         userId: "",
