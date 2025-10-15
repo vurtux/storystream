@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
 import Image from "next/image";
-
 type SpotlightContent = {
   conId: number;
   conName: string;
@@ -168,16 +167,18 @@ const HomeClient = () => {
 
   return (
     <div className="relative">
-      {/* Sticky header with logo fully left-aligned */}
-      <div className="sticky top-0 z-50 w-full bg-white flex items-center py-2">
-        <Image
-          src="/images/dashLogo.png"
-          alt="App Logo"
-          width={30}
-          height={30}
-          className="w-9 h-9 object-cover"
-        />
+      <div className="sticky top-0 z-50 w-full bg-white">
+        <div className="flex items-center py-2 px-3 max-w-[728px] mx-auto">
+          <Image
+            src="/images/android-chrome-512x512.png"
+            alt="App Logo"
+            width={48}
+            height={48}
+            className="w-12 h-12 object-cover"
+          />
+        </div>
       </div>
+
 
       {/* Render home sections */}
       {renderBlocks()}
@@ -187,7 +188,9 @@ const HomeClient = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
           <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
             <div className="p-6 text-center">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">{popupTitle}</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                {popupTitle}
+              </h2>
               <p className="text-gray-600 text-sm mb-5">{popupBody}</p>
               <button
                 onClick={handlePopupClose}

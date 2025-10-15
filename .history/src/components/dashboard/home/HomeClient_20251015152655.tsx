@@ -175,7 +175,7 @@ const HomeClient = () => {
           alt="App Logo"
           width={30}
           height={30}
-          className="w-9 h-9 object-cover"
+          className="w-9 h-10 object-cover"
         />
       </div>
 

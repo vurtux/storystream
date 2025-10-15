@@ -170,14 +170,14 @@ const HomeClient = () => {
     <div className="relative">
       {/* Sticky header with logo fully left-aligned */}
       <div className="sticky top-0 z-50 w-full bg-white flex items-center py-2">
-        <Image
-          src="/images/dashLogo.png"
-          alt="App Logo"
-          width={30}
-          height={30}
-          className="w-9 h-9 object-cover"
-        />
-      </div>
+  <Image
+    src="/images/android-chrome-512x512.png"
+    alt="App Logo"
+    width={48}
+    height={48}
+    className="w-12 h-12 object-cover"
+  />
+</div>
 
       {/* Render home sections */}
       {renderBlocks()}

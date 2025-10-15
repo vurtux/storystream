@@ -174,8 +174,8 @@ const HomeClient = () => {
           src="/images/dashLogo.png"
           alt="App Logo"
           width={30}
-          height={30}
-          className="w-9 h-9 object-cover"
+          height={40}
+          className="w-10 h-10 object-cover"
         />
       </div>
 
