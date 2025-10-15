@@ -96,7 +96,8 @@ const DetailsClient = ({ conId, title }: any) => {
   };
 
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
-    const isVip: any = localStorage.getItem("loginData");
+    try {
+      const isVip: any = localStorage.getItem("loginData");
     if (!isVip) {
       confirm();
     }
@@ -111,6 +112,9 @@ const DetailsClient = ({ conId, title }: any) => {
           lower: true,
         })}`
       );
+    }
+    } catch (error) {
+      console.log("Error in handle episode", error);
     }
   };
 
@@ -139,7 +143,7 @@ const DetailsClient = ({ conId, title }: any) => {
 
   const fetchData = async () => {
     try {
-      const lang: any = localStorage.getItem("language");
+      const lang: any = localStorage.getItem("language")  || "";
       const country = localStorage.getItem("country") || "";
       const result = await handlePodcastPaging({
         conId: Number(conId),
@@ -202,7 +206,8 @@ const DetailsClient = ({ conId, title }: any) => {
   //     link.click();
   // };
   const handleDownload = (item: any) => {
-    const isVip: any = localStorage.getItem("loginData");
+    // const isVip: any = localStorage.getItem("loginData");
+    const isVip: any = JSON.parse(localStorage.getItem("loginData") || "{}");
     if (!isVip) {
       confirm();
     }
