@@ -92,6 +92,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         
         {/* 🔹 Force Light Color Scheme */}
         <meta name="color-scheme" content="light only" />
+        
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            html { color-scheme: light only; }
+            body { background-color: #FFFFFF !important; color: #000000 !important; }
+          `
+        }} />
       </head>
 
       <body suppressHydrationWarning>

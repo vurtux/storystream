@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         {/* 🔹 StoryStream Meta Tags */}
         <meta charSet="UTF-8" />
@@ -90,16 +90,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:description" content="Discover immersive audio experiences." />
         <meta name="twitter:image" content="https://www.storystream.mobi/images/og-image.png" />
         
-        {/* 🔹 Force Light Color Scheme */}
-        <meta name="color-scheme" content="light only" />
+        {/* 🔹 Dark Mode Color Scheme Support */}
+        <meta name="color-scheme" content="light dark" />
       </head>
 
-      <body suppressHydrationWarning>
+      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
         <DashboardProvider>
           <AudioProvider>
             <main
-              style={{ backgroundColor: "#FFFFFF" }}
-              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
+              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar bg-white dark:bg-gray-900 ${
                 shouldShowNavbar ? 'pb-16' : ''
               }`}
             >

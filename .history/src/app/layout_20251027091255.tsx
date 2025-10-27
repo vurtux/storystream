@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="light">
       <head>
         {/* 🔹 StoryStream Meta Tags */}
         <meta charSet="UTF-8" />
@@ -91,10 +91,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:image" content="https://www.storystream.mobi/images/og-image.png" />
         
         {/* 🔹 Force Light Color Scheme */}
-        <meta name="color-scheme" content="light only" />
+        <meta name="color-scheme" content="light" />
       </head>
 
-      <body suppressHydrationWarning>
+      <body style={{ backgroundColor: '#FFFFFF', color: '#000000' }}>
         <DashboardProvider>
           <AudioProvider>
             <main

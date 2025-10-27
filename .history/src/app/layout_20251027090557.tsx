@@ -1,5 +1,5 @@
 'use client';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import './globals.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -12,12 +12,42 @@ import { AudioProvider } from '../context/AudioProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Toggle theme function (you can expose this via Context if needed)
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const newTheme = !prev;
+      if (newTheme) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return newTheme;
+    });
+  };
 
   const hideNavbarOnRoutes = ['/auth/login', '/auth/verification'];
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         {/* 🔹 StoryStream Meta Tags */}
         <meta charSet="UTF-8" />
@@ -89,12 +119,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:title" content="StoryStream: Audio Books & Shows" />
         <meta name="twitter:description" content="Discover immersive audio experiences." />
         <meta name="twitter:image" content="https://www.storystream.mobi/images/og-image.png" />
-        
-        {/* 🔹 Force Light Color Scheme */}
-        <meta name="color-scheme" content="light only" />
       </head>
 
-      <body suppressHydrationWarning>
+      <body>
         <DashboardProvider>
           <AudioProvider>
             <main
@@ -106,7 +133,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <ToastProvider />
               {children}
             </main>
-            {shouldShowNavbar && <Menubar />}
+           
           </AudioProvider>
         </DashboardProvider>
       </body>

@@ -1,5 +1,5 @@
 'use client';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import './globals.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -12,12 +12,42 @@ import { AudioProvider } from '../context/AudioProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Toggle theme function (you can expose this via Context if needed)
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const newTheme = !prev;
+      if (newTheme) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return newTheme;
+    });
+  };
 
   const hideNavbarOnRoutes = ['/auth/login', '/auth/verification'];
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={isDarkMode ? 'dark' : ''}>
       <head>
         {/* 🔹 StoryStream Meta Tags */}
         <meta charSet="UTF-8" />
@@ -90,23 +120,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="twitter:description" content="Discover immersive audio experiences." />
         <meta name="twitter:image" content="https://www.storystream.mobi/images/og-image.png" />
         
-        {/* 🔹 Force Light Color Scheme */}
-        <meta name="color-scheme" content="light only" />
+        {/* 🌓 Theme Color for Mobile Browsers */}
+        <meta name="theme-color" content={isDarkMode ? '#111827' : '#FFFFFF'} />
       </head>
 
-      <body suppressHydrationWarning>
+      <body className="bg-white dark:bg-gray-900 transition-colors duration-200">
         <DashboardProvider>
           <AudioProvider>
             <main
-              style={{ backgroundColor: "#FFFFFF" }}
-              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
+              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar bg-white dark:bg-gray-900 ${
                 shouldShowNavbar ? 'pb-16' : ''
               }`}
             >
               <ToastProvider />
               {children}
             </main>
-            {shouldShowNavbar && <Menubar />}
+           
           </AudioProvider>
         </DashboardProvider>
       </body>
