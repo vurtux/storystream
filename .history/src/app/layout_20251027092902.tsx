@@ -92,20 +92,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         
         {/* 🔹 Force Light Color Scheme */}
         <meta name="color-scheme" content="light only" />
-        
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            html { color-scheme: light only; }
-            body { background-color: #FFFFFF !important; color: #000000 !important; }
-          `
-        }} />
       </head>
 
       <body suppressHydrationWarning>
         <DashboardProvider>
           <AudioProvider>
             <main
-              style={{ backgroundColor: "#FFFFFF" }}
+            
               className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
                 shouldShowNavbar ? 'pb-16' : ''
               }`}
