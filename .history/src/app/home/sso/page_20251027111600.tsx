@@ -1,5 +1,12 @@
-import { Suspense } from "react";
+"use client";
 import HomeClient from "../../../components/dashboard/home/HomeClient";
+
+export default function SSOPage() {
+  return <HomeClient />;
+}
+
+import { Suspense } from "react";
+import HomeClient from "../../../components/Dashboard/HomeClient/page";
 
 // Loading component
 function LoadingFallback() {

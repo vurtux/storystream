@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import HomeClient from "../../../components/dashboard/home/HomeClient";
+import HomeClient from "../../../components/Dashboard/HomeClient/page";
 
 // Loading component
 function LoadingFallback() {

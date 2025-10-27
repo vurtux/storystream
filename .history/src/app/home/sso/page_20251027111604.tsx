@@ -1,3 +1,9 @@
+"use client";
+
+export default function SSOPage() {
+  return <HomeClient />;
+}
+
 import { Suspense } from "react";
 import HomeClient from "../../../components/dashboard/home/HomeClient";
 
