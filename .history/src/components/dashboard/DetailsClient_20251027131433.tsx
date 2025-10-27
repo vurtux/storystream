@@ -160,6 +160,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
       
+      console.log("Fetching page:", pageNum, "isLoadMore:", isLoadMore);
       
       const result = await handlePodcastPaging({
         conId: Number(conId),
@@ -188,6 +189,7 @@ const DetailsClient = ({ conId, title }: any) => {
         // Append new episodes to existing ones
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
+          console.log("Updated episode list length:", updated.length);
           return updated;
         });
         
@@ -196,8 +198,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
+      console.log("Total loaded:", totalLoaded);
       
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+        console.log("No more episodes to load");
         setHasMore(false);
       }
     } catch (error) {

@@ -196,8 +196,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
+      console.log("Total loaded:", totalLoaded);
       
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+        console.log("No more episodes to load");
         setHasMore(false);
       }
     } catch (error) {

@@ -99,17 +99,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-      
-      // Check if it's already an object or needs parsing
-      let parsedData;
-      try {
-        parsedData = typeof isVip === 'string' ? JSON.parse(isVip) : isVip;
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        confirm();
-        return;
-      }
-      
+      const parsedData = JSON.parse(isVip);
       if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
         confirm();
       } else {
@@ -160,6 +150,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
       
+      console.log("Fetching page:", pageNum, "isLoadMore:", isLoadMore);
       
       const result = await handlePodcastPaging({
         conId: Number(conId),
@@ -170,12 +161,14 @@ const DetailsClient = ({ conId, title }: any) => {
         country,
       });
 
-    
+      console.log("API Response:", result);
 
       const podcast_details = result.response.podcast.podcast_details;
       const new_episodes = result.response.podcast.podcast_episode_details;
 
-      
+      console.log("New episodes count:", new_episodes?.length);
+      console.log("Current episodes count:", episodeData.length);
+      console.log("Total episodes:", podcast_details.total_episode);
 
       if (!isLoadMore) {
         setPodcastData(podcast_details);
@@ -188,16 +181,19 @@ const DetailsClient = ({ conId, title }: any) => {
         // Append new episodes to existing ones
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
+          console.log("Updated episode list length:", updated.length);
           return updated;
         });
         
-        setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
+        setAudioList(prevList => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
       }
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
+      console.log("Total loaded:", totalLoaded);
       
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+        console.log("No more episodes to load");
         setHasMore(false);
       }
     } catch (error) {
@@ -216,26 +212,27 @@ const DetailsClient = ({ conId, title }: any) => {
   }, [loadingMore, hasMore]);
 
   // Intersection Observer setup
- useEffect(() => {
-  if (!observerTarget.current) return; // avoid null ref
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-  const observer = new IntersectionObserver(
-    entries => {
-      if (entries[0].isIntersecting && hasMore && !loadingMore) {
-        loadMore();
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
-    },
-    { threshold: 0.1, rootMargin: '100px' }
-  );
-
-  const currentTarget = observerTarget.current;
-  observer.observe(currentTarget);
-
-  return () => {
-    if (currentTarget) observer.unobserve(currentTarget);
-  };
-}, [episodeData, loadMore, hasMore, loadingMore]);
-
+    };
+  }, [loadMore, hasMore, loadingMore]);
 
   // Fetch more data when page changes
   useEffect(() => {
@@ -283,17 +280,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-      
-      // Check if it's already an object or needs parsing
-      let parsedData;
-      try {
-        parsedData = typeof isVip === 'string' ? JSON.parse(isVip) : isVip;
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        confirm();
-        return;
-      }
-      
+      const parsedData = JSON.parse(isVip);
       if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
         confirm();
       } else {
@@ -485,18 +472,14 @@ const DetailsClient = ({ conId, title }: any) => {
             )}
 
             {/* Observer target - invisible element at the end */}
-            {hasMore && (
-              <div 
-                ref={observerTarget} 
-                className="h-10 w-full flex items-center justify-center"
-                style={{ minHeight: '40px' }}
-              >
-                <span className="text-gray-400 text-sm">Loading more...</span>
-              </div>
-            )}
+            {hasMore && <div ref={observerTarget} className="h-4" />}
 
             {/* No more episodes message */}
-            
+            {!hasMore && episodeData.length > 0 && (
+              <div className="text-center text-gray-500 text-sm mt-4 mb-4">
+                All episodes loaded
+              </div>
+            )}
           </>
         )}
       </div>

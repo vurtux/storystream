@@ -160,6 +160,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
       
+      console.log("Fetching page:", pageNum, "isLoadMore:", isLoadMore);
       
       const result = await handlePodcastPaging({
         conId: Number(conId),
@@ -170,12 +171,14 @@ const DetailsClient = ({ conId, title }: any) => {
         country,
       });
 
-    
+      console.log("API Response:", result);
 
       const podcast_details = result.response.podcast.podcast_details;
       const new_episodes = result.response.podcast.podcast_episode_details;
 
-      
+      console.log("New episodes count:", new_episodes?.length);
+      console.log("Current episodes count:", episodeData.length);
+      console.log("Total episodes:", podcast_details.total_episode);
 
       if (!isLoadMore) {
         setPodcastData(podcast_details);
@@ -188,6 +191,7 @@ const DetailsClient = ({ conId, title }: any) => {
         // Append new episodes to existing ones
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
+          console.log("Updated episode list length:", updated.length);
           return updated;
         });
         
@@ -196,8 +200,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
+      console.log("Total loaded:", totalLoaded);
       
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+        console.log("No more episodes to load");
         setHasMore(false);
       }
     } catch (error) {
@@ -496,7 +502,11 @@ const DetailsClient = ({ conId, title }: any) => {
             )}
 
             {/* No more episodes message */}
-            
+            {!hasMore && episodeData.length > 0 && (
+              <div className="text-center text-gray-500 text-sm mt-4 mb-4">
+                All episodes loaded
+              </div>
+            )}
           </>
         )}
       </div>

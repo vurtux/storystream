@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Share2,
@@ -79,14 +79,17 @@ const DetailsClient = ({ conId, title }: any) => {
   const { setCurrentAudio, setAudioList } = useAudio();
   const [bookDetails, setBookDetails] = useState<any>(null);
   const [podcastData, setPodcastData] = useState<PodcastDetail>();
-  const [episodeData, setEpisodeData] = useState<PodcastEpisodeDetail[]>([]);
+  const [episodeData, setEpisodeData] = useState<PodcastEpisodeDetail[]>();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  
-  const observerTarget = useRef<HTMLDivElement>(null);
+
+  // const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
+  //     // setIsPlaying(false);
+  //     setCurrentAudio(index);
+  //     setEpisodeId(item.episode_id);
+  //     router.push(`/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`);
+  //     // router.push(`/episode?episode_id=${encodeURIComponent(item.episode_id)}`);
+  // }
 
   const confirm = () => {
     setShowSubscriptionDialog(true);
@@ -95,32 +98,21 @@ const DetailsClient = ({ conId, title }: any) => {
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
     try {
       const isVip: any = localStorage.getItem("loginData");
-      if (!isVip) {
-        confirm();
-        return;
-      }
-      
-      // Check if it's already an object or needs parsing
-      let parsedData;
-      try {
-        parsedData = typeof isVip === 'string' ? JSON.parse(isVip) : isVip;
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        confirm();
-        return;
-      }
-      
-      if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
-        confirm();
-      } else {
-        setCurrentAudio(index);
-        setEpisodeId(item.episode_id);
-        router.push(
-          `/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, {
-            lower: true,
-          })}`
-        );
-      }
+    if (!isVip) {
+      confirm();
+    }
+    const parsedData = JSON.parse(isVip);
+    if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+      confirm();
+    } else {
+      setCurrentAudio(index);
+      setEpisodeId(item.episode_id);
+      router.push(
+        `/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, {
+          lower: true,
+        })}`
+      );
+    }
     } catch (error) {
       console.log("Error in handle episode", error);
     }
@@ -149,104 +141,35 @@ const DetailsClient = ({ conId, title }: any) => {
     }
   };
 
-  const fetchData = async (pageNum: number = 1, isLoadMore: boolean = false) => {
+  const fetchData = async () => {
     try {
-      if (isLoadMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
-
-      const lang: any = localStorage.getItem("language") || "";
+      const lang: any = localStorage.getItem("language")  || "";
       const country = localStorage.getItem("country") || "";
-      
-      
       const result = await handlePodcastPaging({
         conId: Number(conId),
-        page: pageNum,
+        page: 1,
         debug: false,
         test: "1122",
         lang: lang,
         country,
       });
-
-    
-
       const podcast_details = result.response.podcast.podcast_details;
-      const new_episodes = result.response.podcast.podcast_episode_details;
-
-      
-
-      if (!isLoadMore) {
-        setPodcastData(podcast_details);
-        setBookDetails(result.response.podcast.book_details);
-        setEpisodeData(new_episodes);
-        
-        const episodeIds = new_episodes.map((item: any) => item.episode_id);
-        setAudioList(episodeIds);
-      } else {
-        // Append new episodes to existing ones
-        setEpisodeData(prev => {
-          const updated = [...prev, ...new_episodes];
-          return updated;
-        });
-        
-        setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
-      }
-
-      // Check if there are more episodes to load
-      const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
-      
-      if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
-        setHasMore(false);
-      }
+      setPodcastData(podcast_details);
+      setBookDetails(result.response.podcast.book_details);
+      const episodeIds = result.response.podcast.podcast_episode_details.map(
+        (item: any) => item.episode_id
+      );
+      setAudioList(episodeIds);
+      setEpisodeData(result.response.podcast.podcast_episode_details);
     } catch (error) {
       console.log("Failed to fetch podcast:", error);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   };
 
-  // Load more episodes when observer triggers
-  const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      setPage(prev => prev + 1);
-    }
-  }, [loadingMore, hasMore]);
-
-  // Intersection Observer setup
- useEffect(() => {
-  if (!observerTarget.current) return; // avoid null ref
-
-  const observer = new IntersectionObserver(
-    entries => {
-      if (entries[0].isIntersecting && hasMore && !loadingMore) {
-        loadMore();
-      }
-    },
-    { threshold: 0.1, rootMargin: '100px' }
-  );
-
-  const currentTarget = observerTarget.current;
-  observer.observe(currentTarget);
-
-  return () => {
-    if (currentTarget) observer.unobserve(currentTarget);
-  };
-}, [episodeData, loadMore, hasMore, loadingMore]);
-
-
-  // Fetch more data when page changes
   useEffect(() => {
-    if (page > 1) {
-      fetchData(page, true);
-    }
-  }, [page]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchData(1, false);
+    fetchData();
   }, [detailData, conId]);
 
   const renderDescription = () => {
@@ -276,34 +199,26 @@ const DetailsClient = ({ conId, title }: any) => {
     );
   };
 
+  // const handleDownload = (item: any) => {
+  //     const link = document.createElement("a");
+  //     link.href = item.download_url || item.stream_url;
+  //     link.download = `${item.title || "podcast"}.mp3`;
+  //     link.click();
+  // };
   const handleDownload = (item: any) => {
-    try {
-      const isVip: any = localStorage.getItem("loginData");
-      if (!isVip) {
-        confirm();
-        return;
-      }
-      
-      // Check if it's already an object or needs parsing
-      let parsedData;
-      try {
-        parsedData = typeof isVip === 'string' ? JSON.parse(isVip) : isVip;
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        confirm();
-        return;
-      }
-      
-      if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
-        confirm();
-      } else {
-        const link = document.createElement("a");
-        link.href = item.download_url || item.stream_url;
-        link.download = `${item.title || "podcast"}.mp3`;
-        link.click();
-      }
-    } catch (error) {
-      console.log("Error downloading:", error);
+    // const isVip: any = localStorage.getItem("loginData");
+    const isVip: any = JSON.parse(localStorage.getItem("loginData") || "{}");
+    if (!isVip) {
+      confirm();
+    }
+    const parsedData = JSON.parse(isVip);
+    if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+      confirm();
+    } else {
+      const link = document.createElement("a");
+      link.href = item.download_url || item.stream_url;
+      link.download = `${item.title || "podcast"}.mp3`;
+      link.click();
     }
   };
 
@@ -313,35 +228,35 @@ const DetailsClient = ({ conId, title }: any) => {
       <div className="relative rounded-tl-lg rounded-tr-lg overflow-hidden max-h-[400px]">
         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/30 to-transparent z-10" />
 
-        {loading ? (
-          <div className="w-full h-[400px] bg-gray-300 animate-pulse" />
-        ) : podcastData?.img_local_uri ? (
-          <>
-            <Image
-              src={podcastData.img_local_uri}
-              alt="Podcast Cover"
-              height={400}
-              width={428}
-              className="w-full h-[400px] object-cover"
+            {loading ? (
+            <div className="w-full h-[400px] bg-gray-300 animate-pulse" />
+            ) : podcastData?.img_local_uri ? (
+            <>
+                <Image
+                src={podcastData.img_local_uri}
+                alt="Podcast Cover"
+                height={400}
+                width={428}
+                className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/100 to-transparent"></div>
+            </>
+            ) : null}
+
+            <div className="absolute top-4 left-4 text-white z-20">
+            <ArrowLeft
+                onClick={() => router.back()}
+                className="cursor-pointer w-[25px] h-[30px]"
             />
-            <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/100 to-transparent"></div>
-          </>
-        ) : null}
+            </div>
 
-        <div className="absolute top-4 left-4 text-white z-20">
-          <ArrowLeft
-            onClick={() => router.back()}
-            className="cursor-pointer w-[25px] h-[30px]"
-          />
+            <div className="absolute top-4 right-4 text-white z-20">
+            <Share2
+                onClick={handleShareClick}
+                className="cursor-pointer w-[25px] h-[30px]"
+            />
+            </div>
         </div>
-
-        <div className="absolute top-4 right-4 text-white z-20">
-          <Share2
-            onClick={handleShareClick}
-            className="cursor-pointer w-[25px] h-[30px]"
-          />
-        </div>
-      </div>
 
       <div className="text-center mt-4">
         {loading ? (
@@ -421,10 +336,10 @@ const DetailsClient = ({ conId, title }: any) => {
       )}
 
       <div className="mt-6">
-        <h3 className="font-semibold text-lg">
-          {podcastData?.total_episode || 0}{" "}
-          {podcastData?.ptype === "book" ? "Chapters" : "Episodes"}
-        </h3>
+       <h3 className="font-semibold text-lg">
+  {podcastData?.total_episode || 0}{" "}
+  {podcastData?.ptype === "book" ? "Chapters" : "Episodes"}
+</h3>
 
         {loading ? (
           <div className="space-y-3 mt-4">
@@ -436,68 +351,40 @@ const DetailsClient = ({ conId, title }: any) => {
             ))}
           </div>
         ) : (
-          <>
-            {episodeData?.map((item, index) => (
+          episodeData?.map((item, index) => (
+            <div
+              className="mt-1 bg-gray-100 rounded-xl p-4 flex items-center justify-between"
+              key={index}
+            >
               <div
-                className="mt-1 bg-gray-100 rounded-xl p-4 flex items-center justify-between"
-                key={item.episode_id}
+                onClick={() => handleEpisode(item, index)}
+                className="flex items-center gap-3 select-none"
               >
                 <div
-                  onClick={() => handleEpisode(item, index)}
-                  className="flex items-center gap-3 select-none"
+                  style={{
+                    background:
+                      "linear-gradient(49.06deg, #6B0DFF 19.36%, #FF6B79 76.77%)",
+                  }}
+                  className="p-2 rounded-full"
                 >
-                  <div
-                    style={{
-                      background:
-                        "linear-gradient(49.06deg, #6B0DFF 19.36%, #FF6B79 76.77%)",
-                    }}
-                    className="p-2 rounded-full"
-                  >
-                    <Play size={20} className="text-white cursor-pointer" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-black">
-                      {index + 1}. {item?.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item?.duration_format} mins
-                    </p>
-                  </div>
+                  <Play size={20} className="text-white cursor-pointer" />
                 </div>
-                <Download
-                  onClick={() => handleDownload(item)}
-                  size={18}
-                  className="text-gray-700 cursor-pointer hover:text-black"
-                />
+                <div>
+                  <p className="font-semibold text-sm text-black">
+                    {index + 1}. {item?.title}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item?.duration_format} mins
+                  </p>
+                </div>
               </div>
-            ))}
-
-            {/* Loading indicator for more episodes */}
-            {loadingMore && (
-              <div className="space-y-3 mt-4">
-                {[...Array(2)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-16 bg-gray-100 animate-pulse rounded-xl"
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Observer target - invisible element at the end */}
-            {hasMore && (
-              <div 
-                ref={observerTarget} 
-                className="h-10 w-full flex items-center justify-center"
-                style={{ minHeight: '40px' }}
-              >
-                <span className="text-gray-400 text-sm">Loading more...</span>
-              </div>
-            )}
-
-            {/* No more episodes message */}
-            
-          </>
+              <Download
+                onClick={() => handleDownload(item)}
+                size={18}
+                className="text-gray-700 cursor-pointer hover:text-black"
+              />
+            </div>
+          ))
         )}
       </div>
 

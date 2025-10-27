@@ -160,6 +160,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
       
+      console.log("Fetching page:", pageNum, "isLoadMore:", isLoadMore);
       
       const result = await handlePodcastPaging({
         conId: Number(conId),
@@ -170,12 +171,14 @@ const DetailsClient = ({ conId, title }: any) => {
         country,
       });
 
-    
+      console.log("API Response:", result);
 
       const podcast_details = result.response.podcast.podcast_details;
       const new_episodes = result.response.podcast.podcast_episode_details;
 
-      
+      console.log("New episodes count:", new_episodes?.length);
+      console.log("Current episodes count:", episodeData.length);
+      console.log("Total episodes:", podcast_details.total_episode);
 
       if (!isLoadMore) {
         setPodcastData(podcast_details);
@@ -188,6 +191,7 @@ const DetailsClient = ({ conId, title }: any) => {
         // Append new episodes to existing ones
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
+          console.log("Updated episode list length:", updated.length);
           return updated;
         });
         
@@ -196,8 +200,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
+      console.log("Total loaded:", totalLoaded);
       
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+        console.log("No more episodes to load");
         setHasMore(false);
       }
     } catch (error) {
@@ -216,26 +222,31 @@ const DetailsClient = ({ conId, title }: any) => {
   }, [loadingMore, hasMore]);
 
   // Intersection Observer setup
- useEffect(() => {
-  if (!observerTarget.current) return; // avoid null ref
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        console.log("Observer triggered:", entries[0].isIntersecting, "hasMore:", hasMore, "loadingMore:", loadingMore);
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          console.log("Loading more episodes...");
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
 
-  const observer = new IntersectionObserver(
-    entries => {
-      if (entries[0].isIntersecting && hasMore && !loadingMore) {
-        loadMore();
+    const currentTarget = observerTarget.current;
+    console.log("Observer target element:", currentTarget);
+    
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
-    },
-    { threshold: 0.1, rootMargin: '100px' }
-  );
-
-  const currentTarget = observerTarget.current;
-  observer.observe(currentTarget);
-
-  return () => {
-    if (currentTarget) observer.unobserve(currentTarget);
-  };
-}, [episodeData, loadMore, hasMore, loadingMore]);
-
+    };
+  }, [loadMore, hasMore, loadingMore]);
 
   // Fetch more data when page changes
   useEffect(() => {
@@ -496,7 +507,11 @@ const DetailsClient = ({ conId, title }: any) => {
             )}
 
             {/* No more episodes message */}
-            
+            {!hasMore && episodeData.length > 0 && (
+              <div className="text-center text-gray-500 text-sm mt-4 mb-4">
+                All episodes loaded
+              </div>
+            )}
           </>
         )}
       </div>
