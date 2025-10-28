@@ -123,7 +123,7 @@ const SubscribePage = () => {
             />
           </div>
           <h2 className="text-xl font-semibold text-purple-600 mt-4">
-            StoryStream Pro
+            {/* StoryStream Pro */}
           </h2>
           <p className="text-lg font-bold text-gray-900 my-3">
             Unlock All Shows & Books
@@ -142,7 +142,7 @@ const SubscribePage = () => {
             }}
             className="text-white py-3 px-6 rounded-xl text-lg font-medium w-full transition hover:opacity-90"
           >
-            Subscribe Now (Pro)
+            Subscribe Now {timer > 1 ? `(${timer} Sec)` : "(Pro)"}
           </button>
           <div
             className="text-sm text-gray-600 mt-4 cursor-pointer hover:underline"

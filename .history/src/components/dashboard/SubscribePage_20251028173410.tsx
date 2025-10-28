@@ -142,7 +142,7 @@ const SubscribePage = () => {
             }}
             className="text-white py-3 px-6 rounded-xl text-lg font-medium w-full transition hover:opacity-90"
           >
-            Subscribe Now (Pro)
+            Subscribe Now {timer > 1 ? `(${timer} Sec)` : "(Pro)"}
           </button>
           <div
             className="text-sm text-gray-600 mt-4 cursor-pointer hover:underline"
