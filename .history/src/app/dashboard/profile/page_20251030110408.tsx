@@ -128,7 +128,7 @@ export default function ProfilePage() {
 
         {/* Always visible */}
         <MenuItem
-          imgSrc="/images/Calling.png"
+          imgSrc="/Calling.png"
           label="Contact Us"
           value={<IoIosArrowForward />}
         />

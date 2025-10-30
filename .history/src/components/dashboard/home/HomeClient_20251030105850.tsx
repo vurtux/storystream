@@ -87,7 +87,7 @@ const HomeClient = () => {
     if (countryParam) {
       localStorage.setItem("country", countryParam);
     }
-
+    
     if (langParam) {
       localStorage.setItem("language", langParam);
     }
@@ -95,7 +95,7 @@ const HomeClient = () => {
     // If sid exists, validate the user
     if (sid && !isValidating) {
       setIsValidating(true);
-
+      
       const validateUser = async () => {
         try {
           const payload = { sid };
@@ -107,9 +107,9 @@ const HomeClient = () => {
             localStorage.setItem("isLoggedIn", "true");
             localStorage.setItem("loginData", JSON.stringify(res.response));
             localStorage.setItem("menu", "home");
-
+            
             showSuccess("Login successfully!");
-
+            
             // Redirect to home after successful validation
             router.push("/home");
           } else {
@@ -205,14 +205,14 @@ const HomeClient = () => {
     <div className="relative">
       {/* Sticky header with logo fully left-aligned */}
       <div className="sticky top-0 z-50 w-full bg-white flex items-center justify-center py-3">
-        <Image
-          src="/images/sslogo.png"
-          alt="App Logo"
-          width={200}
-          height={50}
-          className="object-contain"
-        />
-      </div>
+  <Image
+    src="/images/sslogo.png"
+    alt="App Logo"
+    width={200}
+    height={50}
+    className="object-contain"
+  />
+</div>
 
 
       {/* Show loading state during validation */}
