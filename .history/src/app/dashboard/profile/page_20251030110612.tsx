@@ -131,7 +131,7 @@ export default function ProfilePage() {
           imgSrc="/images/Calling.png"
           label="Contact Us"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("https://www.myuzeplay.com/static/support", "_self")}
+          onClick={() => window.open("https://www.myuzeplay.com/static/pp", "_self")}
         />
         <MenuItem
           imgSrc="/profile/Shield Done.png"
