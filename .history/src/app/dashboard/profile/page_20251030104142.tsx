@@ -142,7 +142,7 @@ export default function ProfilePage() {
           imgSrc="/profile/Paper.png"
           label="Terms of Service"
           value={<IoIosArrowForward />}
-          onClick={() => window.open('/tnc.html', '_self')}
+          onClick={() => window.open("https://www.myuzeplay.com/static/tnc", "_self")}
         />
 
         {/* Logout at bottom for logged in */}
