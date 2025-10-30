@@ -137,7 +137,7 @@ export default function ProfilePage() {
           imgSrc="/profile/Shield Done.png"
           label="Privacy Policy"
           value={<IoIosArrowForward />}
-          onClick={() => window.open('/pp.html', '_self')}
+          onClick={() => window.open('/tnc.html', '_self')}
         />
         <MenuItem
           imgSrc="/profile/Paper.png"
