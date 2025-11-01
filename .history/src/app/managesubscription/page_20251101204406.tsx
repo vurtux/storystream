@@ -36,7 +36,7 @@ export default function ManageSubscription() {
     const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
     if (storedData?.profile?.userId) {
       setUserId(storedData.profile.userId);
-      setIsSubscribed(storedData.profile?.vip === 1);
+      setIsSubscribed(storedData.profile?.v || false);
       setCurrentPlan(storedData.profile?.planType || "Daily");
     }
   }

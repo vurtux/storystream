@@ -87,19 +87,12 @@ const DetailsClient = ({ conId, title }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
 
-  useEffect(() => {
-    const isVip = localStorage.getItem("loginData");
-    if (isVip) {
-      try {
-        const parsed = JSON.parse(isVip);
-        if (parsed?.profile?.vip === 1) {
-          setIsPaid(true);
-        }
-      } catch (err) {
-        console.log("Invalid loginData:", err);
-      }
-    }
-  }, []);
+useEffect(() => {
+  const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  if (storedData?.profile?.isPaid) {
+    setIsPaid(true);
+  }
+}, []);
 
 
 

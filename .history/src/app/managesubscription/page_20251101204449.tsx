@@ -37,6 +37,7 @@ export default function ManageSubscription() {
     if (storedData?.profile?.userId) {
       setUserId(storedData.profile.userId);
       setIsSubscribed(storedData.profile?.vip === 1);
+
       setCurrentPlan(storedData.profile?.planType || "Daily");
     }
   }

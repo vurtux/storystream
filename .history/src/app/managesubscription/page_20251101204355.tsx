@@ -30,13 +30,20 @@ export default function ManageSubscription() {
     },
   ];
 
- 
+  // useEffect(() => {
+  //   const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  //   if (storedData?.profile?.userId) {
+  //     setUserId(storedData.profile.userId);
+  //     setIsSubscribed(storedData.profile?.isPaid || false);
+  //     setCurrentPlan(storedData.profile?.planType || "Daily");
+  //   }
+  // }, []);
   useEffect(() => {
   if (typeof window !== "undefined") {
     const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
     if (storedData?.profile?.userId) {
       setUserId(storedData.profile.userId);
-      setIsSubscribed(storedData.profile?.vip === 1);
+      setIsSubscribed(storedData.profile?.isPaid || false);
       setCurrentPlan(storedData.profile?.planType || "Daily");
     }
   }

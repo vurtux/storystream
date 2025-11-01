@@ -30,17 +30,14 @@ export default function ManageSubscription() {
     },
   ];
 
- 
-  useEffect(() => {
-  if (typeof window !== "undefined") {
-    const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
-    if (storedData?.profile?.userId) {
-      setUserId(storedData.profile.userId);
-      setIsSubscribed(storedData.profile?.vip === 1);
-      setCurrentPlan(storedData.profile?.planType || "Daily");
-    }
-  }
-}, []);
+  // useEffect(() => {
+  //   const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  //   if (storedData?.profile?.userId) {
+  //     setUserId(storedData.profile.userId);
+  //     setIsSubscribed(storedData.profile?.isPaid || false);
+  //     setCurrentPlan(storedData.profile?.planType || "Daily");
+  //   }
+  // }, []);
 
   const handleCancelSubscription = async () => {
     if (!userId) {
