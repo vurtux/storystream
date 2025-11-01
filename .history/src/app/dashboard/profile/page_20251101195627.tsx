@@ -66,16 +66,11 @@ export default function ProfilePage() {
 
   const handleLogin = () => {
     // router.push('/subscribe');
-    window.location.href = 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t';
   };
 
   const handleManageAccount = () => {
     router.push('/dashboard/profile/edit');
   };
-
-  const handleManageAccountSubscription = () => {
-    router.push("/managesubscription");
-  }
 
   const handleBannerClick = () => {
     router.push('/subscribe');
@@ -130,7 +125,7 @@ export default function ProfilePage() {
               imgSrc="/profile/Group 36707.png"
               label="Manage Subscription"
               value={<IoIosArrowForward />}
-              onClick={handleManageAccountSubscription}
+              onClick={handleLogin}
             />
           </>
         )}

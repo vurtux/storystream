@@ -116,7 +116,7 @@ const SubscribePage = () => {
             }}
             className="text-white py-3 px-6 rounded-xl text-lg font-medium w-full transition hover:opacity-90"
           >
-            Subscribe Now
+            Subscribe Now (Pro)
           </button>
 
           <div

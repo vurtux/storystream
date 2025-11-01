@@ -73,10 +73,6 @@ export default function ProfilePage() {
     router.push('/dashboard/profile/edit');
   };
 
-  const handleManageAccountSubscription = () => {
-    router.push("/managesubscription");
-  }
-
   const handleBannerClick = () => {
     router.push('/subscribe');
   };
@@ -130,7 +126,7 @@ export default function ProfilePage() {
               imgSrc="/profile/Group 36707.png"
               label="Manage Subscription"
               value={<IoIosArrowForward />}
-              onClick={handleManageAccountSubscription}
+              onClick={handleLogin}
             />
           </>
         )}

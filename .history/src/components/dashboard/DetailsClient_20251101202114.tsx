@@ -85,14 +85,6 @@ const DetailsClient = ({ conId, title }: any) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
-    if (storedData?.profile?.isPaid) {
-      setIsPaid(true);
-    }
-  }, []);
 
 
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -394,7 +386,7 @@ const DetailsClient = ({ conId, title }: any) => {
       )}
 
       <div className="mt-6">
-        {isPaid ? (
+        {localStorage.getItem("loginData") ? (
           <button
             onClick={handlePlayButton}
             style={{

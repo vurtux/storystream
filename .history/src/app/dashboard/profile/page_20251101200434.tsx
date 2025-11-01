@@ -130,7 +130,7 @@ export default function ProfilePage() {
               imgSrc="/profile/Group 36707.png"
               label="Manage Subscription"
               value={<IoIosArrowForward />}
-              onClick={handleManageAccountSubscription}
+              onClick={handleLogin}
             />
           </>
         )}

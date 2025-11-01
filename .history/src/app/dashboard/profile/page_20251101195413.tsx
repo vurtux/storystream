@@ -65,17 +65,12 @@ export default function ProfilePage() {
   };
 
   const handleLogin = () => {
-    // router.push('/subscribe');
-    window.location.href = 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t';
+    router.push('/subscribe');
   };
 
   const handleManageAccount = () => {
     router.push('/dashboard/profile/edit');
   };
-
-  const handleManageAccountSubscription = () => {
-    router.push("/managesubscription");
-  }
 
   const handleBannerClick = () => {
     router.push('/subscribe');
@@ -99,12 +94,13 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Banner - Only show if not logged in */}
-      {!loggedIn && (
+      {/* Banner - Show only if user not paid */}
+      {(!loggedIn || !localStorage.getItem('userData') || JSON.parse(localStorage.getItem('userData') || '{}')?.isPaid !== true) && (
         <div className="w-full mb-6 cursor-pointer" onClick={handleBannerClick}>
           <Image height={251} width={380} alt="banner" src="/images/Promo_Discount.png" />
         </div>
       )}
+
 
       {/* Menu Options */}
       <div className="space-y-4 flex-1">
@@ -130,7 +126,7 @@ export default function ProfilePage() {
               imgSrc="/profile/Group 36707.png"
               label="Manage Subscription"
               value={<IoIosArrowForward />}
-              onClick={handleManageAccountSubscription}
+              onClick={handleLogin}
             />
           </>
         )}

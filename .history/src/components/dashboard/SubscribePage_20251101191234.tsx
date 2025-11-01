@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 import { Dialog } from "primereact/dialog";
 import React, { useEffect, useState } from "react";
 import useDashboard from "../../hooks/useDashboard";
@@ -14,6 +14,7 @@ type UserData = {
 };
 
 const SubscribePage = () => {
+
   const router = useRouter();
   const { timer, setTimer, showSubscriptionDialog, setShowSubscriptionDialog } = useDashboard();
 
@@ -26,24 +27,44 @@ const SubscribePage = () => {
   });
 
   const handleSubscribe = async () => {
-    if (!userData?.userId || userData?.userId === null || userData?.userId === "") {
-      router.push("/subscribe");
+    if (
+      !userData?.userId ||
+      userData?.userId === null ||
+      userData?.userId === ""
+    ) {
+      // router.push("/auth/login");
+      router.push('/subscribe');
     } else {
-      router.push("/subscribe");
+      // window.open(
+      //   `https://payment.myuze.app/p/index.php?&userid=${
+      //     userData.userId
+      //   }&deviceId=${20030107}&country=${userData?.country}&mobileNo=${
+      //     userData?.mobileNo
+      //   }&isdCode=${
+      //     userData?.isdCode
+      //   }&langCode=en&app_version=3.0.3&build_number=10060&upi=&platform=web&plan=`,
+      //   "_self"
+      // );
+      router.push('/subscribe');
     }
     setShowSubscriptionDialog(false);
   };
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return; // SSR safe
 
+    // const rawData = localStorage.getItem("loginData");
     const rawData = JSON.parse(localStorage.getItem("loginData") || "{}");
 
-    if (!rawData) return;
+    if (!rawData) {
+      // no login data, keep default
+      return;
+    }
 
     try {
       const parsed = JSON.parse(rawData);
 
+      // Check if parsed data has expected structure
       if (parsed?.profile) {
         setUserData({
           userId: parsed.profile.userId || "",
@@ -55,6 +76,7 @@ const SubscribePage = () => {
       }
     } catch (error) {
       console.log("Failed to parse loginData:", error);
+      // Keep default safe values
       setUserData({
         userId: "",
         isdCode: "",
@@ -100,14 +122,18 @@ const SubscribePage = () => {
               alt="Subscription Logo"
             />
           </div>
-
-          <h2 className="text-xl font-semibold text-purple-600 mt-4">StoryStream</h2>
-
-          <p className="text-gray-600 my-4">
-            Subscribe now to enjoy unlimited access to StoryStream for R5/day on your Vodacom
-            Account/Airtime. First day is free.
+          <h2 className="text-xl font-semibold text-purple-600 mt-4">
+            StoryStream Pro
+          </h2>
+          <p className="text-lg font-bold text-gray-900 my-3">
+            Unlock All Shows & Books
+            <br />
+            with StoryStream Pro
           </p>
-
+          <div className="border border-gray-200"></div>
+          <p className="text-gray-600 my-4">
+           
+          </p>
           <button
             onClick={handleSubscribe}
             style={{
@@ -116,27 +142,14 @@ const SubscribePage = () => {
             }}
             className="text-white py-3 px-6 rounded-xl text-lg font-medium w-full transition hover:opacity-90"
           >
-            Subscribe Now
+            Subscribe Now (Pro)
           </button>
-
           <div
             className="text-sm text-gray-600 mt-4 cursor-pointer hover:underline"
             onClick={() => timer === 1 && setShowSubscriptionDialog(false)}
           >
             &larr; I’ll try this later, take me back
           </div>
-
-          {/* ✅ Terms & Conditions placed below */}
-          <p className="text-xs text-gray-500 mt-3">
-            By subscribing, you agree to our{" "}
-            <a
-              href="https://www.storystream.mobi/tnc.html"
-              className="text-purple-600 underline hover:text-purple-800"
-            >
-              Terms and Conditions
-            </a>.
-          </p>
-
         </div>
       </Dialog>
     </div>

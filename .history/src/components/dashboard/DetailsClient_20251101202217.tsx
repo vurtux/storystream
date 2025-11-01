@@ -87,12 +87,12 @@ const DetailsClient = ({ conId, title }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
 
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
-    if (storedData?.profile?.isPaid) {
-      setIsPaid(true);
-    }
-  }, []);
+useEffect(() => {
+  const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  if (storedData?.profile?.isPaid) {
+    setIsPaid(true);
+  }
+}, []);
 
 
   const observerTarget = useRef<HTMLDivElement>(null);

@@ -85,16 +85,7 @@ const DetailsClient = ({ conId, title }: any) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("loginData") || "{}");
-    if (storedData?.profile?.isPaid) {
-      setIsPaid(true);
-    }
-  }, []);
-
-
+  
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const confirm = () => {
@@ -108,7 +99,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-
+      
       // Check if it's already an object or needs parsing
       let parsedData;
       try {
@@ -118,7 +109,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-
+      
       if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
         confirm();
       } else {
@@ -168,8 +159,8 @@ const DetailsClient = ({ conId, title }: any) => {
 
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
-
-
+      
+      
       const result = await handlePodcastPaging({
         conId: Number(conId),
         page: pageNum,
@@ -179,18 +170,18 @@ const DetailsClient = ({ conId, title }: any) => {
         country,
       });
 
-
+    
 
       const podcast_details = result.response.podcast.podcast_details;
       const new_episodes = result.response.podcast.podcast_episode_details;
 
-
+      
 
       if (!isLoadMore) {
         setPodcastData(podcast_details);
         setBookDetails(result.response.podcast.book_details);
         setEpisodeData(new_episodes);
-
+        
         const episodeIds = new_episodes.map((item: any) => item.episode_id);
         setAudioList(episodeIds);
       } else {
@@ -199,13 +190,13 @@ const DetailsClient = ({ conId, title }: any) => {
           const updated = [...prev, ...new_episodes];
           return updated;
         });
-
+        
         setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
       }
 
       // Check if there are more episodes to load
       const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
-
+      
       if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
         setHasMore(false);
       }
@@ -225,25 +216,25 @@ const DetailsClient = ({ conId, title }: any) => {
   }, [loadingMore, hasMore]);
 
   // Intersection Observer setup
-  useEffect(() => {
-    if (!observerTarget.current) return; // avoid null ref
+ useEffect(() => {
+  if (!observerTarget.current) return; // avoid null ref
 
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    );
+  const observer = new IntersectionObserver(
+    entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        loadMore();
+      }
+    },
+    { threshold: 0.1, rootMargin: '100px' }
+  );
 
-    const currentTarget = observerTarget.current;
-    observer.observe(currentTarget);
+  const currentTarget = observerTarget.current;
+  observer.observe(currentTarget);
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [episodeData, loadMore, hasMore, loadingMore]);
+  return () => {
+    if (currentTarget) observer.unobserve(currentTarget);
+  };
+}, [episodeData, loadMore, hasMore, loadingMore]);
 
 
   // Fetch more data when page changes
@@ -292,7 +283,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-
+      
       // Check if it's already an object or needs parsing
       let parsedData;
       try {
@@ -302,7 +293,7 @@ const DetailsClient = ({ conId, title }: any) => {
         confirm();
         return;
       }
-
+      
       if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
         confirm();
       } else {
@@ -393,32 +384,28 @@ const DetailsClient = ({ conId, title }: any) => {
         </div>
       )}
 
-      <div className="mt-6">
-        {isPaid ? (
-          <button
-            onClick={handlePlayButton}
-            style={{
-              background:
-                "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-            }}
-            className="w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Play size={18} /> Play Now
-          </button>
-        ) : (
-          <button
-            onClick={() => router.push("/subscribe")}
-            style={{
-              background:
-                "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-            }}
-            className="w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Play size={18} /> Subscribe Now
-          </button>
-        )}
+      <div className="flex justify-between mt-6 gap-3">
+        <button
+          style={{
+            color: "#6B0DFF",
+            background:
+              "radial-gradient(92.09% 394.93% at 7.91% 50%, rgba(107, 13, 255, 0.2) 0%, rgba(255, 107, 121, 0.2) 100%)",
+          }}
+          className="w-1/2 py-3 rounded-xl bg-gradient-to-r from-purple-200 to-purple-200 text-purple-900 font-semibold flex items-center justify-center gap-2"
+        >
+          <Download size={18} /> Download Now
+        </button>
+        <button
+          onClick={handlePlayButton}
+          style={{
+            background:
+              "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
+          }}
+          className="w-1/2 py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Play size={18} /> Play Now
+        </button>
       </div>
-
 
       {podcastData?.ptype === "book" && (
         <div className="mt-6">
@@ -499,8 +486,8 @@ const DetailsClient = ({ conId, title }: any) => {
 
             {/* Observer target - invisible element at the end */}
             {hasMore && (
-              <div
-                ref={observerTarget}
+              <div 
+                ref={observerTarget} 
                 className="h-10 w-full flex items-center justify-center"
                 style={{ minHeight: '40px' }}
               >
@@ -509,7 +496,7 @@ const DetailsClient = ({ conId, title }: any) => {
             )}
 
             {/* No more episodes message */}
-
+            
           </>
         )}
       </div>

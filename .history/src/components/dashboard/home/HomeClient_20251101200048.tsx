@@ -108,6 +108,7 @@ const HomeClient = () => {
             localStorage.setItem("loginData", JSON.stringify(res.response));
             localStorage.setItem("menu", "home");
             showSuccess("Login successfully!");
+
             // Redirect to home after successful validation
             router.push("/home");
           } else {

@@ -112,7 +112,7 @@ export default function ProfilePage() {
         {!loggedIn && (
           <MenuItem
             imgSrc="/profile/Logout.png"
-            label={<div onClick={handleLogin} className="font-semibold">Login</div>}
+            label={<div onClick={handleManageAccountSubscription} className="font-semibold">Login</div>}
             textColor="text-red-500"
           />
         )}

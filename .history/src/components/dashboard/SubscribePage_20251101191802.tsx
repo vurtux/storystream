@@ -116,7 +116,7 @@ const SubscribePage = () => {
             }}
             className="text-white py-3 px-6 rounded-xl text-lg font-medium w-full transition hover:opacity-90"
           >
-            Subscribe Now
+            Subscribe Now (Pro)
           </button>
 
           <div
@@ -130,13 +130,14 @@ const SubscribePage = () => {
           <p className="text-xs text-gray-500 mt-3">
             By subscribing, you agree to our{" "}
             <a
-              href="https://www.storystream.mobi/tnc.html"
+              href="https://www.storystream.mobi//tnc.html"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-purple-600 underline hover:text-purple-800"
             >
               Terms and Conditions
             </a>.
           </p>
-
         </div>
       </Dialog>
     </div>
