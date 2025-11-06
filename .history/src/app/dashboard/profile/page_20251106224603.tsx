@@ -84,6 +84,10 @@ export default function ProfilePage() {
 
   // ✅ Subscribe Now handler
   const handleSubscribeNow = () => {
+    if (!loggedIn) {
+      router.push("/auth/login?redirect=subscribe");
+      return;
+    }
     router.push("/subscribe");
   };
 

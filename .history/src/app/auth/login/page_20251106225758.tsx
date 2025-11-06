@@ -175,7 +175,6 @@ export default function LoginPage() {
                                 disableDropdown
                                 disableCountryGuess
                                 enableSearch={false}
-                                countryCodeEditable={false}
 
                                 containerClass="w-[100%] text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
                                 inputClass="!w-full !py-2 !pl-14 !pr-4 !text-sm !rounded-lg !border-none focus:!ring-0"

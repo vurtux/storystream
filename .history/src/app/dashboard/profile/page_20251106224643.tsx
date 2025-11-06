@@ -149,7 +149,7 @@ export default function ProfilePage() {
               onClick={handleManageAccount}
             />
 
-            {isVip && (
+            {!isVip && (
               <MenuItem
                 imgSrc="/profile/Group 36707.png"
                 label="Manage Subscription"

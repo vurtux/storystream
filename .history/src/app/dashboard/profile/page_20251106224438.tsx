@@ -84,6 +84,10 @@ export default function ProfilePage() {
 
   // ✅ Subscribe Now handler
   const handleSubscribeNow = () => {
+    if (!loggedIn) {
+      router.push("/auth/login?redirect=subscribe");
+      return;
+    }
     router.push("/subscribe");
   };
 
@@ -121,9 +125,9 @@ export default function ProfilePage() {
       <div className="space-y-4 flex-1">
 
         {/* ✅ Subscribe Now - show first, only when NOT logged in */}
-        {loggedIn && (
+        {!loggedIn && (
           <MenuItem
-            imgSrc="/images/subscriptionLogo.png"
+            imgSrc="/profile/Subscribe.png"
             label="Subscribe Now"
             value={<IoIosArrowForward />}
             onClick={handleSubscribeNow}

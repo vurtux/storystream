@@ -140,7 +140,7 @@ export default function ProfilePage() {
         )}
 
         {/* ✅ Logged-in Options */}
-        {loggedIn && (
+        {!loggedIn && (
           <>
             <MenuItem
               imgSrc="/profile/Profile.png"
@@ -149,7 +149,7 @@ export default function ProfilePage() {
               onClick={handleManageAccount}
             />
 
-            {isVip && (
+            {!isVip && (
               <MenuItem
                 imgSrc="/profile/Group 36707.png"
                 label="Manage Subscription"

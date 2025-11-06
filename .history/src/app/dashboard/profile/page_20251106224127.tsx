@@ -82,8 +82,12 @@ export default function ProfilePage() {
     router.push("/subscribe");
   };
 
-  // ✅ Subscribe Now handler
+  // ✅ NEW: Subscribe Now handler
   const handleSubscribeNow = () => {
+    if (!loggedIn) {
+      router.push("/auth/login?redirect=subscribe");
+      return;
+    }
     router.push("/subscribe");
   };
 
@@ -110,7 +114,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Banner (only if not VIP) */}
+      {/* Banner */}
       {!isVip && (
         <div className="w-full mb-6 cursor-pointer" onClick={handleBannerClick}>
           <Image height={251} width={380} alt="banner" src="/images/Promo_Discount.png" />
@@ -119,18 +123,6 @@ export default function ProfilePage() {
 
       {/* Menu Items */}
       <div className="space-y-4 flex-1">
-
-        {/* ✅ Subscribe Now - show first, only when NOT logged in */}
-        {loggedIn && (
-          <MenuItem
-            imgSrc="/images/subscriptionLogo.png"
-            label="Subscribe Now"
-            value={<IoIosArrowForward />}
-            onClick={handleSubscribeNow}
-          />
-        )}
-
-        {/* ✅ Login - only when NOT logged in */}
         {!loggedIn && (
           <MenuItem
             imgSrc="/profile/Logout.png"
@@ -139,7 +131,6 @@ export default function ProfilePage() {
           />
         )}
 
-        {/* ✅ Logged-in Options */}
         {loggedIn && (
           <>
             <MenuItem
@@ -158,6 +149,16 @@ export default function ProfilePage() {
               />
             )}
           </>
+        )}
+
+        {/* ✅ NEW: Subscribe Now (only if not VIP) */}
+        {!isVip && (
+          <MenuItem
+            imgSrc="/profile/Subscribe.png"
+            label="Subscribe Now"
+            value={<IoIosArrowForward />}
+            onClick={handleSubscribeNow}
+          />
         )}
 
         {/* Common Items */}
@@ -180,7 +181,6 @@ export default function ProfilePage() {
           onClick={() => window.open("/tnc.html", "_self")}
         />
 
-        {/* ✅ Logout (only when logged in) */}
         {loggedIn && (
           <MenuItem
             imgSrc="/profile/Logout.png"
