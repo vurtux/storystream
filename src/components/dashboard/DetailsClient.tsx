@@ -6,6 +6,7 @@ import {
   Share2,
   Play,
   Download,
+  CircleCheckBig,
   BookOpen,
   Lightbulb,
   User,
@@ -18,6 +19,8 @@ import { handlePodcastPaging } from "../../app/api/podcast";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
 import SubscribePage from "./SubscribePage";
+import { isPodcastDownloaded, savePodcast } from "../../utils/indexDB";
+import { showSuccess } from "../../utils/toastService";
 
 interface PodcastDetail {
   podcast_id: number;
@@ -76,6 +79,7 @@ const DetailsClient = ({ conId, title }: any) => {
 
   const { setEpisodeId, detailData, setShowSubscriptionDialog } =
     useDashboard();
+  const [downloadedEpisodes, setDownloadedEpisodes] = useState<Record<number, boolean>>({});
   const { setCurrentAudio, setAudioList } = useAudio();
   const [bookDetails, setBookDetails] = useState<any>(null);
   const [podcastData, setPodcastData] = useState<PodcastDetail>();
@@ -100,8 +104,6 @@ const DetailsClient = ({ conId, title }: any) => {
       }
     }
   }, []);
-
-
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -177,7 +179,6 @@ const DetailsClient = ({ conId, title }: any) => {
       const lang: any = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
 
-
       const result = await handlePodcastPaging({
         conId: Number(conId),
         page: pageNum,
@@ -187,22 +188,32 @@ const DetailsClient = ({ conId, title }: any) => {
         country,
       });
 
-
-
       const podcast_details = result.response.podcast.podcast_details;
       const new_episodes = result.response.podcast.podcast_episode_details;
-
-
 
       if (!isLoadMore) {
         setPodcastData(podcast_details);
         setBookDetails(result.response.podcast.book_details);
         setEpisodeData(new_episodes);
+        for (const ep of new_episodes) {
+          const exists = await isPodcastDownloaded(ep.episode_id.toString());
+          setDownloadedEpisodes(prev => ({
+          ...prev,
+          [ep.episode_id]: exists,
+        }));
+        }
 
         const episodeIds = new_episodes.map((item: any) => item.episode_id);
         setAudioList(episodeIds);
       } else {
         // Append new episodes to existing ones
+        for (const ep of new_episodes) {
+          const exists = await isPodcastDownloaded(ep.episode_id);
+          setDownloadedEpisodes(prev => ({
+          ...prev,
+          [ep.episode_id]: exists,
+        }));
+        }
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
           return updated;
@@ -293,7 +304,7 @@ const DetailsClient = ({ conId, title }: any) => {
     );
   };
 
-  const handleDownload = (item: any) => {
+  const handleDownload = async(item: any) => {
     try {
       const isVip: any = localStorage.getItem("loginData");
       if (!isVip) {
@@ -314,10 +325,21 @@ const DetailsClient = ({ conId, title }: any) => {
       if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
         confirm();
       } else {
-        const link = document.createElement("a");
-        link.href = item.download_url || item.stream_url;
-        link.download = `${item.title || "podcast"}.mp3`;
-        link.click();
+        const isAlreadyDownloaded = await isPodcastDownloaded(item?.episode_id);
+        if(isAlreadyDownloaded) {
+            showSuccess("Already Downloaded!");
+            return;
+        }
+        savePodcast(item?.stream_uri, item?.episode_id?.toString());
+        setDownloadedEpisodes(prev => ({
+          ...prev,
+          [item.episode_id]: true,
+        }));
+        showSuccess("Downloaded successfully!");
+        // const link = document.createElement("a");
+        // link.href = item.download_url || item.stream_url;
+        // link.download = `${item.title || "podcast"}.mp3`;
+        // link.click();
       }
     } catch (error) {
       console.log("Error downloading:", error);
@@ -327,7 +349,7 @@ const DetailsClient = ({ conId, title }: any) => {
   return (
     <div>
       {/* Hero Section */}
-      <div className="relative rounded-tl-lg rounded-tr-lg overflow-hidden max-h-[400px]">
+      <div className="relative rounded-tl-lg rounded-tr-lg max-h-[400px] mx-[-12px]">
         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/30 to-transparent z-10" />
 
         {loading ? (
@@ -431,13 +453,13 @@ const DetailsClient = ({ conId, title }: any) => {
       {podcastData?.ptype === "book" && (
         <div className="mt-6">
           <h3 className="font-semibold text-xl text-gray-900">Description</h3>
-          <p className="text-sm mt-2">
+          <div className="text-sm mt-2">
             {loading ? (
               <div className="h-20 bg-gray-100 animate-pulse rounded" />
             ) : (
               renderDescription()
             )}
-          </p>
+          </div>
         </div>
       )}
 
@@ -485,11 +507,18 @@ const DetailsClient = ({ conId, title }: any) => {
                     </p>
                   </div>
                 </div>
+                {downloadedEpisodes[item.episode_id] ? (
+                <CircleCheckBig
+                  size={18}
+                  className="text-green-600 cursor-default"
+                />
+              ) : (
                 <Download
                   onClick={() => handleDownload(item)}
                   size={18}
                   className="text-gray-700 cursor-pointer hover:text-black"
                 />
+              )}
               </div>
             ))}
 
