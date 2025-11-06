@@ -53,67 +53,60 @@ export default function LoginPage() {
     //     }
     // };
     const handleSendOtp = async () => {
-  try {
-    const fp = await FingerprintJS.load();
-    const result = await fp.get();
+        try {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
 
-    const tempAuth = {
-      mobileNo,
-      deviceId: result.visitorId,
-      isdCode,
+            const tempAuth = {
+                mobileNo: mobileNo,
+                deviceId: result.visitorId,
+                isdCode: isdCode
+            };
+
+            setAuthData(tempAuth);
+            localStorage.setItem("authData", JSON.stringify(tempAuth));
+
+            const payload = {
+                deviceId: result.visitorId,
+                langCode: "en",
+                mobileNo: mobileNo,
+                isdCode: isdCode,
+            };
+            const payloadMDN = {
+                deviceId: result.visitorId,
+                langCode: "en",
+                mobileNo: mobileNo,
+                isdCode: isdCode,
+            };
+            const res = await ValidateMDN(payload);
+            const data = await handleLogin(payload);
+
+            if (!res?.response?.status) {
+                showError("Failed to send OTP");
+                return;
+            }
+
+            const profile = res?.response?.profile;
+
+            // ✅ Save profile temporarily
+            localStorage.setItem("loginData", JSON.stringify(res.response));
+
+            // ✅ If user is NOT VIP → send to subscription page
+            if (profile.vip === 0) {
+                showError("Please subscribe to continue");
+                router.push("/subscribe");
+                return;
+            }
+
+            // ✅ Else VIP user → go to OTP verification
+            showSuccess("OTP sent successfully!");
+            router.push("/auth/verification");
+
+        } catch (error) {
+            console.log("Error in login api", error);
+            showError("Otp send failed");
+        }
     };
-
-    setAuthData(tempAuth);
-    localStorage.setItem("authData", JSON.stringify(tempAuth));
-
-    // ✅ 1 — Check MDN profile first
-    const payloadMDN = {
-      mobileNo,
-      isdCode,
-    };
-
-    const mdnRes = await ValidateMDN(payloadMDN);
-
-    if (!mdnRes?.response?.status) {
-      showError("Mobile number validation failed");
-      return;
-    }
-
-    const profile = mdnRes?.response?.profile;
-
-    // ✅ Save profile for later
-    localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
-
-    // ✅ 2 — If user is NOT VIP → Redirect to Subscribe
-    if (profile.vip === 1) {
-      showError("Please subscribe to continue");
-      router.push("/subscribe");
-      return;
-    }
-
-    // ✅ 3 — VIP USER → Now send OTP
-    const payload = {
-      deviceId: result.visitorId,
-      langCode: "en",
-      mobileNo,
-      isdCode,
-    };
-
-    const loginRes = await handleLogin(payload);
-
-    if (!loginRes?.response?.status) {
-      showError("Failed to send OTP");
-      return;
-    }
-
-    showSuccess("OTP sent successfully!");
-    router.push("/auth/verification");
-
-  } catch (error) {
-    console.log("Error in login api", error);
-    showError("OTP send failed");
-  }
-};
 
 
     useEffect(() => {

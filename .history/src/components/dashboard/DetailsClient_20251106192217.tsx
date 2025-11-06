@@ -674,16 +674,13 @@ const DetailsClient = ({ conId, title }: any) => {
 
     try {
       const data = JSON.parse(raw);
-
+      
       // Check if subscription is pending (isActive === 5)
       const isPending = data?.vipInfo?.isActive === 5;
-
+      
       // Check if user is VIP
-      const isPaid = isPending
-        ? true            // If pending, still treat as paid
-        : data?.profile?.vip === 1;
-
-
+      const isPaid = data?.profile?.vip === 0;
+      
       return { isPending, isPaid };
     } catch (e) {
       console.log("Invalid login data:", e);
@@ -709,9 +706,9 @@ const DetailsClient = ({ conId, title }: any) => {
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
     try {
       const raw = localStorage.getItem("loginData");
-
+      
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -720,7 +717,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Failed to parse loginData:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -904,9 +901,9 @@ const DetailsClient = ({ conId, title }: any) => {
   const handleDownload = async (item: any) => {
     try {
       const raw = localStorage.getItem("loginData");
-
+      
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -915,7 +912,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Invalid login data:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -938,7 +935,7 @@ const DetailsClient = ({ conId, title }: any) => {
         showSuccess("Already Downloaded!");
         return;
       }
-
+      
       savePodcast(item?.stream_uri, item?.episode_id?.toString());
       setDownloadedEpisodes(prev => ({
         ...prev,
@@ -1041,14 +1038,7 @@ const DetailsClient = ({ conId, title }: any) => {
           </button>
         ) : (
           <button
-            onClick={() => {
-              const raw = localStorage.getItem("loginData");
-              if (!raw) {
-                router.push("/auth/login");
-              } else {
-                router.push("/subscribe");
-              }
-            }}
+            onClick={() => router.push("/subscribe")}
             style={{
               background:
                 "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
@@ -1169,12 +1159,12 @@ const DetailsClient = ({ conId, title }: any) => {
 
       {/* Pending Subscription Bottom Sheet */}
       {showPendingSheet && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end"
           onClick={() => setShowPendingSheet(false)}
         >
-          <div
-            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-10 shadow-xl animate-slide-up"
+          <div 
+            className="bg-white w-full rounded-t-3xl p-6 animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -1182,19 +1172,20 @@ const DetailsClient = ({ conId, title }: any) => {
                 <div className="p-2 bg-orange-100 rounded-full">
                   <AlertCircle className="text-orange-600" size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Subscription Pending</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Subscription Pending
+                </h3>
               </div>
-              <X
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
+              <X 
+                className="cursor-pointer text-gray-500 hover:text-gray-700" 
                 size={24}
                 onClick={() => setShowPendingSheet(false)}
               />
             </div>
-
+            
             <div className="mb-6">
               <p className="text-gray-700 text-base leading-relaxed">
-                Your subscription payment is currently pending. Please complete the payment
-                to enjoy uninterrupted access to all content.
+                Your subscription payment is currently pending. Please complete the payment process to enjoy uninterrupted access to all content.
               </p>
             </div>
 
@@ -1222,7 +1213,6 @@ const DetailsClient = ({ conId, title }: any) => {
           </div>
         </div>
       )}
-
 
       <SubscribePage />
 

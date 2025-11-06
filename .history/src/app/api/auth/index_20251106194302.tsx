@@ -6,7 +6,7 @@ interface loginProps {
     mobileNo: string;
     isdCode: string;
 }
-interface mdnProps {
+interface validateProps {
     mobileNo: string;
     isdCode: string;
 }
@@ -30,11 +30,11 @@ export const handleLogin = async (payload: loginProps) => {
         },
     });
 };
-export const ValidateMDN = async (payload: mdnProps) => {
+export const ValidateMDN = async (payload: validateProps) => {
     return await requestApi({
         url: 'api/v1/feed/ValidateMDN',
         method: 'POST',
-        data: payload,
+        data: validateProps,
         headers: {
             'device-os': 'web',
             'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',

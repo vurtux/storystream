@@ -85,7 +85,7 @@ export default function LoginPage() {
     localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
 
     // ✅ 2 — If user is NOT VIP → Redirect to Subscribe
-    if (profile.vip === 1) {
+    if (profile.vip === 0) {
       showError("Please subscribe to continue");
       router.push("/subscribe");
       return;

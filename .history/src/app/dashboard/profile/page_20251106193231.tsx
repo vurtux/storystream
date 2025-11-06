@@ -67,7 +67,7 @@ export default function ProfilePage() {
   };
 
   const handleLogin = () => {
-    router.push("/auth/login");
+    router.push("/dashboard/profile/edit");
     // window.location.href =
     //   "https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t";
   };

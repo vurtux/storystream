@@ -711,7 +711,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const raw = localStorage.getItem("loginData");
 
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -720,7 +720,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Failed to parse loginData:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -906,7 +906,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const raw = localStorage.getItem("loginData");
 
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -915,7 +915,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Invalid login data:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -1041,14 +1041,7 @@ const DetailsClient = ({ conId, title }: any) => {
           </button>
         ) : (
           <button
-            onClick={() => {
-              const raw = localStorage.getItem("loginData");
-              if (!raw) {
-                router.push("/auth/login");
-              } else {
-                router.push("/subscribe");
-              }
-            }}
+            onClick={() => router.push("/subscribe")}
             style={{
               background:
                 "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
@@ -1174,7 +1167,7 @@ const DetailsClient = ({ conId, title }: any) => {
           onClick={() => setShowPendingSheet(false)}
         >
           <div
-            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-10 shadow-xl animate-slide-up"
+            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-4 shadow-xl animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">

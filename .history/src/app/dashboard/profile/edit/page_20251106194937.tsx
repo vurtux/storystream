@@ -68,7 +68,7 @@ export default function EditProfilePage() {
     setFirstName(profile.firstname || "");
     setLastName(profile.lastname || "");
     setEmail(profile.email || "");
-    setPhone(profile.mobileNo || "");
+    setPhone(profile. || "");
     setCountryCode(profile.country || "ZA");
     setIsdCode(profile.isdCode || "91");
     setGender(profile.gender || "M");

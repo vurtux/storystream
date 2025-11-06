@@ -652,11 +652,11 @@ interface PodcastEpisodeDetail {
 
 const DetailsClient = ({ conId, title }: any) => {
   const router = useRouter();
+  const { setEpisodeId, detailData, setShowSubscriptionDialog } = useDashboard();
 
-  const { setEpisodeId, detailData, setShowSubscriptionDialog } =
-    useDashboard();
   const [downloadedEpisodes, setDownloadedEpisodes] = useState<Record<number, boolean>>({});
   const { setCurrentAudio, setAudioList } = useAudio();
+
   const [bookDetails, setBookDetails] = useState<any>(null);
   const [podcastData, setPodcastData] = useState<PodcastDetail>();
   const [episodeData, setEpisodeData] = useState<PodcastEpisodeDetail[]>([]);
@@ -667,7 +667,34 @@ const DetailsClient = ({ conId, title }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [showPendingSheet, setShowPendingSheet] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
+  // ✅ LOGIN CHECK — added here
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = localStorage.getItem("loginData");
+
+      if (!raw || raw === "null" || raw === "undefined") {
+        router.replace("/auth/login");
+        return;
+      }
+
+      const data = JSON.parse(raw);
+      const isLogged = data?.profile?.isLoggedin === 1;
+
+      if (!isLogged) {
+        router.replace("/auth/login");
+        return;
+      }
+    } catch (e) {
+      console.log("Invalid loginData:", e);
+      router.replace("/auth/login");
+    }
+  }, [router]);
+
+  // ✅ Check subscription status
   const checkSubscriptionStatus = () => {
     const raw = localStorage.getItem("loginData");
     if (!raw) return { isPending: false, isPaid: false };
@@ -675,14 +702,9 @@ const DetailsClient = ({ conId, title }: any) => {
     try {
       const data = JSON.parse(raw);
 
-      // Check if subscription is pending (isActive === 5)
       const isPending = data?.vipInfo?.isActive === 5;
 
-      // Check if user is VIP
-      const isPaid = isPending
-        ? true            // If pending, still treat as paid
-        : data?.profile?.vip === 1;
-
+      const isPaid = isPending ? true : data?.profile?.vip === 1;
 
       return { isPending, isPaid };
     } catch (e) {
@@ -696,91 +718,68 @@ const DetailsClient = ({ conId, title }: any) => {
     setIsPaid(isPaid);
   }, []);
 
-  const observerTarget = useRef<HTMLDivElement>(null);
-
-  const confirm = () => {
-    setShowSubscriptionDialog(true);
-  };
-
-  const showPendingMessage = () => {
-    setShowPendingSheet(true);
-  };
+  const confirm = () => setShowSubscriptionDialog(true);
+  const showPendingMessage = () => setShowPendingSheet(true);
 
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
     try {
       const raw = localStorage.getItem("loginData");
-
-      if (!raw) {
-        router.push("/auth/login");
-        return;
-      }
+      if (!raw) return confirm();
 
       let data;
       try {
         data = JSON.parse(raw);
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        router.push("/auth/login");
-        return;
+      } catch {
+        return confirm();
       }
 
-      // First check if subscription is pending (isActive === 5)
-      if (data?.vipInfo?.isActive === 5) {
-        showPendingMessage();
-        return;
-      }
+      if (data?.vipInfo?.isActive === 5) return showPendingMessage();
+      if (!data?.profile?.vip) return confirm();
 
-      // Then check if user is VIP
-      if (!data?.profile || data?.profile?.vip !== 1) {
-        confirm();
-        return;
-      }
-
-      // All checks passed, play episode
       setCurrentAudio(index);
       setEpisodeId(item.episode_id);
+
       router.push(
-        `/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, {
-          lower: true,
-        })}`
+        `/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, { lower: true })}`
       );
-    } catch (error) {
-      console.log("Error in handle episode", error);
+    } catch (err) {
+      console.log("Error:", err);
     }
   };
 
   const handlePlayButton = () => {
-    if (episodeData && episodeData.length > 0) {
-      handleEpisode(episodeData[0], 0);
+    if (episodeData.length > 0) handleEpisode(episodeData[0], 0);
+  };
+
+  const handleDownload = async (item: any) => {
+    try {
+      const raw = localStorage.getItem("loginData");
+      if (!raw) return confirm();
+
+      let data = JSON.parse(raw);
+
+      if (data?.vipInfo?.isActive === 5) return showPendingMessage();
+      if (!data?.profile?.vip) return confirm();
+
+      const exists = await isPodcastDownloaded(item?.episode_id);
+      if (exists) return showSuccess("Already Downloaded!");
+
+      savePodcast(item?.stream_uri, item?.episode_id.toString());
+      setDownloadedEpisodes((prev) => ({ ...prev, [item.episode_id]: true }));
+
+      showSuccess("Downloaded successfully!");
+    } catch (err) {
+      console.log("Download error:", err);
     }
   };
 
-  const handleShareClick = async () => {
-    const shareUrl = window.location.href;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Sharing failed:", error);
-      }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
-      alert("Link copied to clipboard!");
-    }
-  };
-
+  // ✅ Fetch episodes
   const fetchData = async (pageNum: number = 1, isLoadMore: boolean = false) => {
     try {
-      if (isLoadMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
+      if (isLoadMore) setLoadingMore(true);
+      else setLoading(true);
 
-      const lang: any = localStorage.getItem("language") || "";
+      const lang = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
 
       const result = await handlePodcastPaging({
@@ -788,7 +787,7 @@ const DetailsClient = ({ conId, title }: any) => {
         page: pageNum,
         debug: false,
         test: "1122",
-        lang: lang,
+        lang,
         country,
       });
 
@@ -799,29 +798,20 @@ const DetailsClient = ({ conId, title }: any) => {
         setPodcastData(podcast_details);
         setBookDetails(result.response.podcast.book_details);
         setEpisodeData(new_episodes);
+
         for (const ep of new_episodes) {
           const exists = await isPodcastDownloaded(ep.episode_id.toString());
-          setDownloadedEpisodes(prev => ({
-            ...prev,
-            [ep.episode_id]: exists,
-          }));
+          setDownloadedEpisodes((prev) => ({ ...prev, [ep.episode_id]: exists }));
         }
 
-        const episodeIds = new_episodes.map((item: any) => item.episode_id);
-        setAudioList(episodeIds);
+        setAudioList(new_episodes.map((item: any) => item.episode_id));
       } else {
         for (const ep of new_episodes) {
           const exists = await isPodcastDownloaded(ep.episode_id);
-          setDownloadedEpisodes(prev => ({
-            ...prev,
-            [ep.episode_id]: exists,
-          }));
+          setDownloadedEpisodes((prev) => ({ ...prev, [ep.episode_id]: exists }));
         }
-        setEpisodeData(prev => {
-          const updated = [...prev, ...new_episodes];
-          return updated;
-        });
 
+        setEpisodeData((prev) => [...prev, ...new_episodes]);
         setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
       }
 
@@ -831,43 +821,38 @@ const DetailsClient = ({ conId, title }: any) => {
         setHasMore(false);
       }
     } catch (error) {
-      console.log("Failed to fetch podcast:", error);
+      console.log("Failed:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
+  // ✅ Infinite scroll logic
   const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      setPage(prev => prev + 1);
-    }
+    if (!loadingMore && hasMore) setPage((prev) => prev + 1);
   }, [loadingMore, hasMore]);
 
   useEffect(() => {
     if (!observerTarget.current) return;
 
     const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          loadMore();
-        }
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) loadMore();
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 0.1, rootMargin: "100px" }
     );
 
-    const currentTarget = observerTarget.current;
-    observer.observe(currentTarget);
+    const current = observerTarget.current;
+    observer.observe(current);
 
     return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
+      if (current) observer.unobserve(current);
     };
   }, [episodeData, loadMore, hasMore, loadingMore]);
 
   useEffect(() => {
-    if (page > 1) {
-      fetchData(page, true);
-    }
+    if (page > 1) fetchData(page, true);
   }, [page]);
 
   useEffect(() => {
@@ -906,7 +891,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const raw = localStorage.getItem("loginData");
 
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -915,7 +900,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Invalid login data:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -1041,14 +1026,7 @@ const DetailsClient = ({ conId, title }: any) => {
           </button>
         ) : (
           <button
-            onClick={() => {
-              const raw = localStorage.getItem("loginData");
-              if (!raw) {
-                router.push("/auth/login");
-              } else {
-                router.push("/subscribe");
-              }
-            }}
+            onClick={() => router.push("/subscribe")}
             style={{
               background:
                 "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",

@@ -596,97 +596,79 @@ import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
 import SubscribePage from "./SubscribePage";
 import { isPodcastDownloaded, savePodcast } from "../../utils/indexDB";
-import { showSuccess, showError } from "../../utils/toastService";
+import { showSuccess } from "../../utils/toastService";
 
 interface PodcastDetail {
   podcast_id: number;
   title: string;
   description: string;
-  copyright: string;
-  language: string;
-  link_uri: string;
-  img_remote_uri: string;
-  img_local_uri: string;
-  img_height: number;
-  img_width: number;
-  img_type: string;
-  added_on: string;
   total_episode: number;
-  total_following: number;
-  category: string;
-  artiste_id: number | null;
-  artist_name: string | null;
-  is_billable: number;
+  artist_name: string;
   ptype: string;
-  total_duration: string;
+  img_local_uri: string;
 }
 
 interface PodcastEpisodeDetail {
   episode_id: number;
   title: string;
-  description: string;
-  subtitle: string;
-  imgid: number;
-  episodetype: string;
-  keywords: string;
-  episode_seq: number;
-  duration: number;
-  playback_count: number;
-  isexplicit: string;
-  stream_uri: string;
-  stream_url: string;
-  download_url: string;
-  length: number;
-  img_remote_uri: string;
-  img_local_uri: string;
-  img_height: number | null;
-  img_width: number | null;
-  img_type: string | null;
-  added_on: string;
-  pubdate: string;
   duration_format: string;
-  playback_count_format: string;
-  player_icon_url: string;
-  is_billable: number;
+  stream_uri: string;
 }
 
-const DetailsClient = ({ conId, title }: any) => {
+const DetailsClient = ({ conId }: any) => {
   const router = useRouter();
 
-  const { setEpisodeId, detailData, setShowSubscriptionDialog } =
-    useDashboard();
-  const [downloadedEpisodes, setDownloadedEpisodes] = useState<Record<number, boolean>>({});
-  const { setCurrentAudio, setAudioList } = useAudio();
-  const [bookDetails, setBookDetails] = useState<any>(null);
-  const [podcastData, setPodcastData] = useState<PodcastDetail>();
+  const { detailData, setShowSubscriptionDialog, setEpisodeId } = useDashboard();
+  const { setAudioList, setCurrentAudio } = useAudio();
+
+  const [podcastData, setPodcastData] = useState<PodcastDetail | null>(null);
   const [episodeData, setEpisodeData] = useState<PodcastEpisodeDetail[]>([]);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [bookDetails, setBookDetails] = useState<any>(null);
+
+  const [downloadedEpisodes, setDownloadedEpisodes] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const [isPaid, setIsPaid] = useState(false);
   const [showPendingSheet, setShowPendingSheet] = useState(false);
 
-  const checkSubscriptionStatus = () => {
-    const raw = localStorage.getItem("loginData");
-    if (!raw) return { isPending: false, isPaid: false };
+  const observerRef = useRef<HTMLDivElement>(null);
 
+  // ✅ LOGIN CHECK — redirect if user is not logged in
+  useEffect(() => {
     try {
+      const raw = localStorage.getItem("loginData");
+      if (!raw) {
+        router.replace("/auth/login");
+        return;
+      }
+
       const data = JSON.parse(raw);
 
-      // Check if subscription is pending (isActive === 5)
+      if (data?.profile?.isLoggedin !== 1) {
+        router.replace("/auth/login");
+        return;
+      }
+    } catch {
+      router.replace("/auth/login");
+    }
+  }, []);
+
+  // ✅ subscription check
+  const checkSubscriptionStatus = () => {
+    try {
+      const raw = localStorage.getItem("loginData");
+      if (!raw) return { isPending: false, isPaid: false };
+
+      const data = JSON.parse(raw);
+
       const isPending = data?.vipInfo?.isActive === 5;
-
-      // Check if user is VIP
-      const isPaid = isPending
-        ? true            // If pending, still treat as paid
-        : data?.profile?.vip === 1;
-
+      const isPaid = isPending ? true : data?.profile?.vip === 1;
 
       return { isPending, isPaid };
-    } catch (e) {
-      console.log("Invalid login data:", e);
+    } catch {
       return { isPending: false, isPaid: false };
     }
   };
@@ -696,525 +678,279 @@ const DetailsClient = ({ conId, title }: any) => {
     setIsPaid(isPaid);
   }, []);
 
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const openSubscribe = () => setShowSubscriptionDialog(true);
+  const openPending = () => setShowPendingSheet(true);
 
-  const confirm = () => {
-    setShowSubscriptionDialog(true);
-  };
-
-  const showPendingMessage = () => {
-    setShowPendingSheet(true);
-  };
-
+  // ✅ Play episode button
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
+    const raw = localStorage.getItem("loginData");
+    if (!raw) return openSubscribe();
+
+    let data;
     try {
-      const raw = localStorage.getItem("loginData");
-
-      if (!raw) {
-        router.push("/auth/login");
-        return;
-      }
-
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch (e) {
-        console.log("Failed to parse loginData:", e);
-        router.push("/auth/login");
-        return;
-      }
-
-      // First check if subscription is pending (isActive === 5)
-      if (data?.vipInfo?.isActive === 5) {
-        showPendingMessage();
-        return;
-      }
-
-      // Then check if user is VIP
-      if (!data?.profile || data?.profile?.vip !== 1) {
-        confirm();
-        return;
-      }
-
-      // All checks passed, play episode
-      setCurrentAudio(index);
-      setEpisodeId(item.episode_id);
-      router.push(
-        `/episode/${encodeURIComponent(item.episode_id)}/${slugify(item.title, {
-          lower: true,
-        })}`
-      );
-    } catch (error) {
-      console.log("Error in handle episode", error);
+      data = JSON.parse(raw);
+    } catch {
+      return openSubscribe();
     }
+
+    if (data?.vipInfo?.isActive === 5) return openPending();
+    if (!data?.profile?.vip) return openSubscribe();
+
+    setCurrentAudio(index);
+    setEpisodeId(item.episode_id);
+
+    router.push(`/episode/${item.episode_id}/${slugify(item.title, { lower: true })}`);
   };
 
   const handlePlayButton = () => {
-    if (episodeData && episodeData.length > 0) {
-      handleEpisode(episodeData[0], 0);
-    }
+    if (episodeData.length > 0) handleEpisode(episodeData[0], 0);
   };
 
-  const handleShareClick = async () => {
-    const shareUrl = window.location.href;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Sharing failed:", error);
-      }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
-      alert("Link copied to clipboard!");
-    }
-  };
-
-  const fetchData = async (pageNum: number = 1, isLoadMore: boolean = false) => {
+  // ✅ downloading episode
+  const handleDownload = async (item: PodcastEpisodeDetail) => {
     try {
-      if (isLoadMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
+      const raw = localStorage.getItem("loginData");
+      if (!raw) return openSubscribe();
 
-      const lang: any = localStorage.getItem("language") || "";
+      const data = JSON.parse(raw);
+
+      if (data?.vipInfo?.isActive === 5) return openPending();
+      if (!data?.profile?.vip) return openSubscribe();
+
+      const exists = await isPodcastDownloaded(item.episode_id.to);
+      if (exists) return showSuccess("Already Downloaded");
+
+      await savePodcast(item.stream_uri, item.episode_id.toString());
+      setDownloadedEpisodes((prev) => ({ ...prev, [item.episode_id]: true }));
+      showSuccess("Downloaded!");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ✅ loading episodes
+  const fetchData = async (pageNum = 1, loadMore = false) => {
+    try {
+      loadMore ? setLoadingMore(true) : setLoading(true);
+
+      const lang = localStorage.getItem("language") || "";
       const country = localStorage.getItem("country") || "";
 
-      const result = await handlePodcastPaging({
+      const res = await handlePodcastPaging({
         conId: Number(conId),
         page: pageNum,
-        debug: false,
-        test: "1122",
-        lang: lang,
+        lang,
         country,
+        debug: false,
       });
 
-      const podcast_details = result.response.podcast.podcast_details;
-      const new_episodes = result.response.podcast.podcast_episode_details;
+      const pd = res.response.podcast.podcast_details;
+      const eps = res.response.podcast.podcast_episode_details;
 
-      if (!isLoadMore) {
-        setPodcastData(podcast_details);
-        setBookDetails(result.response.podcast.book_details);
-        setEpisodeData(new_episodes);
-        for (const ep of new_episodes) {
-          const exists = await isPodcastDownloaded(ep.episode_id.toString());
-          setDownloadedEpisodes(prev => ({
-            ...prev,
-            [ep.episode_id]: exists,
-          }));
-        }
+      if (!loadMore) {
+        setPodcastData(pd);
+        setBookDetails(res.response.podcast.book_details);
+        setEpisodeData(eps);
 
-        const episodeIds = new_episodes.map((item: any) => item.episode_id);
-        setAudioList(episodeIds);
+        const ids = eps.map((e: any) => e.episode_id);
+        setAudioList(ids);
       } else {
-        for (const ep of new_episodes) {
-          const exists = await isPodcastDownloaded(ep.episode_id);
-          setDownloadedEpisodes(prev => ({
-            ...prev,
-            [ep.episode_id]: exists,
-          }));
-        }
-        setEpisodeData(prev => {
-          const updated = [...prev, ...new_episodes];
-          return updated;
-        });
-
-        setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
+        setEpisodeData((prev) => [...prev, ...eps]);
       }
 
-      const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
-
-      if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
+      if (eps.length === 0 || (episodeData.length + eps.length) >= pd.total_episode) {
         setHasMore(false);
       }
-    } catch (error) {
-      console.log("Failed to fetch podcast:", error);
+
+      for (const e of eps) {
+        const exists = await isPodcastDownloaded(e.episode_id);
+        setDownloadedEpisodes((prev) => ({ ...prev, [e.episode_id]: exists }));
+      }
+    } catch (err) {
+      console.log(err);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
+  // ✅ infinite scroll
   const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      setPage(prev => prev + 1);
-    }
+    if (!loadingMore && hasMore) setPage((p) => p + 1);
   }, [loadingMore, hasMore]);
 
   useEffect(() => {
-    if (!observerTarget.current) return;
+    if (!observerRef.current) return;
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore) {
           loadMore();
         }
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 0.2 }
     );
 
-    const currentTarget = observerTarget.current;
-    observer.observe(currentTarget);
+    const current = observerRef.current;
+    observer.observe(current);
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [episodeData, loadMore, hasMore, loadingMore]);
+    return () => current && observer.unobserve(current);
+  }, [episodeData, hasMore, loadingMore]);
 
   useEffect(() => {
-    if (page > 1) {
-      fetchData(page, true);
-    }
+    if (page > 1) fetchData(page, true);
   }, [page]);
 
   useEffect(() => {
     fetchData(1, false);
   }, [detailData, conId]);
 
-  const renderDescription = () => {
-    const description = podcastData?.description || "";
-    if (description?.length <= 150) return description;
-
-    return showFullDescription ? (
-      <>
-        {description}
-        <span
-          className="text-blue-500 ml-2 cursor-pointer"
-          onClick={() => setShowFullDescription(false)}
-        >
-          Read Less
-        </span>
-      </>
-    ) : (
-      <>
-        {description.slice(0, 150)}...
-        <span
-          className="text-blue-500 ml-2 cursor-pointer"
-          onClick={() => setShowFullDescription(true)}
-        >
-          Read More
-        </span>
-      </>
-    );
-  };
-
-  const handleDownload = async (item: any) => {
-    try {
-      const raw = localStorage.getItem("loginData");
-
-      if (!raw) {
-        router.push("/auth/login");
-        return;
-      }
-
-      let data: any = null;
-      try {
-        data = JSON.parse(raw);
-      } catch (e) {
-        console.log("Invalid login data:", e);
-        router.push("/auth/login");
-        return;
-      }
-
-      // First check if subscription is pending (isActive === 5)
-      if (data?.vipInfo?.isActive === 5) {
-        showPendingMessage();
-        return;
-      }
-
-      // Then check if user is VIP
-      const isVip = data?.profile?.vip === 1;
-      if (!isVip) {
-        confirm();
-        return;
-      }
-
-      // All checks passed, proceed with download
-      const isAlreadyDownloaded = await isPodcastDownloaded(item?.episode_id);
-      if (isAlreadyDownloaded) {
-        showSuccess("Already Downloaded!");
-        return;
-      }
-
-      savePodcast(item?.stream_uri, item?.episode_id?.toString());
-      setDownloadedEpisodes(prev => ({
-        ...prev,
-        [item.episode_id]: true,
-      }));
-      showSuccess("Downloaded successfully!");
-    } catch (error) {
-      console.log("Error downloading:", error);
-    }
-  };
-
   return (
     <div>
-      {/* Hero Section */}
-      <div className="relative rounded-tl-lg rounded-tr-lg max-h-[400px] mx-[-12px]">
-        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/30 to-transparent z-10" />
+      {/* ✅ HERO IMAGE */}
+      <div className="relative max-h-[400px] mx-[-12px]">
+        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/20 to-transparent z-10"></div>
 
         {loading ? (
-          <div className="w-full h-[400px] bg-gray-300 animate-pulse" />
-        ) : podcastData?.img_local_uri ? (
-          <>
-            <Image
-              src={podcastData.img_local_uri}
-              alt="Podcast Cover"
-              height={400}
-              width={428}
-              className="w-full h-[400px] object-cover"
-            />
-            <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/100 to-transparent"></div>
-          </>
-        ) : null}
-
-        <div className="absolute top-4 left-4 text-white z-20">
-          <ArrowLeft
-            onClick={() => router.back()}
-            className="cursor-pointer w-[25px] h-[30px]"
-          />
-        </div>
-
-        <div className="absolute top-4 right-4 text-white z-20">
-          <Share2
-            onClick={handleShareClick}
-            className="cursor-pointer w-[25px] h-[30px]"
-          />
-        </div>
-      </div>
-
-      <div className="text-center mt-4">
-        {loading ? (
-          <div className="h-6 w-2/3 mx-auto bg-gray-200 animate-pulse rounded" />
+          <div className="w-full h-[370px] bg-gray-200 animate-pulse" />
         ) : (
           <>
-            <h2 className="text-2xl font-bold mx-4">{podcastData?.title}</h2>
-            {podcastData?.ptype === "book" && (
-              <>
-                <p className="text-gray-800 font-semibold">
-                  {podcastData?.artist_name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {bookDetails?.duration_display_mins} mins
-                </p>
-              </>
-            )}
+            <Image
+              src={podcastData?.img_local_uri || ""}
+              height={400}
+              width={428}
+              alt="cover"
+              className="w-full h-[370px] object-cover"
+            />
+            <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white"></div>
           </>
+        )}
+
+        <ArrowLeft
+          onClick={() => router.back()}
+          className="absolute top-4 left-4 text-white cursor-pointer"
+        />
+        <Share2
+          onClick={() => navigator.share?.({ url: window.location.href })}
+          className="absolute top-4 right-4 text-white cursor-pointer"
+        />
+      </div>
+
+      {/* ✅ HEADER TEXT */}
+      <div className="text-center mt-4">
+        <h2 className="text-2xl font-bold">{podcastData?.title}</h2>
+        {podcastData?.ptype === "book" && (
+          <p className="text-gray-600">{podcastData?.artist_name}</p>
         )}
       </div>
 
-      {podcastData?.ptype === "book" && (
-        <div className="flex justify-center gap-1 mt-4 flex-wrap">
-          {loading ? (
-            <div className="w-full h-6 bg-gray-100 animate-pulse rounded" />
-          ) : (
-            <>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-md text-sm">
-                <User size={14} /> {bookDetails?.categories || "Self Growth"}
-              </div>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-md text-sm">
-                <BookOpen size={14} /> {podcastData?.total_episode} Chapters
-              </div>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-md text-sm">
-                <Lightbulb size={14} /> {bookDetails?.insights_count || 16}{" "}
-                Insights
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
+      {/* ✅ PLAY BUTTON */}
       <div className="mt-6">
         {isPaid ? (
           <button
             onClick={handlePlayButton}
-            style={{
-              background:
-                "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-            }}
-            className="w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 rounded-xl text-white font-semibold"
+            style={{ background: "linear-gradient(45deg,#6B0DFF,#FF6B79)" }}
           >
-            <Play size={18} /> Play Now
+            <Play size={20} /> Play Now
           </button>
         ) : (
           <button
-            onClick={() => {
-              const raw = localStorage.getItem("loginData");
-              if (!raw) {
-                router.push("/auth/login");
-              } else {
-                router.push("/subscribe");
-              }
-            }}
-            style={{
-              background:
-                "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-            }}
-            className="w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer"
+            onClick={() => router.push("/subscribe")}
+            className="w-full py-3 rounded-xl text-white font-semibold"
+            style={{ background: "linear-gradient(45deg,#6B0DFF,#FF6B79)" }}
           >
-            <Play size={18} /> Subscribe Now
+            <Play size={20} /> Subscribe Now
           </button>
         )}
       </div>
 
-      {podcastData?.ptype === "book" && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-xl text-gray-900">Description</h3>
-          <div className="text-sm mt-2">
-            {loading ? (
-              <div className="h-20 bg-gray-100 animate-pulse rounded" />
-            ) : (
-              renderDescription()
-            )}
-          </div>
-        </div>
-      )}
-
+      {/* ✅ EPISODES LIST */}
       <div className="mt-6">
-        <h3 className="font-semibold text-lg">
-          {podcastData?.total_episode || 0}{" "}
-          {podcastData?.ptype === "book" ? "Chapters" : "Episodes"}
+        <h3 className="font-semibold text-lg mb-3">
+          {podcastData?.total_episode} Episodes
         </h3>
 
-        {loading ? (
-          <div className="space-y-3 mt-4">
-            {[...Array(3)].map((_, i) => (
+        {episodeData.map((ep, index) => (
+          <div
+            key={ep.episode_id}
+            className="bg-gray-100 rounded-xl p-4 flex justify-between items-center mb-2"
+          >
+            <div className="flex items-center w-full">
               <div
-                key={i}
-                className="h-16 bg-gray-100 animate-pulse rounded-xl"
+                className="p-2 rounded-full cursor-pointer"
+                style={{
+                  background: "linear-gradient(49deg,#6B0DFF,#FF6B79)",
+                }}
+                onClick={() => handleEpisode(ep, index)}
+              >
+                <Play size={18} className="text-white" />
+              </div>
+
+              <div className="ml-3 min-w-0 flex-1">
+                <p className="text-sm font-semibold truncate">
+                  {index + 1}. {ep.title}
+                </p>
+                <p className="text-xs text-gray-500">{ep.duration_format} mins</p>
+              </div>
+            </div>
+
+            {downloadedEpisodes[ep.episode_id] ? (
+              <CircleCheckBig size={18} className="text-green-600" />
+            ) : (
+              <Download
+                size={18}
+                className="text-gray-700 cursor-pointer"
+                onClick={() => handleDownload(ep)}
               />
-            ))}
+            )}
           </div>
-        ) : (
-          <>
-            {episodeData?.map((item, index) => (
-              <div
-                className="mt-1 bg-gray-100 rounded-xl p-4 flex items-center justify-between"
-                key={item.episode_id}
-              >
-                <div className="flex items-center flex-1 min-w-0">
-                  <div
-                    style={{
-                      background:
-                        "linear-gradient(49.06deg, #6B0DFF 19.36%, #FF6B79 76.77%)",
-                    }}
-                    className="p-2 rounded-full cursor-pointer"
-                    onClick={() => handleEpisode(item, index)}
-                  >
-                    <Play size={20} className="text-white" />
-                  </div>
+        ))}
 
-                  <div className="flex-1 min-w-0 ml-3">
-                    <p className="font-semibold text-sm text-black truncate">
-                      {index + 1}. {item?.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item?.duration_format} mins
-                    </p>
-                  </div>
-                </div>
+        {loadingMore && <p className="text-center text-gray-400 mt-4">Loading...</p>}
 
-                {downloadedEpisodes[item.episode_id] ? (
-                  <CircleCheckBig size={18} className="text-green-600" />
-                ) : (
-                  <Download
-                    onClick={() => handleDownload(item)}
-                    size={18}
-                    className="text-gray-700 cursor-pointer hover:text-black"
-                  />
-                )}
-              </div>
-            ))}
-
-            {loadingMore && (
-              <div className="space-y-3 mt-4">
-                {[...Array(2)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-16 bg-gray-100 animate-pulse rounded-xl"
-                  />
-                ))}
-              </div>
-            )}
-
-            {hasMore && (
-              <div
-                ref={observerTarget}
-                className="h-10 w-full flex items-center justify-center"
-                style={{ minHeight: '40px' }}
-              >
-                <span className="text-gray-400 text-sm">Loading more...</span>
-              </div>
-            )}
-          </>
+        {hasMore && (
+          <div ref={observerRef} className="h-10 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">Loading more…</span>
+          </div>
         )}
       </div>
 
-      {!loading && bookDetails && bookDetails.length !== 0 && (
-        <div className="max-w-2xl mx-auto mt-6 p-6 bg-white shadow-md rounded-xl border border-gray-100">
-          <h2 className="text-2xl font-semibold mb-6">Key Learnings</h2>
-          <ul className="space-y-6">
-            {bookDetails?.insights?.map((point: any, index: any) => (
-              <li key={index} className="flex items-start space-x-3">
-                <CheckCircle className="text-pink-500 mt-1" size={20} />
-                <p className="text-gray-800">{point}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Pending Subscription Bottom Sheet */}
+      {/* ✅ PENDING SUBSCRIPTION SHEET */}
       {showPendingSheet && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center"
           onClick={() => setShowPendingSheet(false)}
         >
           <div
-            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-10 shadow-xl animate-slide-up"
+            className="bg-white rounded-t-3xl p-6 w-full max-w-md mb-10 animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-orange-100 rounded-full">
-                  <AlertCircle className="text-orange-600" size={24} />
+                  <AlertCircle size={24} className="text-orange-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Subscription Pending</h3>
+                <h3 className="text-xl font-bold">Subscription Pending</h3>
               </div>
-              <X
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
-                size={24}
-                onClick={() => setShowPendingSheet(false)}
-              />
+              <X size={24} className="cursor-pointer" onClick={() => setShowPendingSheet(false)} />
             </div>
 
-            <div className="mb-6">
-              <p className="text-gray-700 text-base leading-relaxed">
-                Your subscription payment is currently pending. Please complete the payment
-                to enjoy uninterrupted access to all content.
-              </p>
-            </div>
+            <p className="text-gray-700 mb-6">
+              Your subscription payment is pending. Please complete payment to continue.
+            </p>
 
             <div className="flex gap-3">
               <button
+                className="flex-1 py-3 border rounded-xl"
                 onClick={() => setShowPendingSheet(false)}
-                className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setShowPendingSheet(false);
-                  router.push("/subscribe");
-                }}
-                style={{
-                  background:
-                    "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-                }}
-                className="flex-1 py-3 px-4 rounded-xl text-white font-semibold"
+                onClick={() => router.push("/subscribe")}
+                className="flex-1 py-3 rounded-xl text-white"
+                style={{ background: "linear-gradient(45deg,#6B0DFF,#FF6B79)" }}
               >
                 Complete Payment
               </button>
@@ -1222,7 +958,6 @@ const DetailsClient = ({ conId, title }: any) => {
           </div>
         </div>
       )}
-
 
       <SubscribePage />
 
@@ -1236,7 +971,7 @@ const DetailsClient = ({ conId, title }: any) => {
           }
         }
         .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
+          animation: slide-up 0.35s ease-out;
         }
       `}</style>
     </div>

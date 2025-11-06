@@ -711,7 +711,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const raw = localStorage.getItem("loginData");
 
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -720,7 +720,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Failed to parse loginData:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -906,7 +906,7 @@ const DetailsClient = ({ conId, title }: any) => {
       const raw = localStorage.getItem("loginData");
 
       if (!raw) {
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -915,7 +915,7 @@ const DetailsClient = ({ conId, title }: any) => {
         data = JSON.parse(raw);
       } catch (e) {
         console.log("Invalid login data:", e);
-        router.push("/auth/login");
+        confirm();
         return;
       }
 
@@ -1041,14 +1041,7 @@ const DetailsClient = ({ conId, title }: any) => {
           </button>
         ) : (
           <button
-            onClick={() => {
-              const raw = localStorage.getItem("loginData");
-              if (!raw) {
-                router.push("/auth/login");
-              } else {
-                router.push("/subscribe");
-              }
-            }}
+            onClick={() => router.push("/subscribe")}
             style={{
               background:
                 "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
@@ -1169,59 +1162,59 @@ const DetailsClient = ({ conId, title }: any) => {
 
       {/* Pending Subscription Bottom Sheet */}
       {showPendingSheet && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
-          onClick={() => setShowPendingSheet(false)}
-        >
-          <div
-            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-10 shadow-xl animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-full">
-                  <AlertCircle className="text-orange-600" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Subscription Pending</h3>
-              </div>
-              <X
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
-                size={24}
-                onClick={() => setShowPendingSheet(false)}
-              />
-            </div>
-
-            <div className="mb-6">
-              <p className="text-gray-700 text-base leading-relaxed">
-                Your subscription payment is currently pending. Please complete the payment
-                to enjoy uninterrupted access to all content.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowPendingSheet(false)}
-                className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowPendingSheet(false);
-                  router.push("/subscribe");
-                }}
-                style={{
-                  background:
-                    "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
-                }}
-                className="flex-1 py-3 px-4 rounded-xl text-white font-semibold"
-              >
-                Complete Payment
-              </button>
-            </div>
+  <div
+    className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+    onClick={() => setShowPendingSheet(false)}
+  >
+    <div
+      className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-4 shadow-xl animate-slide-up"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-orange-100 rounded-full">
+            <AlertCircle className="text-orange-600" size={24} />
           </div>
+          <h3 className="text-xl font-bold text-gray-900">Subscription Pending</h3>
         </div>
-      )}
+        <X
+          className="cursor-pointer text-gray-500 hover:text-gray-700"
+          size={24}
+          onClick={() => setShowPendingSheet(false)}
+        />
+      </div>
+
+      <div className="mb-6">
+        <p className="text-gray-700 text-base leading-relaxed">
+          Your subscription payment is currently pending. Please complete the payment
+          to enjoy uninterrupted access to all content.
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => setShowPendingSheet(false)}
+          className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            setShowPendingSheet(false);
+            router.push("/subscribe");
+          }}
+          style={{
+            background:
+              "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
+          }}
+          className="flex-1 py-3 px-4 rounded-xl text-white font-semibold"
+        >
+          Complete Payment
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
       <SubscribePage />

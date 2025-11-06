@@ -6,10 +6,6 @@ interface loginProps {
     mobileNo: string;
     isdCode: string;
 }
-interface mdnProps {
-    mobileNo: string;
-    isdCode: string;
-}
 
 interface verifyProps extends loginProps {
     otp: string;
@@ -19,20 +15,9 @@ interface validateProps {
     sid: string;
 }
 
-export const handleLogin = async (payload: loginProps) => {
+export const handleLoginValidateMDN = async (payload: loginProps) => {
     return await requestApi({
         url: 'api/v1/feed/GetOTP',
-        method: 'POST',
-        data: payload,
-        headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
-        },
-    });
-};
-export const ValidateMDN = async (payload: mdnProps) => {
-    return await requestApi({
-        url: 'api/v1/feed/ValidateMDN',
         method: 'POST',
         data: payload,
         headers: {
