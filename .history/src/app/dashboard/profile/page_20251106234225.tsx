@@ -63,7 +63,7 @@ export default function ProfilePage() {
     localStorage.removeItem("authData");
     setLoggedIn(false);
     setIsVip(false);
-    router.push("/auth/login");
+    router.push("/subscribe");
   };
 
   const handleLogin = () => {

@@ -53,71 +53,67 @@ export default function LoginPage() {
     //     }
     // };
     const handleSendOtp = async () => {
-        try {
-            // Load fingerprint
-            const fp = await FingerprintJS.load();
-            const result = await fp.get();
+  try {
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
 
-            const tempAuth = {
-                mobileNo,
-                deviceId: result.visitorId,
-                isdCode,
-            };
-
-            setAuthData(tempAuth);
-            localStorage.setItem("authData", JSON.stringify(tempAuth));
-            localStorage.setItem("mobile", mobileNo);
-
-            // 1 — Check MDN profile first
-            const payloadMDN = {
-                mobileNo,
-                isdCode,
-            };
-            const mdnRes = await ValidateMDN(payloadMDN);
-
-            if (!mdnRes?.response?.status) {
-                showError("Please subscribe to continue");
-                router.push("/subscribe");
-                return;
-            }
-
-            const profile = mdnRes.response.profile;
-            const vipInfo = mdnRes.response.vipInfo;
-
-            // Save profile for later
-            localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
-
-            // 2 — Send OTP if VIP
-            if (vipInfo?.isActive === 5 || profile?.vip === 1) {
-                const payload = {
-                    deviceId: result.visitorId,
-                    langCode: "en",
-                    mobileNo,
-                    isdCode,
-                };
-
-                const loginRes = await handleLogin(payload);
-
-                if (!loginRes?.response?.status) {
-                    showError("Failed to send OTP");
-                    return;
-                }
-
-                showSuccess("OTP sent successfully!");
-                router.push("/auth/verification");
-                return;
-            }
-
-            // 3 — If user is NOT VIP → Redirect to Subscribe
-            showError("Please subscribe to continue");
-            router.push("/subscribe");
-
-        } catch (error) {
-            console.log("Error in login api", error);
-            showError("OTP send failed");
-        }
+    const tempAuth = {
+      mobileNo,
+      deviceId: result.visitorId,
+      isdCode,
     };
 
+    setAuthData(tempAuth);
+    localStorage.setItem("authData", JSON.stringify(tempAuth));
+
+    // ✅ 1 — Check MDN profile first
+    const payloadMDN = {
+      mobileNo,
+      isdCode,
+    };
+
+    const mdnRes = await ValidateMDN(payloadMDN);
+
+    if (!mdnRes?.response?.status) {
+      showError("Mobile number validation failed");
+      return;
+    }
+
+    const profile = mdnRes?.response?.profile;
+
+    // ✅ Save profile for later
+    localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
+
+    // ✅ 2 — If user is NOT VIP → Redirect to Subscribe
+    if (profile.vip === 0) {
+      showError("Please subscribe to continue");
+      router.push("/subscribe");
+      return;
+    }
+
+    // ✅ 3 — VIP USER → Now send OTP
+    const payload = {
+      deviceId: result.visitorId,
+      langCode: "en",
+      mobileNo,
+      isdCode,
+    };
+
+    const loginRes = await handleLogin(payload);
+
+    if (!loginRes?.response?.status) {
+      showError("Failed to send OTP");
+      return;
+    }
+
+    showSuccess("OTP sent successfully!");
+    router.push("/auth/verification");
+
+  } catch (error) {
+    console.log("Error in login api", error);
+    showError("OTP send failed");
+  }
+};
 
 
     useEffect(() => {
@@ -180,13 +176,12 @@ export default function LoginPage() {
                                 disableCountryGuess
                                 enableSearch={false}
                                 countryCodeEditable={false}
-                                containerClass="w-full text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
-                                inputClass="!w-full !py-1 !pl-12 !pr-3 !text-sm !rounded-md !border-none focus:!ring-0"
-                                buttonClass="!bg-transparent !border-none !left-2 absolute z-10"
+                                containerClass="w-[100%] text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
+                                inputClass="!w-full !py-2 !pl-14 !pr-4 !text-sm !rounded-lg !border-none focus:!ring-0"
+                                buttonClass="!bg-transparent !border-none !left-3 absolute z-10"
                                 dropdownClass="!z-50"
                                 onChange={handlePhoneChange}
                             />
-
                         </div>
 
                         <button className="w-full cursor-pointer py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500" onClick={handleSendOtp}>

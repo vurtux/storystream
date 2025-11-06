@@ -108,7 +108,9 @@ const HomeClient = () => {
             
             localStorage.setItem("loginData", JSON.stringify(res.response));
             const raw = localStorage.getItem("loginData");
-            localStorage.setItem("mobile", res.response.profile.mobileNo);
+            data = JSON.parse(raw);
+
+            localStorage.setItem("mobile", data.profile.mobileNo);
             localStorage.setItem("menu", "home");
             showSuccess("Login successfully!");
             // Redirect to home after successful validation

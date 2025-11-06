@@ -63,7 +63,7 @@ export default function ProfilePage() {
     localStorage.removeItem("authData");
     setLoggedIn(false);
     setIsVip(false);
-    router.push("/auth/login");
+    router.push("/subscribe");
   };
 
   const handleLogin = () => {
@@ -88,7 +88,9 @@ export default function ProfilePage() {
    
   };
 
-  
+  const handleSubscribeNow = () => {
+    router.push("/subscribe");
+  };
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -128,12 +130,12 @@ export default function ProfilePage() {
       <div className="space-y-4 flex-1">
 
         {/* Subscribe Now - only when logged in */}
-        {!isVip && (
+        {!loggedIn && (
           <MenuItem
             imgSrc="/images/subscriptionLogo.png"
             label="Subscribe Now"
             value={<IoIosArrowForward />}
-            onClick={handleBannerClick}
+            onClick={handleSubscribeNow}
           />
         )}
 

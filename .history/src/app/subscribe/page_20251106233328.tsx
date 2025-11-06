@@ -24,9 +24,9 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
 
 export default function SubscriptionClient() {
   const plans = [
-    { price: 'R 5', period: 'Daily', billing: 'R 5/day', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020' },
-    { price: 'R 25', period: 'Weekly', billing: 'R 25/week', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239' },
-    { price: 'R 80', period: 'Monthly', billing: 'R 80/month', savings: '36%', link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240' },
+    { price: 'R 5', period: 'Daily', billing: 'R 5/day', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t' },
+    { price: 'R 25', period: 'Weekly', billing: 'R 25/week', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t' },
+    { price: 'R 80', period: 'Monthly', billing: 'R 80/month', savings: '36%', link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t' },
   ];
 
   // Get saved mobile number from localStorage
