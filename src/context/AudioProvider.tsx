@@ -13,7 +13,7 @@ interface AudioContextType {
     audioList: any;
     setAudioList: (track: any) => void;
     audioRef: React.RefObject<HTMLAudioElement | null>;
-    handlePlay: (episodeData: any) => void;
+    handlePlay: () => void;
     handlePlayPause: (episodeData: any) => void;
 }
 
@@ -38,7 +38,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     //     }
     // }, []);
 
-    const handlePlay = (episodeData: any) => {
+    const handlePlay = () => {
         const isVip: any = localStorage.getItem('loginData');
         if(!isVip) return;
         const parsedData = JSON.parse(isVip);

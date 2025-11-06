@@ -11,6 +11,7 @@ import useDashboard from "../../hooks/useDashboard";
 import { getEpisodeDetail } from "../../app/api/podcast";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
+import { isPodcastDownloaded, playOfflinePodcast } from "../../utils/indexDB";
 
 interface Episode {
   episode_id: number;
@@ -181,8 +182,17 @@ export default function PodcastClient({ episode_id, title }: any) {
   }, [playbackRate, audioRef]);
 
   useEffect(() => {
+
     const fetchData = async () => {
       try {
+        // const isAlreadyDownloaded = await isPodcastDownloaded(episode_id?.toString());
+        // if(isAlreadyDownloaded){
+        //   await playOfflinePodcast(episode_id?.toString(), audioRef);
+        //   setTimeout(() => {
+        //     handlePlay();
+        //   }, 1000);
+        //   return;
+        // }
         const lang = localStorage.getItem("language");
         const country = localStorage.getItem("country") || "";
         const result = await getEpisodeDetail(
@@ -198,7 +208,7 @@ export default function PodcastClient({ episode_id, title }: any) {
         localStorage.setItem("episodeData", JSON.stringify(ep));
         setAudioSrc(ep?.stream_url);
         setTimeout(() => {
-          handlePlay(ep);
+          handlePlay();
         }, 1000);
       } catch (error) {
         console.log("Failed to fetch podcast:", error);
