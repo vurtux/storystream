@@ -32,8 +32,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
   const { setDetailData, setSeeAllData } = useDashboard();
 
   const [loading, setLoading] = useState(true);
-  const [isVip, setIsVip] = useState(false);
-
+  const [isVip, setIsVip] = useState(0);
 
   useEffect(() => {
     if (data?.contents?.length > 0) {
@@ -65,24 +64,18 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
   };
 
   useEffect(() => {
-  if (typeof window === "undefined") return; // Prevent crash during SSR
+    if (typeof window === "undefined") return; // ✅ Prevent crash during SSR
 
-  const data = localStorage.getItem("loginData");
-  if (!data) return;
+    const data = localStorage.getItem("loginData");
+    if (!data) return;
 
-  try {
-    const parsed = JSON.parse(data);
-
-    // ✅ VIP if isActive === 5 OR profile.vip === 1
-    const vipActive = parsed?.vipInfo?.isActive === 5;
-    const profileVip = parsed?.profile?.vip === 1;
-
-    setIsVip(vipActive || profileVip);
-  } catch (err) {
-    console.error("Failed to parse loginData:", err);
-  }
-}, []);
-
+    try {
+      const parsed = JSON.parse(data);
+      setIsVip(parsed?.profile?.vip);
+    } catch (err) {
+      console.error("Failed to parse loginData:", err);
+    }
+  }, []);
 
   return (
     <div>

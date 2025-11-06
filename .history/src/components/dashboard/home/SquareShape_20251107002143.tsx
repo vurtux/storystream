@@ -32,7 +32,7 @@ const SquareShape = ({ data }: { data: SquareBlock }) => {
   const { setDetailData, setSeeAllData } = useDashboard();
 
   const [loading, setLoading] = useState(true);
-  const [isVip, setIsVip] = useState(false);
+ const [isVip, setIsVip] = useState(false);
 
 
   useEffect(() => {
