@@ -18,12 +18,6 @@ export default function LoginPage() {
     const [isdCode, setIsdCode] = useState("91");
 
     const handleSendOtp = async () => {
-        // ✅ Validation: Check if mobile number is entered
-        if (!mobileNo || mobileNo.trim() === "") {
-            showError("Please enter your mobile number");
-            return;
-        }
-
         try {
             // Load fingerprint
             const fp = await FingerprintJS.load();
@@ -40,7 +34,10 @@ export default function LoginPage() {
             localStorage.setItem("mobile", mobileNo);
 
             // 1 — Check MDN profile first
-            const payloadMDN = { mobileNo, isdCode };
+            const payloadMDN = {
+                mobileNo,
+                isdCode,
+            };
             const mdnRes = await ValidateMDN(payloadMDN);
 
             if (!mdnRes?.response?.status) {
@@ -52,11 +49,18 @@ export default function LoginPage() {
             const profile = mdnRes.response.profile;
             const vipInfo = mdnRes.response.vipInfo;
 
+            // Save profile for later
             localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
 
             // 2 — Send OTP if VIP
             if (vipInfo?.isActive === 5 || profile?.vip === 1) {
-                const payload = { deviceId: result.visitorId, langCode: "en", mobileNo, isdCode };
+                const payload = {
+                    deviceId: result.visitorId,
+                    langCode: "en",
+                    mobileNo,
+                    isdCode,
+                };
+
                 const loginRes = await handleLogin(payload);
 
                 if (!loginRes?.response?.status) {
@@ -78,7 +82,6 @@ export default function LoginPage() {
             showError("OTP send failed");
         }
     };
-
 
     useEffect(() => {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -110,8 +113,8 @@ export default function LoginPage() {
             <div className="relative w-full max-w-[430px] h-full mx-auto shadow-2xl">
                 {/* Background Image */}
                 <div className="absolute inset-0 w-full h-full">
-                    <Image
-                        alt='login'
+                    <Image 
+                        alt='login' 
                         fill
                         src="/images/loginImage.png"
                         className="object-cover"
@@ -168,8 +171,8 @@ export default function LoginPage() {
                     </div>
 
                     {/* Send OTP Button */}
-                    <button
-                        className="w-full cursor-pointer py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all shadow-md mb-2"
+                    <button 
+                        className="w-full cursor-pointer py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all shadow-md mb-2" 
                         onClick={handleSendOtp}
                     >
                         Send OTP
