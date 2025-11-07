@@ -131,7 +131,7 @@ export default function SubscriptionClient() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 w-full max-w-2xl mx-auto pb-56">
+        <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
           <div className="p-4 pt-3 text-center">
             <div className="flex justify-center mb-1.5"><span className="text-3xl">⚡</span></div>
             <h1 className="text-2xl font-bold mb-1.5 text-gray-900">
@@ -191,7 +191,7 @@ export default function SubscriptionClient() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-md p-3 pb-5 bg-white shadow-2xl rounded-xl">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md p-2 bg-white shadow-2xl rounded-xl">
           <div className="max-w-md mx-auto">
             <button
               onClick={handleContinue}
@@ -204,10 +204,15 @@ export default function SubscriptionClient() {
             >
               CONTINUE FOR <span className="ml-2 font-extrabold text-xl">{plansWithMDN[selectedPlan].price}</span>
             </button>
-            <p className="text-[11px] mt-3 text-gray-600 text-center leading-relaxed px-2">
+            
+            <p className="text-[10px] mt-2 text-gray-500 text-center">
               By continuing, you agree to our{' '}
-              <a href="https://www.storystream.mobi/tnc.html" target="_blank" rel="noopener noreferrer" className="text-purple-600 underline hover:text-purple-700 font-semibold">
+              <a href="/terms" className="text-purple-600 underline hover:text-purple-700">
                 Terms & Conditions
+              </a>
+              {' '}and{' '}
+              <a href="/privacy" className="text-purple-600 underline hover:text-purple-700">
+                Privacy Policy
               </a>
             </p>
           </div>

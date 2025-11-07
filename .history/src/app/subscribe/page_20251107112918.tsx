@@ -206,8 +206,12 @@ export default function SubscriptionClient() {
             </button>
             <p className="text-[11px] mt-3 text-gray-600 text-center leading-relaxed px-2">
               By continuing, you agree to our{' '}
-              <a href="https://www.storystream.mobi/tnc.html" target="_blank" rel="noopener noreferrer" className="text-purple-600 underline hover:text-purple-700 font-semibold">
+              <a href="/terms" className="text-purple-600 underline hover:text-purple-700 font-semibold">
                 Terms & Conditions
+              </a>
+              {' '}and{' '}
+              <a href="/privacy" className="text-purple-600 underline hover:text-purple-700 font-semibold">
+                Privacy Policy
               </a>
             </p>
           </div>

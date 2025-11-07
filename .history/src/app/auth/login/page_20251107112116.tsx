@@ -108,7 +108,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-white flex items-center justify-center">
+        <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gray-900 flex items-center justify-center">
             {/* Mobile View Container - Max width for desktop */}
             <div className="relative w-full max-w-[430px] h-full mx-auto shadow-2xl">
                 {/* Background Image */}

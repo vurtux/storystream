@@ -108,10 +108,9 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-white flex items-center justify-center">
-            {/* Mobile View Container - Max width for desktop */}
-            <div className="relative w-full max-w-[430px] h-full mx-auto shadow-2xl">
-                {/* Background Image */}
+        <div className="fixed inset-0 w-screen h-screen overflow-hidden">
+            <div className="relative w-full h-full">
+                {/* Background Image - Fixed aspect ratio */}
                 <div className="absolute inset-0 w-full h-full">
                     <Image 
                         alt='login' 
@@ -134,49 +133,51 @@ export default function LoginPage() {
 
                 {/* Login Form Container - Positioned at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-8 pt-6 bg-gradient-to-t from-white via-white to-transparent">
-                    {/* Logo and Title */}
-                    <div className="flex flex-col items-center mb-4">
-                        <div className="mb-3">
-                            <Image
-                                src="/images/loginLogo.png"
-                                height={80}
-                                width={80}
-                                alt="Logo"
-                                className="h-20 w-20"
+                    <div className="max-w-md mx-auto">
+                        {/* Logo and Title */}
+                        <div className="flex flex-col items-center mb-4">
+                            <div className="mb-3">
+                                <Image
+                                    src="/images/loginLogo.png"
+                                    height={80}
+                                    width={80}
+                                    alt="Logo"
+                                    className="h-20 w-20"
+                                />
+                            </div>
+                            <h2 className="text-lg sm:text-xl text-black font-semibold">
+                                Login to your account
+                            </h2>
+                            <p className="text-xs sm:text-sm text-gray-600 mb-4">
+                                Enjoy Audio Books you like
+                            </p>
+                        </div>
+
+                        {/* Phone Input */}
+                        <div className="mb-4">
+                            <PhoneInput
+                                country={'za'}
+                                onlyCountries={['za']}
+                                disableDropdown
+                                disableCountryGuess
+                                enableSearch={false}
+                                countryCodeEditable={false}
+                                containerClass="w-full text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
+                                inputClass="!w-full !py-2.5 !pl-12 !pr-3 !text-sm !rounded-md !border-none focus:!ring-0"
+                                buttonClass="!bg-transparent !border-none !left-2 absolute z-10"
+                                dropdownClass="!z-50"
+                                onChange={handlePhoneChange}
                             />
                         </div>
-                        <h2 className="text-xl text-black font-semibold">
-                            Login to your account
-                        </h2>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Enjoy Audio Books you like
-                        </p>
-                    </div>
 
-                    {/* Phone Input */}
-                    <div className="mb-4">
-                        <PhoneInput
-                            country={'za'}
-                            onlyCountries={['za']}
-                            disableDropdown
-                            disableCountryGuess
-                            enableSearch={false}
-                            countryCodeEditable={false}
-                            containerClass="w-full text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
-                            inputClass="!w-full !py-2.5 !pl-12 !pr-3 !text-sm !rounded-md !border-none focus:!ring-0"
-                            buttonClass="!bg-transparent !border-none !left-2 absolute z-10"
-                            dropdownClass="!z-50"
-                            onChange={handlePhoneChange}
-                        />
+                        {/* Send OTP Button */}
+                        <button 
+                            className="w-full cursor-pointer py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all shadow-md" 
+                            onClick={handleSendOtp}
+                        >
+                            Send OTP
+                        </button>
                     </div>
-
-                    {/* Send OTP Button */}
-                    <button 
-                        className="w-full cursor-pointer py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all shadow-md" 
-                        onClick={handleSendOtp}
-                    >
-                        Send OTP
-                    </button>
                 </div>
             </div>
         </div>
