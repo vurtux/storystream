@@ -27,8 +27,8 @@ export default function SeeAllClient({ heading }: any) {
             try {
                 const parsed = JSON.parse(loginData);
                 const vipActive = parsed?.vipInfo?.isActive === 5;
+                
                 const profileVip = parsed?.profile?.vip === 1;
-               
                 setIsVip(vipActive || profileVip);
             } catch (err) {
                 console.error("Failed to parse loginData:", err);
@@ -68,7 +68,7 @@ export default function SeeAllClient({ heading }: any) {
                                     fill
                                     className="object-cover"
                                 />
-                                {!isVip && (
+                                {isVip && (
                                     <div className="absolute top-2 right-2">
                                         <Image
                                             style={{ borderRadius: "20%" }}

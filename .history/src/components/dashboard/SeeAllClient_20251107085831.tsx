@@ -12,27 +12,15 @@ export default function SeeAllClient({ heading }: any) {
     const { setDetailData } = useDashboard();
 
     const [seeAllData, setSeeAllData] = useState<any[]>([]);
-    const [isVip, setIsVip] = useState(false); // ✅ VIP status
 
     useEffect(() => {
-        // Load See All Data
         const data = localStorage.getItem('seeAllData');
+        console.log(data, "data====");
         if (data) {
             setSeeAllData(JSON.parse(data));
-        }
-
-        // ✅ Load VIP status
-        const loginData = localStorage.getItem('loginData');
-        if (loginData) {
-            try {
-                const parsed = JSON.parse(loginData);
-                const vipActive = parsed?.vipInfo?.isActive === 5;
-                const profileVip = parsed?.profile?.vip === 1;
-               
-                setIsVip(vipActive || profileVip);
-            } catch (err) {
-                console.error("Failed to parse loginData:", err);
-            }
+            // setTimeout(() => {
+            //     setSeeAllData(JSON.parse(data));
+            // }, 500); // simulate slight delay for shimmer
         }
     }, []);
 
@@ -56,29 +44,19 @@ export default function SeeAllClient({ heading }: any) {
                             <div className="mt-2 h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
                         </div>
                     ))
-                    : seeAllData.map((item: any, idx: number) => (
+                    : (seeAllData)?.map((item: any, idx: number) => (
                         <div key={idx} className="text-center">
-                            <div
-                                onClick={() => handleDetail(item.conId || item.podcast_id, item.conName, item.imgIrl)}
-                                className="relative w-full aspect-square rounded-lg overflow-hidden cursor-pointer"
-                            >
-                                <Image
-                                    src={item.imgIrl}
-                                    alt={item.conName || "conName"}
-                                    fill
-                                    className="object-cover"
-                                />
-                                {!isVip && (
-                                    <div className="absolute top-2 right-2">
-                                        <Image
-                                            style={{ borderRadius: "20%" }}
-                                            src="/images/myuze1.jpeg"
-                                            alt="VIP Badge"
-                                            width={20}
-                                            height={20}
-                                        />
-                                    </div>
-                                )}
+                            <div onClick={() => handleDetail(item.conId || item.podcast_id, item.conName, item.imgIrl)} className="relative w-full aspect-square rounded-lg overflow-hidden cursor-pointer">
+                               
+                                <div className="absolute top-2 right-2">
+                                    <Image
+                                        style={{ borderRadius: "20%" }}
+                                        src="/images/myuze1.jpeg"
+                                        alt="Badge"
+                                        width={20}
+                                        height={20}
+                                    />
+                                </div>
                             </div>
                             <p className="mt-2 text-xs font-medium">{item.conName}</p>
                         </div>

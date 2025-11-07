@@ -28,7 +28,7 @@ export default function SeeAllClient({ heading }: any) {
                 const parsed = JSON.parse(loginData);
                 const vipActive = parsed?.vipInfo?.isActive === 5;
                 const profileVip = parsed?.profile?.vip === 1;
-               
+                console.log("VIP Active:", vipActive, "Profile VIP:", profileVip);
                 setIsVip(vipActive || profileVip);
             } catch (err) {
                 console.error("Failed to parse loginData:", err);

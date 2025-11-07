@@ -68,7 +68,7 @@ export default function SeeAllClient({ heading }: any) {
                                     fill
                                     className="object-cover"
                                 />
-                                {!isVip && (
+                                {isVip && (
                                     <div className="absolute top-2 right-2">
                                         <Image
                                             style={{ borderRadius: "20%" }}
