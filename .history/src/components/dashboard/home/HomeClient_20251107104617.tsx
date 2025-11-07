@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
 import HeaderSlider from "../DashboardHeader";
-import { handleValidate,handleGetProfile } from "../../../app/api/auth";
+import { handleValidate } from "../../../app/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
@@ -103,15 +103,15 @@ const HomeClient = () => {
 
           const resPro = await handleGetProfile(res.response.profile.userId);
 
-          setAuth({ userInfo: resPro.response.profile });
+          setAuth({ userInfo: res.response.profile });
 
           
           if (res.response.status) {
             localStorage.setItem("isLoggedIn", "true");
             
-            localStorage.setItem("loginData", JSON.stringify(resPro.response));
+            localStorage.setItem("loginData", JSON.stringify(res.response));
             const raw = localStorage.getItem("loginData");
-            localStorage.setItem("mobile", resPro.response.profile.mobileNo);
+            localStorage.setItem("mobile", res.response.profile.mobileNo);
             localStorage.setItem("menu", "home");
             showSuccess("Login successfully!");
             // Redirect to home after successful validation

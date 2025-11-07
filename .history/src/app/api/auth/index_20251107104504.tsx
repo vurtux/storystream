@@ -67,12 +67,12 @@ export const handleValidate = async (payload: validateProps) => {
 };
 
 
-export const handleGetProfile = async (userID: string) => {
+export const handleGetProfile = async (string userID) => {
     return await requestApi({
         url: 'api/v1/feed/GetProfile',
         method: 'POST',
         data: {
-            userId: userID
+            "userId": "17193448"
         },
         headers: {
             'device-os': 'web',
