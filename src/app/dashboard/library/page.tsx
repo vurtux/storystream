@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import PodcastLibrary from '../../../components/library/Podcast';
+import BookLibrary from '../../../components/library/Book';
 
 const Library = () => {
     const [activeTab, setActiveTab] = useState<'podcasts' | 'books'>('podcasts');
@@ -32,16 +34,12 @@ const Library = () => {
                 </button>
             </div>
 
-            {/* No Data Found */}
-            <div className="flex flex-col items-center justify-center mt-16">
-                <Image
-                    src="/images/not-found.png" // <-- Make sure to place this image in the public/ folder
-                    alt="No Data"
-                    width={200}
-                    height={200}
-                />
-                <p className="mt-4 text-lg font-semibold">No Data Found</p>
-            </div>
+            {activeTab === "podcasts" ? <>
+            <PodcastLibrary />
+            </> : 
+            <>
+            <BookLibrary />
+            </>}
         </div>
     );
 };

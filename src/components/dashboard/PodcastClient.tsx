@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaBackward, FaForward, FaPlay, FaPause } from "react-icons/fa";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { MdArrowBack, MdSpeed } from "react-icons/md";
-import { Clock3, Share2, MoreVertical, Download } from "lucide-react";
+import { Clock3, Share2, MoreVertical, Download, CircleCheckBig } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "primereact/dialog";
@@ -11,7 +11,7 @@ import useDashboard from "../../hooks/useDashboard";
 import { getEpisodeDetail } from "../../app/api/podcast";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
-import { isPodcastDownloaded, playOfflinePodcast } from "../../utils/indexDB";
+import { getOfflineEpisode, isPodcastDownloaded, playOfflinePodcast } from "../../utils/indexDB";
 
 interface Episode {
   episode_id: number;
@@ -102,6 +102,8 @@ export default function PodcastClient({ episode_id, title }: any) {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSleepTimer, setShowSleepTimer] = useState(false);
   const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
+  const [offlineImgUrl, setOfflineImgUrl] = useState("/images/loginLogo.png");
+  const [isDownloaded, setIsDownloaded] = useState(false);
   const [timer, setTimer] = useState(5);
   const [userData, setUserData] = useState<UserData>({
     userId: "",
@@ -185,14 +187,17 @@ export default function PodcastClient({ episode_id, title }: any) {
 
     const fetchData = async () => {
       try {
-        // const isAlreadyDownloaded = await isPodcastDownloaded(episode_id?.toString());
-        // if(isAlreadyDownloaded){
-        //   await playOfflinePodcast(episode_id?.toString(), audioRef);
-        //   setTimeout(() => {
-        //     handlePlay();
-        //   }, 1000);
-        //   return;
-        // }
+        const isAlreadyDownloaded = await isPodcastDownloaded(episode_id?.toString());
+        if(isAlreadyDownloaded){
+          const podcast_data = await playOfflinePodcast(episode_id?.toString(), audioRef);
+          // setOfflineImgUrl(podcast_data?.imageUrl);
+          setIsDownloaded(true);
+          console.log(podcast_data?.imageUrl, "podcast_data");
+          setTimeout(() => {
+            handlePlay();
+          }, 1000);
+          return;
+        }
         const lang = localStorage.getItem("language");
         const country = localStorage.getItem("country") || "";
         const result = await getEpisodeDetail(
@@ -328,9 +333,9 @@ export default function PodcastClient({ episode_id, title }: any) {
       </div>
 
       <div className="w-full rounded-xl overflow-hidden shadow-lg">
-        {episodeData?.img_local_uri ? (
+        {episodeData?.img_local_uri || offlineImgUrl ? (
           <Image
-            src={episodeData?.img_local_uri || ""}
+            src={episodeData?.img_local_uri || offlineImgUrl}
             alt="Podcast Cover"
             height={400}
             width={1000}
@@ -345,7 +350,7 @@ export default function PodcastClient({ episode_id, title }: any) {
 
       <div className="text-center mt-4">
         <h2 className="font-bold text-lg">
-          {episodeData?.title || "No title"}
+          {episodeData?.title || title || "No title"}
         </h2>
         <p className="text-sm">{episodeData?.subtitle}</p>
       </div>
@@ -372,7 +377,7 @@ export default function PodcastClient({ episode_id, title }: any) {
       </div>
 
       <div className="flex items-center justify-between w-full max-w-sm mt-6 px-6">
-        <button onClick={() => handleAudioChange("minus")}>
+        <button disabled={isDownloaded} onClick={() => handleAudioChange("minus")}>
           <FaBackward className="text-2xl" />
         </button>
         <button
@@ -426,7 +431,7 @@ export default function PodcastClient({ episode_id, title }: any) {
             src="/images/forward-icon.png"
           />
         </button>
-        <button onClick={() => handleAudioChange("plus")}>
+        <button disabled={isDownloaded} onClick={() => handleAudioChange("plus")}>
           <FaForward className="text-2xl" />
         </button>
       </div>
@@ -446,10 +451,14 @@ export default function PodcastClient({ episode_id, title }: any) {
           className="w-5 h-5 text-gray-600 cursor-pointer"
           onClick={handleShareClick}
         />
+        {isDownloaded ? <>
+        <CircleCheckBig size={18} className="text-green-600" />
+        </> : <>
         <Download
           className="w-5 h-5 text-gray-600 cursor-pointer"
           onClick={handleDownload}
         />
+        </>}
       </div>
 
       {/* Playback Speed Dialog */}
