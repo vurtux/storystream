@@ -595,8 +595,8 @@ import { handlePodcastPaging } from "../../app/api/podcast";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
 import SubscribePage from "./SubscribePage";
-import { isPodcastDownloaded, savePodcast } from "../../utils/indexDB";
-import { showSuccess, showError } from "../../utils/toastService";
+import { isPodcastDownloaded, saveEpisodeOffline, savePodcast } from "../../utils/indexDB";
+import { showSuccess } from "../../utils/toastService";
 
 interface PodcastDetail {
   podcast_id: number;
@@ -929,22 +929,29 @@ const DetailsClient = ({ conId, title }: any) => {
       const isVip = data?.profile?.vip === 1;
       if (!isVip) {
         confirm();
-        return;
+      } else {
+        const isAlreadyDownloaded = await isPodcastDownloaded(item?.episode_id);
+        if(isAlreadyDownloaded) {
+            showSuccess("Already Downloaded!");
+            return;
+        }
+        // savePodcast(item?.stream_uri, item?.episode_id?.toString());
+        saveEpisodeOffline({
+          img_local_uri: item?.img_local_uri,
+          stream_uri: item?.stream_uri, 
+          episode_id: item?.episode_id?.toString(),
+          title: item?.title
+        });
+        setDownloadedEpisodes(prev => ({
+          ...prev,
+          [item.episode_id]: true,
+        }));
+        showSuccess("Downloaded successfully!");
+        // const link = document.createElement("a");
+        // link.href = item.download_url || item.stream_url;
+        // link.download = `${item.title || "podcast"}.mp3`;
+        // link.click();
       }
-
-      // All checks passed, proceed with download
-      const isAlreadyDownloaded = await isPodcastDownloaded(item?.episode_id);
-      if (isAlreadyDownloaded) {
-        showSuccess("Already Downloaded!");
-        return;
-      }
-
-      savePodcast(item?.stream_uri, item?.episode_id?.toString());
-      setDownloadedEpisodes(prev => ({
-        ...prev,
-        [item.episode_id]: true,
-      }));
-      showSuccess("Downloaded successfully!");
     } catch (error) {
       console.log("Error downloading:", error);
     }
