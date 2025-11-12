@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { showError } from '../../utils/toastService';
 
 interface FeatureRowProps {
   name: string;
@@ -73,14 +72,13 @@ export default function SubscriptionClient() {
   const handleContinue = () => {
     const isSubscribed = localStorage.getItem('isSubscribed');
     const selected = plansWithMDN[selectedPlan];
-    localStorage.setItem('selectedPlan', selected.link);
-    
     setLoading(true);
 
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('redirecting', 'true');
-      
+      sessionStorage.setItem('selectedPlan', JSON.stringify(selected));
     }
+    showError(selected);
     if (isSubscribed === 'true') {
       router.push('/auth/login');
       return;

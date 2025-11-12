@@ -88,13 +88,13 @@ export default function LoginPage() {
             if (isSubscribed === "true") {
                 
                 try {
-                  
                      const linkWithMobile = mobileNo
                         ? `${storedPlan}&msisdn=${mobileNo}`
                         : storedPlan;
 
                     window.location.href = linkWithMobile!;
                     return;
+                    }
                 } catch (error) {
                     console.error("Invalid selectedPlan data:", error);
                 }

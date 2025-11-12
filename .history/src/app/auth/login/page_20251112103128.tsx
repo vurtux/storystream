@@ -45,12 +45,15 @@ export default function LoginPage() {
             if (!mdnRes?.response?.status) {
                 const isSubscribed = localStorage.getItem("isSubscribed");
                 const storedPlan = localStorage.getItem("selectedPlan");
-                if (isSubscribed === "true") {
-                    const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+               
 
-                    window.location.href = linkWithMobile!;
+                if (isSubscribed === "true") {
+                    
+                    const linkWithMobile = mobileNo
+                        ? `${storedPlan.link}&msisdn=${mobileNo}`
+                        : selectedPlan.link;
+
+                    window.location.href = linkWithMobile;
                     return;
                 } else {
                     showError("Please subscribe to continue");
@@ -85,16 +88,19 @@ export default function LoginPage() {
             // router.push("/subscribe");
             const isSubscribed = localStorage.getItem("isSubscribed");
             const storedPlan = localStorage.getItem("selectedPlan");
+            const selectedPlan = storedPlan ? JSON.parse(storedPlan) : null;
             if (isSubscribed === "true") {
                 
                 try {
-                  
-                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+                    const plan = JSON.parse(selectedPlan);
+                    if (plan?.link) {
+                        const linkWithMobile = mobileNo
+                            ? `${plan.link}&msisdn=${mobileNo}`
+                            : plan.link;
 
-                    window.location.href = linkWithMobile!;
-                    return;
+                        window.location.href = linkWithMobile;
+                        return;
+                    }
                 } catch (error) {
                     console.error("Invalid selectedPlan data:", error);
                 }

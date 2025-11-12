@@ -42,23 +42,25 @@ export default function LoginPage() {
             // 1 — Check MDN profile first
             const payloadMDN = { mobileNo, isdCode };
             const mdnRes = await ValidateMDN(payloadMDN);
+            const isSubscribed = localStorage.getItem("isSubscribed");
+            const selectedPlan = localStorage.getItem("selectedPlan");
             if (!mdnRes?.response?.status) {
-                const isSubscribed = localStorage.getItem("isSubscribed");
-                const storedPlan = localStorage.getItem("selectedPlan");
-                if (isSubscribed === "true") {
+                if (isSubscribed === "true" && selectedPlan) {
+                    const plan = JSON.parse(selectedPlan);
                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+                        ? `${plan.link}&msisdn=${mobileNo}`
+                        : plan.link;
 
-                    window.location.href = linkWithMobile!;
+                    window.location.href = linkWithMobile;
                     return;
-                } else {
+                }
+                else {
                     showError("Please subscribe to continue");
                     router.push("/subscribe");
                     return;
                 }
-            }
 
+            }
 
             const profile = mdnRes.response.profile;
             const vipInfo = mdnRes.response.vipInfo;
@@ -83,23 +85,15 @@ export default function LoginPage() {
             // 3 — If user is NOT VIP → Redirect to Subscribe
             // showError("Please subscribe to continue");
             // router.push("/subscribe");
-            const isSubscribed = localStorage.getItem("isSubscribed");
-            const storedPlan = localStorage.getItem("selectedPlan");
-            if (isSubscribed === "true") {
-                
-                try {
-                  
-                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+            if (isSubscribed === "true" && selectedPlan) {
+                const plan = JSON.parse(selectedPlan);
+                const linkWithMobile = mobileNo
+                    ? `${plan.link}&msisdn=${mobileNo}`
+                    : plan.link;
 
-                    window.location.href = linkWithMobile!;
-                    return;
-                } catch (error) {
-                    console.error("Invalid selectedPlan data:", error);
-                }
+                window.location.href = linkWithMobile;
+                return;
             }
-
             else {
                 showError("Please subscribe to continue");
                 router.push("/subscribe");
@@ -108,8 +102,18 @@ export default function LoginPage() {
 
         } catch (error) {
             console.log("Error in login api", error);
+             const isSubscribed = localStorage.getItem("isSubscribed");
+            const selectedPlan = localStorage.getItem("selectedPlan");
             // showError("OTP send failed");
-
+            if (isSubscribed === "true" && selectedPlan) {
+                    const plan = JSON.parse(selectedPlan);
+                    const linkWithMobile = mobileNo
+                        ? `${plan.link}&msisdn=${mobileNo}`
+                        : plan.link;
+    
+                    window.location.href = linkWithMobile;
+                    return;
+                }
         }
     };
 

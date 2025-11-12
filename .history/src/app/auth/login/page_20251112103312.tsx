@@ -88,7 +88,7 @@ export default function LoginPage() {
             if (isSubscribed === "true") {
                 
                 try {
-                  
+                    const plan = JSON.parse(selectedPlan);
                      const linkWithMobile = mobileNo
                         ? `${storedPlan}&msisdn=${mobileNo}`
                         : storedPlan;

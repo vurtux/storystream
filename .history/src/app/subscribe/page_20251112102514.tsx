@@ -73,7 +73,7 @@ export default function SubscriptionClient() {
   const handleContinue = () => {
     const isSubscribed = localStorage.getItem('isSubscribed');
     const selected = plansWithMDN[selectedPlan];
-    localStorage.setItem('selectedPlan', selected.link);
+    localStorage.setItem('selectedPlan', selected.link));
     
     setLoading(true);
 

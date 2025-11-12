@@ -73,14 +73,13 @@ export default function SubscriptionClient() {
   const handleContinue = () => {
     const isSubscribed = localStorage.getItem('isSubscribed');
     const selected = plansWithMDN[selectedPlan];
-    localStorage.setItem('selectedPlan', selected.link);
-    
     setLoading(true);
 
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('redirecting', 'true');
-      
+      sessionStorage.setItem('selectedPlan', JSON.stringify(selected.link));
     }
+    showError(JSON.stringify(selected));
     if (isSubscribed === 'true') {
       router.push('/auth/login');
       return;

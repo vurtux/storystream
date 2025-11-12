@@ -85,16 +85,19 @@ export default function LoginPage() {
             // router.push("/subscribe");
             const isSubscribed = localStorage.getItem("isSubscribed");
             const storedPlan = localStorage.getItem("selectedPlan");
+            const selectedPlan = storedPlan ? JSON.parse(storedPlan) : null;
             if (isSubscribed === "true") {
                 
                 try {
-                  
-                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+                    const plan = JSON.parse(selectedPlan);
+                    if (plan?.link) {
+                        const linkWithMobile = mobileNo
+                            ? `${plan.link}&msisdn=${mobileNo}`
+                            : plan.link;
 
-                    window.location.href = linkWithMobile!;
-                    return;
+                        window.location.href = linkWithMobile;
+                        return;
+                    }
                 } catch (error) {
                     console.error("Invalid selectedPlan data:", error);
                 }

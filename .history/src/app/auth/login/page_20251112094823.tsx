@@ -17,101 +17,159 @@ export default function LoginPage() {
     const [mobileNo, setMobileNo] = useState("");
     const [isdCode, setIsdCode] = useState("91");
 
+    // const handleSendOtp = async () => {
+    //     // ✅ Validation: Check if mobile number is entered
+    //     if (!mobileNo || mobileNo.trim() === "") {
+    //         showError("Please enter your mobile number");
+    //         return;
+    //     }
+
+    //     try {
+    //         // Load fingerprint
+    //         const fp = await FingerprintJS.load();
+    //         const result = await fp.get();
+
+    //         const tempAuth = {
+    //             mobileNo,
+    //             deviceId: result.visitorId,
+    //             isdCode,
+    //         };
+
+    //         setAuthData(tempAuth);
+    //         localStorage.setItem("authData", JSON.stringify(tempAuth));
+    //         localStorage.setItem("mobile", mobileNo);
+
+    //         // 1 — Check MDN profile first
+    //         const payloadMDN = { mobileNo, isdCode };
+    //         const mdnRes = await ValidateMDN(payloadMDN);
+
+    //         if (!mdnRes?.response?.status) {
+    //             showError("Please subscribe to continue");
+    //             router.push("/subscribe");
+    //             return;
+    //         }
+
+    //         const profile = mdnRes.response.profile;
+    //         const vipInfo = mdnRes.response.vipInfo;
+
+    //         localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
+
+    //         // 2 — Send OTP if VIP
+    //         if (vipInfo?.isActive === 5 || profile?.vip === 1) {
+    //             const payload = { deviceId: result.visitorId, langCode: "en", mobileNo, isdCode };
+    //             const loginRes = await handleLogin(payload);
+
+    //             if (!loginRes?.response?.status) {
+    //                 // showError("Failed to send OTP");
+    //                 return;
+    //             }
+
+    //             showSuccess("OTP sent successfully!");
+    //             router.push("/auth/verification");
+    //             return;
+    //         }
+
+    //         // 3 — If user is NOT VIP → Redirect to Subscribe
+    //         showError("Please subscribe to continue");
+    //         router.push("/subscribe");
+
+    //     } catch (error) {
+    //         console.log("Error in login api", error);
+    //         showError("OTP send failed");
+    //     }
+    // };
+
     const handleSendOtp = async () => {
-        // ✅ Validation: Check if mobile number is entered
-        if (!mobileNo || mobileNo.trim() === "") {
-            showError("Please enter your mobile number");
-            return;
-        }
+  // ✅ Validation: Check if mobile number is entered
+  if (!mobileNo || mobileNo.trim() === "") {
+    showError("Please enter your mobile number");
+    return;
+  }
 
-        try {
-            // Load fingerprint
-            const fp = await FingerprintJS.load();
-            const result = await fp.get();
+  try {
+    // Load fingerprint
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
 
-            const tempAuth = {
-                mobileNo,
-                deviceId: result.visitorId,
-                isdCode,
-            };
-
-            setAuthData(tempAuth);
-            localStorage.setItem("authData", JSON.stringify(tempAuth));
-            localStorage.setItem("mobile", mobileNo);
-
-            // 1 — Check MDN profile first
-            const payloadMDN = { mobileNo, isdCode };
-            const mdnRes = await ValidateMDN(payloadMDN);
-            if (!mdnRes?.response?.status) {
-                const isSubscribed = localStorage.getItem("isSubscribed");
-                const storedPlan = localStorage.getItem("selectedPlan");
-                if (isSubscribed === "true") {
-                    const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
-
-                    window.location.href = linkWithMobile!;
-                    return;
-                } else {
-                    showError("Please subscribe to continue");
-                    router.push("/subscribe");
-                    return;
-                }
-            }
-
-
-            const profile = mdnRes.response.profile;
-            const vipInfo = mdnRes.response.vipInfo;
-
-            localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
-
-            // 2 — Send OTP if VIP
-            if (vipInfo?.isActive === 5 || profile?.vip === 1) {
-                const payload = { deviceId: result.visitorId, langCode: "en", mobileNo, isdCode };
-                const loginRes = await handleLogin(payload);
-
-                if (!loginRes?.response?.status) {
-                    // showError("Failed to send OTP");
-                    return;
-                }
-
-                showSuccess("OTP sent successfully!");
-                router.push("/auth/verification");
-                return;
-            }
-
-            // 3 — If user is NOT VIP → Redirect to Subscribe
-            // showError("Please subscribe to continue");
-            // router.push("/subscribe");
-            const isSubscribed = localStorage.getItem("isSubscribed");
-            const storedPlan = localStorage.getItem("selectedPlan");
-            if (isSubscribed === "true") {
-                
-                try {
-                  
-                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
-
-                    window.location.href = linkWithMobile!;
-                    return;
-                } catch (error) {
-                    console.error("Invalid selectedPlan data:", error);
-                }
-            }
-
-            else {
-                showError("Please subscribe to continue");
-                router.push("/subscribe");
-                return;
-            }
-
-        } catch (error) {
-            console.log("Error in login api", error);
-            // showError("OTP send failed");
-
-        }
+    const tempAuth = {
+      mobileNo,
+      deviceId: result.visitorId,
+      isdCode,
     };
+
+    setAuthData(tempAuth);
+    localStorage.setItem("authData", JSON.stringify(tempAuth));
+    localStorage.setItem("mobile", mobileNo);
+
+    // 1 — Check MDN profile first
+    const payloadMDN = { mobileNo, isdCode };
+    const mdnRes = await ValidateMDN(payloadMDN);
+
+    if (!mdnRes?.response?.status) {
+      const isSubscribed = localStorage.getItem("isSubscribed");
+      const selectedPlan = localStorage.getItem("selectedPlan");
+
+      // ✅ if user already subscribed and plan exists → open plan link directly
+      if (isSubscribed === "true" && selectedPlan) {
+        const plan = JSON.parse(selectedPlan);
+        const linkWithMobile = mobileNo
+          ? `${plan.link}&msisdn=${mobileNo}`
+          : plan.link;
+
+        window.location.href = linkWithMobile;
+        return;
+      }
+
+      showError("Please subscribe to continue");
+      router.push("/subscribe");
+      return;
+    }
+
+    const profile = mdnRes.response.profile;
+    const vipInfo = mdnRes.response.vipInfo;
+
+    localStorage.setItem("loginData", JSON.stringify(mdnRes.response));
+
+    // 2 — Send OTP if VIP
+    if (vipInfo?.isActive === 5 || profile?.vip === 1) {
+      const payload = {
+        deviceId: result.visitorId,
+        langCode: "en",
+        mobileNo,
+        isdCode,
+      };
+      const loginRes = await handleLogin(payload);
+
+      if (!loginRes?.response?.status) {
+        return;
+      }
+
+      showSuccess("OTP sent successfully!");
+      router.push("/auth/verification");
+      return;
+    }
+
+    // 3 — If user is NOT VIP → check again for stored plan
+    const isSubscribed = localStorage.getItem("isSubscribed");
+    const selectedPlan = localStorage.getItem("selectedPlan");
+
+    if (isSubscribed === "true" && selectedPlan) {
+      const plan = JSON.parse(selectedPlan);
+      const linkWithMobile = mobileNo
+        ? `${plan.link}&msisdn=${mobileNo}`
+        : plan.link;
+
+      window.location.href = linkWithMobile;
+      return;
+    }
+
+    showError("Please subscribe to continue");
+    router.push("/subscribe");
+  } catch (error) {
+    console.log("Error in login api", error);
+    showError("OTP send failed");
+  }
+};
 
 
     useEffect(() => {

@@ -42,15 +42,20 @@ export default function LoginPage() {
             // 1 — Check MDN profile first
             const payloadMDN = { mobileNo, isdCode };
             const mdnRes = await ValidateMDN(payloadMDN);
+            const isSubscribed = localStorage.getItem("isSubscribed");
+            const selectedPlan = localStorage.getItem("selectedPlan");
+            showError(selectedPlan!);
             if (!mdnRes?.response?.status) {
                 const isSubscribed = localStorage.getItem("isSubscribed");
                 const storedPlan = localStorage.getItem("selectedPlan");
-                if (isSubscribed === "true") {
-                    const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
+                const selectedPlan = storedPlan ? JSON.parse(storedPlan) : null;
 
-                    window.location.href = linkWithMobile!;
+                if (isSubscribed === "true" && selectedPlan?.link) {
+                    const linkWithMobile = mobileNo
+                        ? `${selectedPlan.link}&msisdn=${mobileNo}`
+                        : selectedPlan.link;
+
+                    window.location.href = linkWithMobile;
                     return;
                 } else {
                     showError("Please subscribe to continue");
@@ -83,23 +88,14 @@ export default function LoginPage() {
             // 3 — If user is NOT VIP → Redirect to Subscribe
             // showError("Please subscribe to continue");
             // router.push("/subscribe");
-            const isSubscribed = localStorage.getItem("isSubscribed");
-            const storedPlan = localStorage.getItem("selectedPlan");
-            if (isSubscribed === "true") {
-                
-                try {
-                  
-                     const linkWithMobile = mobileNo
-                        ? `${storedPlan}&msisdn=${mobileNo}`
-                        : storedPlan;
-
-                    window.location.href = linkWithMobile!;
-                    return;
-                } catch (error) {
-                    console.error("Invalid selectedPlan data:", error);
-                }
+            if (isSubscribed === "true" && selectedPlan) {
+                const plan = JSON.parse(selectedPlan);
+                const linkWithMobile = mobileNo
+                    ? `${plan.link}&msisdn=${mobileNo}`
+                    : plan.link;
+                window.location.href = linkWithMobile;
+                return;
             }
-
             else {
                 showError("Please subscribe to continue");
                 router.push("/subscribe");
