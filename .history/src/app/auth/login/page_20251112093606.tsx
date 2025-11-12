@@ -167,7 +167,7 @@ export default function LoginPage() {
             router.push("/subscribe");
         } catch (error) {
             console.log("Error in login api", error);
-            // showError("OTP send failed");
+            showError("OTP send failed");
         }
     };
 

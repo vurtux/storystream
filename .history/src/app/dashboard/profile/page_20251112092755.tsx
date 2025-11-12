@@ -70,7 +70,7 @@ export default function ProfilePage() {
     router.push("/auth/login");
   };
    const handleSubscription = () => {
-    localStorage.setItem("isSubscribed", true.toString());
+    localStorage.setItem("subscribeItem", JSON.stringify(mdnRes.response));
     router.push("/subscribe");
   };
 

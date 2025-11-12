@@ -70,8 +70,7 @@ export default function ProfilePage() {
     router.push("/auth/login");
   };
    const handleSubscription = () => {
-    localStorage.setItem("isSubscribed", true.toString());
-    router.push("/subscribe");
+    router.push("/auth/login");
   };
 
   const handleManageAccount = () => {
@@ -137,7 +136,7 @@ export default function ProfilePage() {
             imgSrc="/images/subscriptionLogo.png"
             label="Subscribe Now"
             value={<IoIosArrowForward />}
-            onClick={handleSubscription}
+            onClick={handleBannerClick}
           />
         )}
 

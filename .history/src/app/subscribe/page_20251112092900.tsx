@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface FeatureRowProps {
@@ -24,40 +23,23 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
 };
 
 export default function SubscriptionClient() {
-  const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState(0);
-  const [loading, setLoading] = useState(false);
-
   const plans = [
-    {
-      price: 'R 5',
-      period: 'Daily',
-      billing: 'R 5/day',
-      savings: null,
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020',
-    },
-    {
-      price: 'R 25',
-      period: 'Weekly',
-      billing: 'R 25/week',
-      savings: null,
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239',
-    },
-    {
-      price: 'R 80',
-      period: 'Monthly',
-      billing: 'R 80/month',
-      savings: '36%',
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240',
-    },
+    { price: 'R 5', period: 'Daily', billing: 'R 5/day', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020' },
+    { price: 'R 25', period: 'Weekly', billing: 'R 25/week', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239' },
+    { price: 'R 80', period: 'Monthly', billing: 'R 80/month', savings: '36%', link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240' },
   ];
 
+  // Get saved mobile number from localStorage
   const mobile = typeof window !== 'undefined' ? localStorage.getItem('mobile') : null;
 
+  // Add MDN to each plan
   const plansWithMDN = plans.map(plan => ({
     ...plan,
     link: mobile ? `${plan.link}&msisdn=${mobile}` : plan.link,
   }));
+
+  const [selectedPlan, setSelectedPlan] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const features = [
     'All Shows Unlocked',
@@ -70,33 +52,24 @@ export default function SubscriptionClient() {
   ];
 
   const handleContinue = () => {
-    const isSubscribed = localStorage.getItem('isSubscribed');
-    const selected = plansWithMDN[selectedPlan];
-
+    localStorage.setItem("isSubscribed", true.toString());
+     const isSubscribed = localStorage.getItem('isLoggedIn');
     setLoading(true);
-
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('redirecting', 'true');
-      sessionStorage.setItem('selectedPlan', JSON.stringify(selected));
-    }
-
-    if (isSubscribed === 'true') {
-      router.push('/auth/login');
-      return;
     }
 
     setTimeout(() => {
       if (typeof window !== 'undefined') {
-        window.location.href = selected.link;
+        window.location.href = plansWithMDN[selectedPlan].link;
       }
     }, 180);
   };
 
   return (
     <>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
           @font-face {
             font-family: 'SF Pro Rounded';
             src: url('/fonts/SFProRounded/FontsFree-Net-SF-Pro-Rounded-Regular.ttf') format('truetype');
@@ -120,14 +93,10 @@ export default function SubscriptionClient() {
           .loader-dot:nth-child(2) { animation-delay: 0.2s; }
           .loader-dot:nth-child(3) { animation-delay: 0.4s; }
           .loader-text { color:white; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 20px rgba(147,51,234,0.8); }
-        `,
-        }}
-      />
+        `
+      }} />
 
-      <div
-        className="min-h-screen w-full flex flex-col text-gray-800"
-        style={{ background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)' }}
-      >
+      <div className="min-h-screen w-full flex flex-col text-gray-800" style={{ background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)' }}>
         {loading && (
           <div className="loader-container">
             <div style={{ position: 'relative' }}>
@@ -144,7 +113,7 @@ export default function SubscriptionClient() {
         )}
 
         {/* Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50">
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 m-0 p-0">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
@@ -154,7 +123,7 @@ export default function SubscriptionClient() {
                     alt="banner"
                     width={300}
                     height={160}
-                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl"
+                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
                     unoptimized
                   />
                 </div>
@@ -166,9 +135,7 @@ export default function SubscriptionClient() {
         {/* Content */}
         <div className="flex-1 w-full max-w-2xl mx-auto pb-56">
           <div className="p-4 pt-3 text-center">
-            <div className="flex justify-center mb-1.5">
-              <span className="text-3xl">⚡</span>
-            </div>
+            <div className="flex justify-center mb-1.5"><span className="text-3xl">⚡</span></div>
             <h1 className="text-2xl font-bold mb-1.5 text-gray-900">
               Subscribe to <span className="text-purple-700">storyStream</span>
             </h1>
@@ -184,7 +151,7 @@ export default function SubscriptionClient() {
                   onClick={() => setSelectedPlan(i)}
                   className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center cursor-pointer transition-all duration-300 relative overflow-hidden
                     ${selectedPlan === i
-                      ? 'border-purple-600 scale-105 shadow-2xl'
+                      ? 'border-purple-600 scale-105 shadow-2xl pulse-glow'
                       : 'border-purple-200 hover:border-purple-400 hover:scale-102'
                     }`}
                 >
@@ -198,11 +165,7 @@ export default function SubscriptionClient() {
                       ✓
                     </div>
                   )}
-                  <span
-                    className={`text-xl font-extrabold block transition-colors ${
-                      selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
-                    }`}
-                  >
+                  <span className={`text-xl font-extrabold block transition-colors ${selectedPlan === i ? 'text-purple-700' : 'text-gray-800'}`}>
                     {plan.price}
                   </span>
                   <span className="text-[11px] text-gray-600 font-semibold mt-0.5 block">
@@ -213,20 +176,17 @@ export default function SubscriptionClient() {
             </div>
           </div>
 
-          {/* Billing Info */}
+          {/* VODACOM BILLING DISCLOSURE (New Section Added Here) */}
           <div className="text-center mt-4 mx-4 p-3">
             <p className="text-[11px] text-gray-700 font-medium">
               Subscriptions will be added to your Vodacom Account/Airtime.
             </p>
-            <a
-              href="https://www.storystream.mobi/tnc.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-purple-600 text-[11px] underline hover:text-purple-700 font-semibold mt-1 block"
-            >
+            <a href="https://www.storystream.mobi/tnc.html" target="_blank" rel="noopener noreferrer" className="text-purple-600 text-[11px] underline hover:text-purple-700 font-semibold mt-1 block">
               Terms & Conditions
             </a>
           </div>
+          {/* END VODACOM BILLING DISCLOSURE */}
+
 
           {/* Features */}
           <div className="mt-5 p-5 pb-3 mx-4 bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-purple-100">
@@ -256,19 +216,11 @@ export default function SubscriptionClient() {
                          hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
                          shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              CONTINUE FOR{' '}
-              <span className="ml-2 font-extrabold text-xl">
-                {plansWithMDN[selectedPlan].price}
-              </span>
+              CONTINUE FOR <span className="ml-2 font-extrabold text-xl">{plansWithMDN[selectedPlan].price}</span>
             </button>
             <p className="text-[11px] mt-3 text-gray-600 text-center leading-relaxed px-2">
               By continuing, you agree to our{' '}
-              <a
-                href="https://www.storystream.mobi/tnc.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-purple-600 underline hover:text-purple-700 font-semibold"
-              >
+              <a href="https://www.storystream.mobi/tnc.html" target="_blank" rel="noopener noreferrer" className="text-purple-600 underline hover:text-purple-700 font-semibold">
                 Terms & Conditions
               </a>
             </p>

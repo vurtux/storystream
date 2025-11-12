@@ -43,8 +43,9 @@ export default function ManageSubscription() {
       setCurrentPlan(stored.vipInfo?.plan_name || stored.profile?.planType || "Daily");
       setCurrentPrice(stored.vipInfo?.price || stored.profile?.price || "R 5");
       setNextChargeDate(
-        (stored.vipInfo?.expiry_date || stored.profile?.nextCharge || "12 Nov 2025").split("T")[0]);
-    }
+  (stored.vipInfo?.expiry_date || stored.profile?.nextCharge || "12 Nov 2025").split("T")[0]
+);
+
   }, []);
 
   return (
