@@ -962,10 +962,6 @@ const DetailsClient = ({ conId, title }: any) => {
           [item.episode_id]: true,
         }));
         showSuccess("Downloaded successfully!");
-        // const link = document.createElement("a");
-        // link.href = item.download_url || item.stream_url;
-        // link.download = `${item.title || "podcast"}.mp3`;
-        // link.click();
       }
     } catch (error) {
       console.log("Error downloading:", error);

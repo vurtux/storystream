@@ -27,8 +27,18 @@ export async function savePodcast(podcastUrl: any, id: any) {
   console.log("✅ Saved for offline:", id);
 }
 
+// Helper function to convert blob to base64
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function saveEpisodeOffline(data: any) {
-  const { episode_id, image_uri, stream_uri, title } = data;
+  const { episode_id, img_local_uri, stream_uri, title } = data;
 
   try {
     const db = await getDB();
@@ -37,23 +47,34 @@ export async function saveEpisodeOffline(data: any) {
     const audioRes = await fetch(stream_uri);
     const audioBlob = await audioRes.blob();
 
-    // Fetch image
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(image_uri)}`;
-    const imageRes = await fetch(proxyUrl);
+        // Fetch image directly (no proxy)
+    console.log('Fetching image from:', img_local_uri);
+    const imageRes = await fetch(img_local_uri, {
+      mode: 'cors', // Try direct CORS request
+    });
+    
+    if (!imageRes.ok) {
+      throw new Error(`Image fetch failed: ${imageRes.status} ${imageRes.statusText}`);
+    }
+    
     const imageBlob = await imageRes.blob();
+    console.log('Image blob type:', imageBlob.type, 'size:', imageBlob.size);
 
+    // Convert to base64
+    const imageDataUrl = await blobToBase64(imageBlob);
+    
     // Store both in IndexedDB
     await db.put("episodes", {
       episode_id,
       audioBlob,
-      imageBlob,
+      imageDataUrl,
       createdAt: new Date().toISOString(),
       title
     });
 
     console.log(`✅ Saved episode ${episode_id} for offline use`);
   } catch (err) {
-    console.error("❌ Failed to save episode:", err);
+    console.log("❌ Failed to save episode:", err);
   }
 }
 
@@ -66,7 +87,7 @@ export async function getOfflineEpisode(episode_id: string) {
   }
 
   const audioUrl = URL.createObjectURL(record.audioBlob);
-  const imageUrl = URL.createObjectURL(record.imageBlob);
+  const imageUrl = record.imageDataUrl;
   console.log(audioUrl, imageUrl, "audioUrl, imageUrl");
 
   return { audioUrl, imageUrl };
