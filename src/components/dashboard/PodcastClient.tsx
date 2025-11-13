@@ -189,8 +189,8 @@ export default function PodcastClient({ episode_id, title }: any) {
       try {
         const isAlreadyDownloaded = await isPodcastDownloaded(episode_id?.toString());
         if(isAlreadyDownloaded){
-          const podcast_data = await playOfflinePodcast(episode_id?.toString(), audioRef);
-          // setOfflineImgUrl(podcast_data?.imageUrl);
+          const podcast_data: any = await playOfflinePodcast(episode_id?.toString(), audioRef);
+          setOfflineImgUrl(podcast_data?.imageUrl);
           setIsDownloaded(true);
           console.log(podcast_data?.imageUrl, "podcast_data");
           setTimeout(() => {

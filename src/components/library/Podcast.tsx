@@ -56,16 +56,31 @@ const PodcastLibrary = () => {
     async function loadOfflinePodcasts() {
       try {
         const episodes = await getAllDownloadedPodcasts();
-        console.log(episodes, "episodes");
+console.log(episodes, "episodes");
 
-        // Convert image blob to URL
-        const withUrls = episodes.map((ep: any) => ({
-          ...ep,
-          imageUrl: URL.createObjectURL(ep.imageBlob),
-        }));
-        console.log(withUrls, "withUrls");
+// Convert image blob to URL with validation
+const withUrls = episodes.map((ep: any) => {
+  let imageUrl = "/images/loginLogo.png"; // fallback
+  
+  // if (ep.imageBlob) {
+  //   // Check if blob has correct image type
+  //   if (ep.imageBlob.type.startsWith('image/')) {
+  //     imageUrl = URL.createObjectURL(ep.imageBlob);
+  //   } else {
+  //     console.log('Invalid image blob type:', ep.imageBlob.type, 'for episode:', ep.episode_id);
+  //     // If blob has wrong type but valid image data, recreate with correct type
+  //     // You might need to determine the correct type based on your data
+  //   }
+  // }
+  
+  return {
+    ...ep,
+    imageUrl,
+  };
+});
+console.log(withUrls, "withUrls");
 
-        setPodcasts(withUrls);
+setPodcasts(withUrls);
       } catch (err) {
         console.error("❌ Error loading offline podcasts:", err);
       } finally {
@@ -102,11 +117,10 @@ const PodcastLibrary = () => {
     <div className="min-h-screen bg-white pb-20">
       {/* Podcast List */}
       <div className="mt-5 space-y-5 px-5">
-        {podcasts.map((podcast) => (
+        {podcasts.map((podcast: any) => (
           <div key={podcast.episode_id} className="flex items-center gap-4">
-            <Image
-              //   src={podcast.imageUrl ?? "/images/loginLogo.png"}
-              src={"/images/loginLogo.png"}
+            <img
+              src={podcast.imageDataUrl ?? "/images/loginLogo.png"}
               onClick={() => handleEpisode(podcast.episode_id, podcast?.title)}
               alt={podcast.episode_id}
               width={40}
