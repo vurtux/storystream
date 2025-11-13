@@ -35,3 +35,18 @@ export const getEpisodeDetail = async (episode_id: number, lang: any, country: a
         // },
     });
 };
+
+export const getContentDownloadCheck = async (episode_id: number, country: any, userId: any) => {
+    return await requestApi({
+        url: `api/v1/feed/contentDownloadCheck/3ab0242fb7a6f01b9c2467dd221a43a5/web/${country}`,
+        method: 'POST',
+        data: {
+            "userId": userId,
+            "plan_id":"1658"
+        },
+        // headers: {
+        //     'device-os': 'web',
+        //     'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+        // },
+    });
+};
