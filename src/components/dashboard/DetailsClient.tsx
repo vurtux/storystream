@@ -591,7 +591,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useDashboard from "../../hooks/useDashboard";
-import { handlePodcastPaging } from "../../app/api/podcast";
+import { getContentDownloadCheck, handlePodcastPaging } from "../../app/api/podcast";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
 import SubscribePage from "./SubscribePage";
@@ -667,6 +667,7 @@ const DetailsClient = ({ conId, title }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [showPendingSheet, setShowPendingSheet] = useState(false);
+  const [limitDownload, setLimitDownload] = useState(false);
 
   const checkSubscriptionStatus = () => {
     const raw = localStorage.getItem("loginData");
@@ -930,6 +931,20 @@ const DetailsClient = ({ conId, title }: any) => {
       if (!isVip) {
         confirm();
       } else {
+        if (data?.vipInfo?.plan_id === "1658") {
+         if(limitDownload) {
+              showSuccess("Please subscribe gold for more download!");
+              return;
+         }
+         const country = localStorage.getItem("country") || "";
+         const result = await getContentDownloadCheck(item.episode_id, country, data?.profile?.userId);   
+         console.log(result, "result");
+         if(result?.response?.total_download_available <= 0) {
+              showSuccess("Please subscribe gold for more download!");
+              setLimitDownload(true);
+              return;
+         }
+        }
         const isAlreadyDownloaded = await isPodcastDownloaded(item?.episode_id);
         if(isAlreadyDownloaded) {
             showSuccess("Already Downloaded!");
