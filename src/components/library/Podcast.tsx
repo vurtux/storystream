@@ -13,7 +13,8 @@ interface OfflinePodcast {
   createdAt: string;
   title: string;
   podcastName: string;
-  imageUrl?: string;
+  imageDataUrl?: string;
+  podcast_name?: string;
 }
 
 const PodcastLibrary = () => {
@@ -50,11 +51,30 @@ const PodcastLibrary = () => {
     async function loadOfflinePodcasts() {
       try {
         const episodes = await getAllDownloadedPodcasts();
-        const withUrls = episodes.map((ep: any) => {
-          const imageUrl = "/images/loginLogo.png"; // fallback
-          return { ...ep, imageUrl };
-        });
-        setPodcasts(withUrls);
+
+// Convert image blob to URL with validation
+const withUrls = episodes.map((ep: any) => {
+  let imageUrl = "/images/loginLogo.png"; // fallback
+  
+  // if (ep.imageBlob) {
+  //   // Check if blob has correct image type
+  //   if (ep.imageBlob.type.startsWith('image/')) {
+  //     imageUrl = URL.createObjectURL(ep.imageBlob);
+  //   } else {
+  //     console.log('Invalid image blob type:', ep.imageBlob.type, 'for episode:', ep.episode_id);
+  //     // If blob has wrong type but valid image data, recreate with correct type
+  //     // You might need to determine the correct type based on your data
+  //   }
+  // }
+  
+  return {
+    ...ep,
+    imageUrl,
+  };
+});
+console.log(withUrls, "withUrls");
+
+setPodcasts(withUrls);
       } catch (err) {
         console.error("❌ Error loading offline podcasts:", err);
       } finally {
@@ -100,7 +120,7 @@ const PodcastLibrary = () => {
         {podcasts.map((podcast) => (
           <div key={podcast.episode_id} className="flex items-center gap-4">
             <Image
-              src={podcast.imageUrl ?? "/images/loginLogo.png"}
+              src={podcast.imageDataUrl ?? "/images/loginLogo.png"}
               onClick={() => handleEpisode(podcast.episode_id, podcast.title)}
               alt={podcast.title}
               width={50}
@@ -109,9 +129,18 @@ const PodcastLibrary = () => {
             />
             <div className="flex-1">
               <h3 className="text-md font-semibold text-gray-800">
-                {podcast.podcastName} | {podcast.title}
+                {podcast?.podcast_name || "NA"} | {podcast?.title || "NA"}
               </h3>
-              <p className="text-sm text-gray-500">{formatDownloadedTime(podcast.createdAt)}</p>
+              <p className="text-sm text-gray-500">
+                {/* Saved | {new Date(podcast.createdAt).toLocaleTimeString()} */}
+                Downloaded on {new Date(podcast.createdAt).toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+              }).replace(",", "")}
+              </p>
             </div>
             <Trash2
               className="text-gray-500 cursor-pointer hover:text-red-500"

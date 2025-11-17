@@ -38,7 +38,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export async function saveEpisodeOffline(data: any) {
-  const { episode_id, img_local_uri, stream_uri, title } = data;
+  const { episode_id, img_local_uri, stream_uri, title, podcast_name } = data;
 
   try {
     const db = await getDB();
@@ -69,7 +69,8 @@ export async function saveEpisodeOffline(data: any) {
       audioBlob,
       imageDataUrl,
       createdAt: new Date().toISOString(),
-      title
+      title,
+      podcast_name
     });
 
     console.log(`✅ Saved episode ${episode_id} for offline use`);

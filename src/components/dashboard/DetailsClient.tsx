@@ -960,7 +960,8 @@ const DetailsClient = ({ conId, title }: any) => {
           img_local_uri: item?.img_local_uri,
           stream_uri: item?.stream_uri, 
           episode_id: item?.episode_id?.toString(),
-          title: item?.title
+          title: item?.title,
+          podcast_name: podcastData?.title
         });
         setDownloadedEpisodes(prev => ({
           ...prev,
