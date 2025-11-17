@@ -1,9 +1,11 @@
-'use client';
-
+"use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
-import { deleteEpisodeOffline, getAllDownloadedPodcasts } from "../../utils/indexDB";
+import {
+  deleteEpisodeOffline,
+  getAllDownloadedPodcasts,
+} from "../../utils/indexDB";
 import slugify from "slugify";
 import { useRouter } from "next/navigation";
 
@@ -12,8 +14,8 @@ interface OfflinePodcast {
   imageBlob: Blob;
   audioBlob: Blob;
   createdAt: string;
+  imageUrl?: string;
   title: string;
-  podcastName: string;
 }
 
 const PodcastLibrary = () => {
@@ -27,7 +29,9 @@ const PodcastLibrary = () => {
 
   const handleEpisode = (episode_id: string, title: string) => {
     router.push(
-      `/episode/${encodeURIComponent(episode_id)}/${slugify(title, { lower: true })}`
+      `/episode/${encodeURIComponent(episode_id)}/${slugify(title, {
+        lower: true,
+      })}`
     );
   };
 
@@ -48,21 +52,35 @@ const PodcastLibrary = () => {
       setSelectedEpisode(null);
     }
   };
-
   useEffect(() => {
     async function loadOfflinePodcasts() {
       try {
         const episodes = await getAllDownloadedPodcasts();
+console.log(episodes, "episodes");
 
-        const withUrls = episodes.map((ep: any) => {
-          let imageUrl = "/images/loginLogo.png"; // fallback
-          return {
-            ...ep,
-            imageUrl,
-          };
-        });
+// Convert image blob to URL with validation
+const withUrls = episodes.map((ep: any) => {
+  let imageUrl = "/images/loginLogo.png"; // fallback
+  
+  // if (ep.imageBlob) {
+  //   // Check if blob has correct image type
+  //   if (ep.imageBlob.type.startsWith('image/')) {
+  //     imageUrl = URL.createObjectURL(ep.imageBlob);
+  //   } else {
+  //     console.log('Invalid image blob type:', ep.imageBlob.type, 'for episode:', ep.episode_id);
+  //     // If blob has wrong type but valid image data, recreate with correct type
+  //     // You might need to determine the correct type based on your data
+  //   }
+  // }
+  
+  return {
+    ...ep,
+    imageUrl,
+  };
+});
+console.log(withUrls, "withUrls");
 
-        setPodcasts(withUrls);
+setPodcasts(withUrls);
       } catch (err) {
         console.error("❌ Error loading offline podcasts:", err);
       } finally {
@@ -95,32 +113,26 @@ const PodcastLibrary = () => {
     );
   }
 
-  const formatDownloadedTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', hour: 'numeric', minute: 'numeric', hour12: true };
-    return `Downloaded on ${date.toLocaleDateString('en-US', options)}`
-  };
-
   return (
-    <div className="min-h-screen bg-white pb-20 px-5 pt-5">
+    <div className="min-h-screen bg-white pb-20">
       {/* Podcast List */}
-      <div className="space-y-5">
+      <div className="mt-5 space-y-5 px-5">
         {podcasts.map((podcast: any) => (
           <div key={podcast.episode_id} className="flex items-center gap-4">
             <img
-              src={podcast.imageUrl ?? "/images/loginLogo.png"}
+              src={podcast.imageDataUrl ?? "/images/loginLogo.png"}
               onClick={() => handleEpisode(podcast.episode_id, podcast?.title)}
               alt={podcast.episode_id}
-              width={50}
-              height={50}
+              width={40}
+              height={40}
               className="rounded-lg object-cover mr-4 cursor-pointer"
             />
             <div className="flex-1">
               <h3 className="text-md font-semibold text-gray-800">
-                {podcast.podcastName} | {podcast.title}
+                Episode {podcast.episode_id}
               </h3>
               <p className="text-sm text-gray-500">
-                {formatDownloadedTime(podcast.createdAt)}
+                Saved | {new Date(podcast.createdAt).toLocaleTimeString()}
               </p>
             </div>
             <Trash2
@@ -131,8 +143,7 @@ const PodcastLibrary = () => {
           </div>
         ))}
       </div>
-
-      {/* Delete Confirmation Modal */}
+      {/* 🟢 Delete Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
@@ -140,8 +151,9 @@ const PodcastLibrary = () => {
               Delete Downloaded File?
             </h2>
             <p className="text-gray-500 text-sm mt-2">
-              Are you sure you want to delete this downloaded file?
+             Are you sure you want to delete this downloaded file??
             </p>
+
             <div className="flex justify-center gap-4 mt-6">
               <button
                 className="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300"

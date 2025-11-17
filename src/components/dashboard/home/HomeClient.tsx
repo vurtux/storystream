@@ -113,7 +113,7 @@ const HomeClient = () => {
             const raw = localStorage.getItem("loginData");
             localStorage.setItem("mobile", resPro.response.profile.mobileNo);
             localStorage.setItem("menu", "home");
-            showSuccess("Login successfully!");
+            
             // Redirect to home after successful validation
             router.push("/home");
           } else {

@@ -3,11 +3,12 @@ import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
 import HeaderSlider from "../DashboardHeader";
-import { handleValidate } from "../../../app/api/auth";
+import { handleValidate,handleGetProfile } from "../../../app/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
 import Image from "next/image";
+
 type SpotlightContent = {
   conId: number;
   conName: string;
@@ -62,11 +63,12 @@ const HomeClient = () => {
   const [popupTitle, setPopupTitle] = useState("");
   const [popupBody, setPopupBody] = useState("");
   const [popupButton, setPopupButton] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
 
   // Fetch home data
   const getHomeData = async () => {
     try {
-      const lang = localStorage.getItem("language");
+      const lang = localStorage.getItem("language") || "en";
       const country = localStorage.getItem("country") || "";
       const res = await handleHome(lang, country);
       setHomeData(res.response.home);
@@ -79,47 +81,83 @@ const HomeClient = () => {
   useEffect(() => {
     const sid = searchParams.get("sid");
     const countryParam = searchParams.get("country");
+    const langParam = searchParams.get("lang");
 
+    // Store country and language if provided
     if (countryParam) {
       localStorage.setItem("country", countryParam);
     }
 
-    if (!sid) return;
+    if (langParam) {
+      localStorage.setItem("language", langParam);
+    }
 
-    const validateUser = async () => {
-      try {
-        const payload = { sid };
-        const res = await handleValidate(payload);
+    // If sid exists, validate the user
+    if (sid && !isValidating) {
+      setIsValidating(true);
 
-        setAuth({ userInfo: res.response.profile });
+      const validateUser = async () => {
+        try {
+          const payload = { sid };
+          const res = await handleValidate(payload);
 
-        if (res.response.status) {
-          localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("loginData", JSON.stringify(res.response));
-          router.push("/home");
-          localStorage.setItem("menu", "home");
-          showSuccess("Login successfully!");
-        } else {
-          throw new Error("Verification failed");
+          const resPro = await handleGetProfile(res.response.profile.userId);
+
+          setAuth({ userInfo: resPro.response.profile });
+
+          
+          if (res.response.status) {
+            localStorage.setItem("isLoggedIn", "true");
+            
+            localStorage.setItem("loginData", JSON.stringify(resPro.response));
+            const raw = localStorage.getItem("loginData");
+            localStorage.setItem("mobile", resPro.response.profile.mobileNo);
+            localStorage.setItem("menu", "home");
+            
+            // Redirect to home after successful validation
+            router.push("/home");
+          } else {
+            throw new Error("Verification failed");
+          }
+        } catch (error) {
+          console.log("Error validating user:", error);
+          // Optionally show error popup
+          setPopupTitle("Login Failed");
+          setPopupBody("Unable to verify your session. Please try again.");
+          setPopupButton("Retry");
+          setShowPopup(true);
+        } finally {
+          setIsValidating(false);
         }
-      } catch (error) {
-        console.log("Error validating user:", error);
-      }
-    };
+      };
 
-    validateUser();
+      validateUser();
+    }
   }, [searchParams, router, setAuth]);
 
   // Handle country change & popup display
   useEffect(() => {
     const popupParam = searchParams.get("popup");
     const countryParam = searchParams.get("country");
+    const langParam = searchParams.get("lang");
 
     if (countryParam) {
       localStorage.setItem("country", countryParam);
     }
 
-    if (popupParam === "1") {
+    if (langParam) {
+      localStorage.setItem("language", langParam);
+    }
+
+    // Handle popup based on parameter value
+    if (popupParam === "0") {
+      setPopupTitle("Subscription Failed");
+      setPopupBody(
+        "We couldn't process your subscription. Please try again or contact support if the issue persists."
+      );
+      setPopupButton("Try Again");
+      setShowPopup(true);
+    } else if (popupParam === "1") {
       setPopupTitle("Welcome to Storystream!");
       setPopupBody(
         "Thank you for subscribing. Click Home below to continue with your subscription."
@@ -135,6 +173,7 @@ const HomeClient = () => {
       setShowPopup(true);
     }
 
+    // Fetch home data
     getHomeData();
   }, [searchParams]);
 
@@ -162,38 +201,43 @@ const HomeClient = () => {
 
   const handlePopupClose = () => {
     setShowPopup(false);
+    // Remove popup parameter from URL
     router.push("/home");
   };
 
   return (
     <div className="relative">
-  <div className="sticky top-0 z-40 flex items-center justify-between text-dark py-2 w-full max-w-[728px] mx-auto">
-    <div className="flex items-center space-x-3">
-      <span className="font-semibold text-sm">
+      {/* Sticky header with logo fully left-aligned */}
+      <div className="sticky top-0 z-50 w-full bg-white flex items-center justify-center py-3">
         <Image
-          src="/images/loginLogo.png"
-          alt="icon"
-          width={10}
-          height={10}
-          className="w-10 h-10 rounded-lg object-cover"
+          src="/images/sslogo.png"
+          alt="App Logo"
+          width={200}
+          height={50}
+          className="object-contain"
         />
-      </span>
-    </div>
-  </div>
-</div>
+      </div>
 
+
+      {/* Show loading state during validation */}
+      {isValidating && (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Validating your session...</p>
+          </div>
+        </div>
+      )}
 
       {/* Render home sections */}
-      {renderBlocks()}
+      {!isValidating && renderBlocks()}
 
-      {/* Simple Centered Popup with transparent background */}
+      {/* Simple Centered Popup with semi-transparent background */}
       {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
             <div className="p-6 text-center">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                {popupTitle}
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">{popupTitle}</h2>
               <p className="text-gray-600 text-sm mb-5">{popupBody}</p>
               <button
                 onClick={handlePopupClose}
