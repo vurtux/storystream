@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
@@ -13,7 +14,6 @@ interface OfflinePodcast {
   createdAt: string;
   title: string;
   podcastName: string;
-  imageUrl?: string;
 }
 
 const PodcastLibrary = () => {
@@ -38,9 +38,12 @@ const PodcastLibrary = () => {
 
   const handleDelete = async () => {
     if (!selectedEpisode) return;
+
     const success = await deleteEpisodeOffline(selectedEpisode);
     if (success) {
-      setPodcasts((prev) => prev.filter((p) => p.episode_id !== selectedEpisode));
+      setPodcasts((prev) =>
+        prev.filter((p) => p.episode_id !== selectedEpisode)
+      );
       setShowModal(false);
       setSelectedEpisode(null);
     }
@@ -50,10 +53,15 @@ const PodcastLibrary = () => {
     async function loadOfflinePodcasts() {
       try {
         const episodes = await getAllDownloadedPodcasts();
+
         const withUrls = episodes.map((ep: any) => {
-          const imageUrl = "/images/loginLogo.png"; // fallback
-          return { ...ep, imageUrl };
+          let imageUrl = "/images/loginLogo.png"; // fallback
+          return {
+            ...ep,
+            imageUrl,
+          };
         });
+
         setPodcasts(withUrls);
       } catch (err) {
         console.error("❌ Error loading offline podcasts:", err);
@@ -61,20 +69,9 @@ const PodcastLibrary = () => {
         setLoading(false);
       }
     }
+
     loadOfflinePodcasts();
   }, []);
-
-  const formatDownloadedTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return `Downloaded on ${date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-    })} ${date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    })}`;
-  };
 
   if (loading) {
     return (
@@ -87,31 +84,44 @@ const PodcastLibrary = () => {
   if (podcasts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <Image src="/images/not-found.png" alt="No Data" width={200} height={200} />
+        <Image
+          src="/images/not-found.png"
+          alt="No Data"
+          width={200}
+          height={200}
+        />
         <p className="mt-4 text-lg font-semibold">No Downloaded Podcasts</p>
       </div>
     );
   }
 
+  const formatDownloadedTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', hour: 'numeric', minute: 'numeric', hour12: true };
+    return `Downloaded on ${date.toLocaleDateString('en-US', options)}`
+  };
+
   return (
     <div className="min-h-screen bg-white pb-20 px-5 pt-5">
       {/* Podcast List */}
       <div className="space-y-5">
-        {podcasts.map((podcast) => (
+        {podcasts.map((podcast: any) => (
           <div key={podcast.episode_id} className="flex items-center gap-4">
-            <Image
-              src={podcast.imageUrl ?? "/images/loginLogo.png"}
-              onClick={() => handleEpisode(podcast.episode_id, podcast.title)}
-              alt={podcast.title}
+            <img
+              src={podcast. ?? "/images/loginLogo.png"}
+              onClick={() => handleEpisode(podcast.episode_id, podcast?.title)}
+              alt={podcast.episode_id}
               width={50}
               height={50}
-              className="rounded-lg object-cover cursor-pointer"
+              className="rounded-lg object-cover mr-4 cursor-pointer"
             />
             <div className="flex-1">
               <h3 className="text-md font-semibold text-gray-800">
                 {podcast.podcastName} | {podcast.title}
               </h3>
-              <p className="text-sm text-gray-500">{formatDownloadedTime(podcast.createdAt)}</p>
+              <p className="text-sm text-gray-500">
+                {formatDownloadedTime(podcast.createdAt)}
+              </p>
             </div>
             <Trash2
               className="text-gray-500 cursor-pointer hover:text-red-500"
@@ -126,7 +136,9 @@ const PodcastLibrary = () => {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
-            <h2 className="text-lg font-semibold text-gray-800">Delete Downloaded File?</h2>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Delete Downloaded File?
+            </h2>
             <p className="text-gray-500 text-sm mt-2">
               Are you sure you want to delete this downloaded file?
             </p>

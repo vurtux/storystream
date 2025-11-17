@@ -126,7 +126,7 @@ const PodcastLibrary = () => {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
-            <h2 className="text-lg font-semibold text-gray-800">Delete Downloaded File?</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Delete Podcast?</h2>
             <p className="text-gray-500 text-sm mt-2">
               Are you sure you want to delete this downloaded file?
             </p>

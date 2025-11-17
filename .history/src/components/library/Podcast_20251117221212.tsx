@@ -2,7 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
-import { deleteEpisodeOffline, getAllDownloadedPodcasts } from "../../utils/indexDB";
+import {
+  deleteEpisodeOffline,
+  getAllDownloadedPodcasts,
+} from "../../utils/indexDB";
 import slugify from "slugify";
 import { useRouter } from "next/navigation";
 
@@ -11,9 +14,8 @@ interface OfflinePodcast {
   imageBlob: Blob;
   audioBlob: Blob;
   createdAt: string;
-  title: string;
-  podcastName: string;
   imageUrl?: string;
+  title: string;
 }
 
 const PodcastLibrary = () => {
@@ -27,7 +29,9 @@ const PodcastLibrary = () => {
 
   const handleEpisode = (episode_id: string, title: string) => {
     router.push(
-      `/episode/${encodeURIComponent(episode_id)}/${slugify(title, { lower: true })}`
+      `/episode/${encodeURIComponent(episode_id)}/${slugify(title, {
+        lower: true,
+      })}`
     );
   };
 
@@ -38,43 +42,54 @@ const PodcastLibrary = () => {
 
   const handleDelete = async () => {
     if (!selectedEpisode) return;
+
     const success = await deleteEpisodeOffline(selectedEpisode);
     if (success) {
-      setPodcasts((prev) => prev.filter((p) => p.episode_id !== selectedEpisode));
+      setPodcasts((prev) =>
+        prev.filter((p) => p.episode_id !== selectedEpisode)
+      );
       setShowModal(false);
       setSelectedEpisode(null);
     }
   };
-
   useEffect(() => {
     async function loadOfflinePodcasts() {
       try {
         const episodes = await getAllDownloadedPodcasts();
-        const withUrls = episodes.map((ep: any) => {
-          const imageUrl = "/images/loginLogo.png"; // fallback
-          return { ...ep, imageUrl };
-        });
-        setPodcasts(withUrls);
+console.log(episodes, "episodes");
+
+// Convert image blob to URL with validation
+const withUrls = episodes.map((ep: any) => {
+  let imageUrl = "/images/loginLogo.png"; // fallback
+  
+  // if (ep.imageBlob) {
+  //   // Check if blob has correct image type
+  //   if (ep.imageBlob.type.startsWith('image/')) {
+  //     imageUrl = URL.createObjectURL(ep.imageBlob);
+  //   } else {
+  //     console.log('Invalid image blob type:', ep.imageBlob.type, 'for episode:', ep.episode_id);
+  //     // If blob has wrong type but valid image data, recreate with correct type
+  //     // You might need to determine the correct type based on your data
+  //   }
+  // }
+  
+  return {
+    ...ep,
+    imageUrl,
+  };
+});
+console.log(withUrls, "withUrls");
+
+setPodcasts(withUrls);
       } catch (err) {
         console.error("❌ Error loading offline podcasts:", err);
       } finally {
         setLoading(false);
       }
     }
+
     loadOfflinePodcasts();
   }, []);
-
-  const formatDownloadedTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return `Downloaded on ${date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-    })} ${date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    })}`;
-  };
 
   if (loading) {
     return (
@@ -87,31 +102,38 @@ const PodcastLibrary = () => {
   if (podcasts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <Image src="/images/not-found.png" alt="No Data" width={200} height={200} />
+        <Image
+          src="/images/not-found.png"
+          alt="No Data"
+          width={200}
+          height={200}
+        />
         <p className="mt-4 text-lg font-semibold">No Downloaded Podcasts</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20 px-5 pt-5">
+    <div className="min-h-screen bg-white pb-20">
       {/* Podcast List */}
-      <div className="space-y-5">
-        {podcasts.map((podcast) => (
+      <div className="mt-5 space-y-5 px-5">
+        {podcasts.map((podcast: any) => (
           <div key={podcast.episode_id} className="flex items-center gap-4">
-            <Image
-              src={podcast.imageUrl ?? "/images/loginLogo.png"}
-              onClick={() => handleEpisode(podcast.episode_id, podcast.title)}
-              alt={podcast.title}
-              width={50}
-              height={50}
-              className="rounded-lg object-cover cursor-pointer"
+            <img
+              src={podcast.imageDataUrl ?? "/images/loginLogo.png"}
+              onClick={() => handleEpisode(podcast.episode_id, podcast?.title)}
+              alt={podcast.episode_id}
+              width={40}
+              height={40}
+              className="rounded-lg object-cover mr-4 cursor-pointer"
             />
             <div className="flex-1">
               <h3 className="text-md font-semibold text-gray-800">
-                {podcast.podcastName} | {podcast.title}
+                Episode {podcast.episode_id}
               </h3>
-              <p className="text-sm text-gray-500">{formatDownloadedTime(podcast.createdAt)}</p>
+              <p className="text-sm text-gray-500">
+                Saved | {new Date(podcast.createdAt).toLocaleTimeString()}
+              </p>
             </div>
             <Trash2
               className="text-gray-500 cursor-pointer hover:text-red-500"
@@ -121,15 +143,17 @@ const PodcastLibrary = () => {
           </div>
         ))}
       </div>
-
-      {/* Delete Confirmation Modal */}
+      {/* 🟢 Delete Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
-            <h2 className="text-lg font-semibold text-gray-800">Delete Downloaded File?</h2>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Delete Downloaded File?
+            </h2>
             <p className="text-gray-500 text-sm mt-2">
-              Are you sure you want to delete this downloaded file?
+             Are you sure you want to delete this downloaded file??
             </p>
+
             <div className="flex justify-center gap-4 mt-6">
               <button
                 className="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300"
