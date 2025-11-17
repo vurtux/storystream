@@ -667,6 +667,7 @@ const DetailsClient = ({ conId, title }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [showPendingSheet, setShowPendingSheet] = useState(false);
+  const [showDownloadLimitSheet, setShowDownloadLimitSheet] = useState(false);
   const [limitDownload, setLimitDownload] = useState(false);
 
   const checkSubscriptionStatus = () => {
@@ -705,6 +706,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
   const showPendingMessage = () => {
     setShowPendingSheet(true);
+  };
+
+  const showDownloadLimitMessage = () => {
+    setShowDownloadLimitSheet(true);
   };
 
   const handleEpisode = (item: PodcastEpisodeDetail, index: number) => {
@@ -933,14 +938,14 @@ const DetailsClient = ({ conId, title }: any) => {
       } else {
         if (data?.vipInfo?.plan_id === "1658") {
          if(limitDownload) {
-              showSuccess("Please subscribe gold for more download!");
+              showDownloadLimitMessage();
               return;
          }
          const country = localStorage.getItem("country") || "";
          const result = await getContentDownloadCheck(item.episode_id, country, data?.profile?.userId);   
          console.log(result, "result");
          if(result?.response?.total_download_available <= 0) {
-              showSuccess("Please subscribe gold for more download!");
+              showDownloadLimitMessage();
               setLimitDownload(true);
               return;
          }
@@ -1227,6 +1232,47 @@ const DetailsClient = ({ conId, title }: any) => {
         </div>
       )}
 
+      {/* Download Limit Bottom Sheet */}
+      {showDownloadLimitSheet && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowDownloadLimitSheet(false)}
+        >
+          <div
+            className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 mb-10 shadow-xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <AlertCircle className="text-red-600" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Download Limit Reached</h3>
+              </div>
+              <X
+                className="cursor-pointer text-gray-500 hover:text-gray-700"
+                size={24}
+                onClick={() => setShowDownloadLimitSheet(false)}
+              />
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-700 text-base leading-relaxed">
+                Your download limit for the Day has expired. Please upgrade your plan by visiting My Account &gt; Manage Subscription or wait till tomorrow for your download limit to Reset.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDownloadLimitSheet(false)}
+                className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SubscribePage />
 
