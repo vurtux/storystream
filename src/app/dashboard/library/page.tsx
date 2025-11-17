@@ -1,5 +1,3 @@
-'use client';
-
 import PodcastLibrary from '../../../components/library/Podcast';
 import BookLibrary from '../../../components/library/Book';
 
