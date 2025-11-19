@@ -59,7 +59,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
   const settings = {
     dots: true, // ✅ Always show dots
     arrows: false,
-    infinite: slideCount>1, // Always scroll infinitely (even one slide)
+    infinite: slideCount>1?true:false, // Always scroll infinitely (even one slide)
     centerMode: true,
     centerPadding: '10%',
     slidesToShow: 1,
@@ -92,14 +92,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
       <Slider {...settings}>
         {data.contents.map((slide, idx) => (
           <div key={idx} className="relative flex justify-center items-center px-2">
-            <Image
-              src={slide.imgIrl}
-              alt={slide.conName || 'headerimg'}
-              height={336}
-              width={336}
-              className="object-cover rounded-2xl"
-              priority={idx === 0}
-            />
+           
             <div className="absolute bottom-[10%] inset-x-0 flex justify-center z-10">
               <button
                 onClick={() => handleDetail(slide.conId, slide.conName)}

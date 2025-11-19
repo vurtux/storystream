@@ -1193,7 +1193,7 @@ const DetailsClient = ({ conId, title }: any) => {
 
       <div className="mb-6">
         <p className="text-gray-700 text-base leading-relaxed">
-          Your subscription could not be charged. Please recharge your Mobile to complete the payment and enjoy StoryStream.
+          Insufficient funds detected. Please top up your airtime to complete your subscription or renewal.
         </p>
       </div>
 

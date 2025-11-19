@@ -79,7 +79,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
     ],
     appendDots: (dots: any) => (
       <div style={{ bottom: '-25px' }}>
-        <ul className="!m-0 flex justify-center gap-0">{dots}</ul>
+        <ul className="!m-0 flex justify-center gap-1">{dots}</ul>
       </div>
     ),
     customPaging: () => (
@@ -93,7 +93,7 @@ const HeaderSlider = ({ data }: { data: SpotlightBlock }) => {
         {data.contents.map((slide, idx) => (
           <div key={idx} className="relative flex justify-center items-center px-2">
             <Image
-              src={slide.imgIrl}
+              src={slide.imgIrl||''}
               alt={slide.conName || 'headerimg'}
               height={336}
               width={336}

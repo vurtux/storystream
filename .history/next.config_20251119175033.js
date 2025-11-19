@@ -1,18 +1,14 @@
-// module.exports = {
-//   webpack: (config) => {
-//     config.resolve.fallback = {
-//       fs: false,
-//       child_process: false,
-//     };
-//     return config;
-//   },
-// };
-
 /** @type {import('next').NextConfig} */
 module.exports = {
   images: {
-    domains: ['ik.imagekit.io', 'files.hubhopper.com', 'images.lystnfm.com'], // Add external image domains here
+    domains: [
+      "ik.imagekit.io",
+      "files.hubhopper.com",
+      "images.lystnfm.com",
+      "d3t3ozftmdmh3i.cloudfront.net" // <-- Added CloudFront domain
+    ],
   },
+
   webpack: (config) => {
     config.resolve.fallback = {
       fs: false,
@@ -20,6 +16,7 @@ module.exports = {
     };
     return config;
   },
+
   async rewrites() {
     return [
       {
@@ -34,10 +31,10 @@ module.exports = {
         source: '/category',
         destination: '/dashboard/category',
       },
-      // {
-      //   source: '/library',
-      //   destination: '/dashboard/library',
-      // },
+      {
+        source: '/library',
+        destination: '/dashboard/library',
+      },
       {
         source: '/profile/language',
         destination: '/dashboard/profile/language',
@@ -54,6 +51,6 @@ module.exports = {
         source: '/home/see-all/:path*',
         destination: '/see-all/:path*',
       },
-    ]
-    }
+    ];
+  },
 };

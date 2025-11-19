@@ -1206,7 +1206,7 @@ const DetailsClient = ({ conId, title }: any) => {
                 <div className="p-2 bg-orange-100 rounded-full">
                   <AlertCircle className="text-orange-600" size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Insufficient Funds</h3>
+                <h3 className="text-xl font-bold text-gray-900">Subscription Pending</h3>
               </div>
               <X
                 className="cursor-pointer text-gray-500 hover:text-gray-700"
