@@ -89,7 +89,6 @@ export async function getOfflineEpisode(episode_id: string) {
 
   const audioUrl = URL.createObjectURL(record.audioBlob);
   const imageUrl = record.imageDataUrl;
-  console.log(audioUrl, imageUrl, "audioUrl, imageUrl");
 
   return { audioUrl, imageUrl };
 }

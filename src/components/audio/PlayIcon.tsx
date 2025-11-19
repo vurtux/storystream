@@ -43,26 +43,11 @@ const NowPlaying = () => {
     };
 
     const handleEpisode = () => {
-        const raw = localStorage.getItem("download_episode_id");
-
-        // If no episode data but downloaded exists
-        if (!episodeData?.episode_id && raw) {
-            setOpenPlayButton(false);
-
-            const url = `/episode/${encodeURIComponent(raw)}/${slugify("1", {
-                lower: true,
-            })}`;
-
-            router.push(url);
-            return;
-        }
-
-        // Normal case
-        setEpisodeId(episodeData.episode_id);
+        setEpisodeId(episodeData?.episode_id);
 
         router.push(
             `/episode/${encodeURIComponent(episodeData.episode_id)}/${slugify(
-                "1",
+                episodeData?.title,
                 { lower: true }
             )}`
         );
