@@ -27,8 +27,8 @@ const PodcastLibrary = () => {
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null);
 
   const handleEpisode = (episode_id: string, title: string) => {
-    localStorage.setItem('download_episode_id', episode_id);
-    localStorage.setItem("episodeData", JSON.stringify({}));
+    // localStorage.setItem('download_episode_id', episode_id);
+    localStorage.setItem("episodeData", JSON.stringify({episode_id: episode_id, title: title}));
     router.push(
       `/episode/${encodeURIComponent(episode_id)}/${slugify(title, { lower: true })}`
     );
