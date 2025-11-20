@@ -24,10 +24,10 @@ function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }
         <span
           style={{
             fontWeight: 600,
-            fontSize: '18px',
-            lineHeight: '140%',
-            letterSpacing: '0.2px',
-            verticalAlign: 'middle',
+            fontSize: "18px",
+            lineHeight: "140%",
+            letterSpacing: "0.2px",
+            verticalAlign: "middle",
           }}
           className={`text-base ${textColor}`}
         >
@@ -38,10 +38,10 @@ function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }
         <span
           style={{
             fontWeight: 600,
-            fontSize: '18px',
-            lineHeight: '140%',
-            letterSpacing: '0.2px',
-            verticalAlign: 'middle',
+            fontSize: "18px",
+            lineHeight: "140%",
+            letterSpacing: "0.2px",
+            verticalAlign: "middle",
           }}
         >
           {value}
@@ -54,27 +54,63 @@ function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }
 export default function ProfilePage() {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [country, setCountry] = useState("ZA");
+  const [isVip, setIsVip] = useState(false);
 
   const handleLogout = () => {
-    localStorage.setItem('isLoggedIn', 'false');
-    localStorage.removeItem('loginData');
-    localStorage.removeItem('authData');
+    localStorage.setItem("isLoggedIn", "false");
+    localStorage.removeItem("loginData");
+    localStorage.removeItem("authData");
     setLoggedIn(false);
-    router.push('/auth/login');
+    setIsVip(false);
+    router.push("/auth/login");
   };
 
   const handleLogin = () => {
-    router.push('/auth/login');
+    router.push("/auth/login");
+  };
+   const handleSubscription = () => {
+    localStorage.setItem("isSubscribed", true.toString());
+    router.push("/subscribe");
   };
 
   const handleManageAccount = () => {
-    router.push('/dashboard/profile/edit');
+    router.push("/dashboard/profile/edit");
   };
 
+  const handleManageAccountSubscription = () => {
+    router.push("/managesubscription");
+  };
+
+  const handleBannerClick = () => {
+    //  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    //  if (isLoggedIn) {
+    //    router.push("/subscribe");
+    //  }else{
+    //    router.push("/auth/login");
+    //  }
+    localStorage.setItem("isSubscribed", true.toString());
+    router.push("/subscribe");
+   
+  };
+
+  
+
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const country = localStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     setLoggedIn(isLoggedIn);
+
+    const savedCountry = localStorage.getItem("country");
+    if (savedCountry) setCountry(savedCountry);
+
+    const stored = JSON.parse(localStorage.getItem("loginData") || "{}");
+
+    // Treat as VIP if profile.vip === 1 OR vipInfo.isActive === 5
+    if (stored?.profile?.vip === 1 || stored?.vipInfo?.isActive === 5) {
+      setIsVip(true);
+    } else {
+      setIsVip(false);
+    }
   }, []);
 
   return (
@@ -87,14 +123,27 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Banner */}
-      <div className="w-full mb-6">
-        <Image height={251} width={380} alt="banner" src="/images/Promo_Discount.png" />
-      </div>
+      {/* Banner (only if not VIP) */}
+      {!isVip && (
+        <div className="w-full mb-6 cursor-pointer" onClick={handleBannerClick}>
+          <Image height={251} width={380} alt="banner" src="/images/Promo_Discount.png" />
+        </div>
+      )}
 
-      {/* Menu Options */}
+      {/* Menu Items */}
       <div className="space-y-4 flex-1">
-        {/* Logged out only */}
+
+        {/* Subscribe Now - only when logged in */}
+        {!isVip && (
+          <MenuItem
+            imgSrc="/images/subscriptionLogo.png"
+            label="Subscribe Now"
+            value={<IoIosArrowForward />}
+            onClick={handleSubscription}
+          />
+        )}
+
+        {/* Login - only when NOT logged in */}
         {!loggedIn && (
           <MenuItem
             imgSrc="/profile/Logout.png"
@@ -103,7 +152,7 @@ export default function ProfilePage() {
           />
         )}
 
-        {/* Logged in only */}
+        {/* Logged-in Options */}
         {loggedIn && (
           <>
             <MenuItem
@@ -112,34 +161,39 @@ export default function ProfilePage() {
               value={<IoIosArrowForward />}
               onClick={handleManageAccount}
             />
-            <MenuItem
-              imgSrc="/profile/Group 36707.png"
-              label="Manage Subscription"
-              value={<IoIosArrowForward />}
-            />
+
+            {isVip && (
+              <MenuItem
+                imgSrc="/profile/Group 36707.png"
+                label="Manage Subscription"
+                value={<IoIosArrowForward />}
+                onClick={handleManageAccountSubscription}
+              />
+            )}
           </>
         )}
 
-        {/* Always visible */}
+        {/* Common Items */}
         <MenuItem
           imgSrc="/profile/Calling.png"
           label="Contact Us"
           value={<IoIosArrowForward />}
+          onClick={() => window.open("https://www.myuzeplay.com/static/support", "_self")}
         />
         <MenuItem
           imgSrc="/profile/Shield Done.png"
           label="Privacy Policy"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("https://www.myuzeplay.com/static/pp", "_self")}
+          onClick={() => window.open("/pp.html", "_self")}
         />
         <MenuItem
           imgSrc="/profile/Paper.png"
           label="Terms of Service"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("https://www.myuzeplay.com/static/tnc", "_self")}
+          onClick={() => window.open("/tnc.html", "_self")}
         />
 
-        {/* Logout at bottom for logged in */}
+        {/* Logout - only when logged in */}
         {loggedIn && (
           <MenuItem
             imgSrc="/profile/Logout.png"
@@ -149,9 +203,8 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-8 text-center text-gray-500 text-sm">
-        Version: 1.0.0 ({localStorage.getItem('country') || 'ZA'})
+        Version: 1.0.1 ({country})
       </div>
     </div>
   );

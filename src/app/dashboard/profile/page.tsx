@@ -69,7 +69,7 @@ export default function ProfilePage() {
   const handleLogin = () => {
     router.push("/auth/login");
   };
-   const handleSubscription = () => {
+  const handleSubscription = () => {
     localStorage.setItem("isSubscribed", true.toString());
     router.push("/subscribe");
   };
@@ -83,16 +83,18 @@ export default function ProfilePage() {
   };
 
   const handleBannerClick = () => {
-     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-     if (isLoggedIn) {
-       router.push("/subscribe");
-     }else{
-       router.push("/auth/login");
-     }
-   
+    //  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    //  if (isLoggedIn) {
+    //    router.push("/subscribe");
+    //  }else{
+    //    router.push("/auth/login");
+    //  }
+    localStorage.setItem("isSubscribed", true.toString());
+    router.push("/subscribe");
+
   };
 
-  
+
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
