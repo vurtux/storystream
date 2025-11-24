@@ -71,31 +71,31 @@ export default function SubscriptionClient() {
   ];
 
   const handleContinue = () => {
-  const isSubscribed = localStorage.getItem('isSubscribed');
-  const selected = plansWithMDN[selectedPlan];
+    const isSubscribed = localStorage.getItem('isSubscribed');
+    const selected = plansWithMDN[selectedPlan];
+    localStorage.setItem('selectedPlan', selected.link);
+    
+    setLoading(true);
 
-  if (!selected) return; // safety check
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('redirecting', 'true');
+      
+    }
+    if (isSubscribed === 'true') {
+      router.push('/auth/login');
+      return;
+    }else{
+       window.location.href = selected.link;
+         return;
+       
+    }
 
-  setLoading(true);
-
-  // Save selected plan
-  localStorage.setItem('selectedPlan', selected.link);
-
-  // Mark redirect state
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('redirecting', 'true');
-  }
-
-  // If user is subscribed → go to login
-  if (isSubscribed === 'true') {
-    router.push('/auth/login');
-    return;
-  }
-
-  // If NOT subscribed → go to payment link
-  window.location.href = selected.link;
-};
-
+    // setTimeout(() => {
+    //   if (typeof window !== 'undefined') {
+    //     window.location.href = selected.link;
+    //   }
+    // }, 180);
+  };
 
   return (
     <>

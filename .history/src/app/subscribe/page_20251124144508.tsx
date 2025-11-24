@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { showError } from '../../utils/toastService';
 
 interface FeatureRowProps {
   name: string;
@@ -23,14 +25,40 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
 };
 
 export default function SubscriptionClient() {
-  const plans = [
-    { price: 'R 5', period: 'Daily', billing: 'R 5/day', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t' },
-    { price: 'R 25', period: 'Weekly', billing: 'R 25/week', savings: null, link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t' },
-    { price: 'R 80', period: 'Monthly', billing: 'R 80/month', savings: '36%', link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t' },
-  ];
-
+  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const plans = [
+    {
+      price: 'R 5',
+      period: 'Daily',
+      billing: 'R 5/day',
+      savings: null,
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020',
+    },
+    {
+      price: 'R 25',
+      period: 'Weekly',
+      billing: 'R 25/week',
+      savings: null,
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239',
+    },
+    {
+      price: 'R 80',
+      period: 'Monthly',
+      billing: 'R 80/month',
+      savings: '36%',
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240',
+    },
+  ];
+
+  const mobile = typeof window !== 'undefined' ? localStorage.getItem('mobile') : null;
+
+  const plansWithMDN = plans.map(plan => ({
+    ...plan,
+    link: mobile ? `${plan.link}&msisdn=${mobile}` : plan.link,
+  }));
 
   const features = [
     'All Shows Unlocked',
@@ -43,18 +71,37 @@ export default function SubscriptionClient() {
   ];
 
   const handleContinue = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.location.href = plans[selectedPlan].link;
-      }
-    }, 1800);
-  };
+  const isSubscribed = localStorage.getItem('isSubscribed');
+  const selected = plansWithMDN[selectedPlan];
+
+  if (!selected) return; // safety check
+
+  setLoading(true);
+
+  // Save selected plan
+  localStorage.setItem('selectedPlan', selected.link);
+
+  // Mark redirect state
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('redirecting', 'true');
+  }
+
+  // If user is subscribed → go to login
+  if (isSubscribed === 'true') {
+    router.push('/auth/login');
+    return;
+  }
+
+  // If NOT subscribed → go to payment link
+  window.location.href = selected.link;
+};
+
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @font-face {
             font-family: 'SF Pro Rounded';
             src: url('/fonts/SFProRounded/FontsFree-Net-SF-Pro-Rounded-Regular.ttf') format('truetype');
@@ -67,97 +114,25 @@ export default function SubscriptionClient() {
           }
           @keyframes scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
           .animate-scroll-x { animation: scroll-x 40s linear infinite; will-change: transform; }
-          
-          @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-          }
-          
-          @keyframes pulse-ring { 
-            0% { transform: scale(0.8); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.3; }
-            100% { transform: scale(0.8); opacity: 1; }
-          }
-          
-          @keyframes bounce-loader {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-          }
-          
-          .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-          }
-          
-          .loader-spinner {
-            width: 70px;
-            height: 70px;
-            border: 6px solid rgba(255, 255, 255, 0.2);
-            border-top: 6px solid #9333ea;
-            border-right: 6px solid #ec4899;
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
-          }
-          
-          .loader-ring {
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            border: 3px solid rgba(147, 51, 234, 0.3);
-            border-radius: 50%;
-            animation: pulse-ring 2s ease-in-out infinite;
-          }
-          
-          .loader-dots {
-            display: flex;
-            gap: 8px;
-          }
-          
-          .loader-dot {
-            width: 12px;
-            height: 12px;
-            background: linear-gradient(135deg, #9333ea, #ec4899);
-            border-radius: 50%;
-            animation: bounce-loader 1s ease-in-out infinite;
-            box-shadow: 0 0 15px rgba(147, 51, 234, 0.6);
-          }
-          
-          .loader-dot:nth-child(2) {
-            animation-delay: 0.2s;
-          }
-          
-          .loader-dot:nth-child(3) {
-            animation-delay: 0.4s;
-          }
-          
-          .loader-text {
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(147, 51, 234, 0.8);
-          }
-        `
-      }} />
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.3; } 100% { transform: scale(0.8); opacity: 1; } }
+          @keyframes bounce-loader { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+          .loader-container { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; }
+          .loader-spinner { width:70px; height:70px; border:6px solid rgba(255,255,255,0.2); border-top:6px solid #9333ea; border-right:6px solid #ec4899; border-radius:50%; animation: spin 1s cubic-bezier(0.68,-0.55,0.265,1.55) infinite; box-shadow: 0 0 30px rgba(147,51,234,0.5); }
+          .loader-ring { position:absolute; width:90px; height:90px; border:3px solid rgba(147,51,234,0.3); border-radius:50%; animation:pulse-ring 2s ease-in-out infinite; }
+          .loader-dots { display:flex; gap:8px; }
+          .loader-dot { width:12px; height:12px; background: linear-gradient(135deg, #9333ea, #ec4899); border-radius:50%; animation: bounce-loader 1s ease-in-out infinite; box-shadow:0 0 15px rgba(147,51,234,0.6); }
+          .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+          .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+          .loader-text { color:white; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 20px rgba(147,51,234,0.8); }
+        `,
+        }}
+      />
 
       <div
         className="min-h-screen w-full flex flex-col text-gray-800"
         style={{ background: 'linear-gradient(191.91deg, #C4A1FF -1.09%, #FF9AA5 100%)' }}
       >
-        {/* Full Screen Loader */}
         {loading && (
           <div className="loader-container">
             <div style={{ position: 'relative' }}>
@@ -174,7 +149,7 @@ export default function SubscriptionClient() {
         )}
 
         {/* Banner */}
-        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50 m-0 p-0">
+        <div className="w-full overflow-hidden relative h-[180px] bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
             <div className="flex animate-scroll-x">
               {[...Array(15)].map((_, i) => (
@@ -184,7 +159,7 @@ export default function SubscriptionClient() {
                     alt="banner"
                     width={300}
                     height={160}
-                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl m-0 p-0"
+                    className="h-[180px] w-auto object-cover rounded-2xl shadow-xl"
                     unoptimized
                   />
                 </div>
@@ -194,9 +169,11 @@ export default function SubscriptionClient() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 w-full max-w-2xl mx-auto pb-40">
+        <div className="flex-1 w-full max-w-2xl mx-auto pb-56">
           <div className="p-4 pt-3 text-center">
-            <div className="flex justify-center mb-1.5"><span className="text-3xl">⚡</span></div>
+            <div className="flex justify-center mb-1.5">
+              <span className="text-3xl">⚡</span>
+            </div>
             <h1 className="text-2xl font-bold mb-1.5 text-gray-900">
               Subscribe to <span className="text-purple-700">storyStream</span>
             </h1>
@@ -206,13 +183,13 @@ export default function SubscriptionClient() {
 
             {/* Plans */}
             <div className="grid grid-cols-3 gap-2.5 px-2">
-              {plans.map((plan, i) => (
+              {plansWithMDN.map((plan, i) => (
                 <div
                   key={i}
                   onClick={() => setSelectedPlan(i)}
                   className={`p-3.5 rounded-2xl bg-white shadow-lg border-2 text-center cursor-pointer transition-all duration-300 relative overflow-hidden
                     ${selectedPlan === i
-                      ? 'border-purple-600 scale-105 shadow-2xl pulse-glow'
+                      ? 'border-purple-600 scale-105 shadow-2xl'
                       : 'border-purple-200 hover:border-purple-400 hover:scale-102'
                     }`}
                 >
@@ -226,7 +203,11 @@ export default function SubscriptionClient() {
                       ✓
                     </div>
                   )}
-                  <span className={`text-xl font-extrabold block transition-colors ${selectedPlan === i ? 'text-purple-700' : 'text-gray-800'}`}>
+                  <span
+                    className={`text-xl font-extrabold block transition-colors ${
+                      selectedPlan === i ? 'text-purple-700' : 'text-gray-800'
+                    }`}
+                  >
                     {plan.price}
                   </span>
                   <span className="text-[11px] text-gray-600 font-semibold mt-0.5 block">
@@ -235,6 +216,21 @@ export default function SubscriptionClient() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Billing Info */}
+          <div className="text-center mt-4 mx-4 p-3">
+            <p className="text-[11px] text-gray-700 font-medium">
+              Subscriptions will be added to your Vodacom Account/Airtime.
+            </p>
+            <a
+              href="https://www.storystream.mobi/tnc.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-600 text-[11px] underline hover:text-purple-700 font-semibold mt-1 block"
+            >
+              Terms & Conditions
+            </a>
           </div>
 
           {/* Features */}
@@ -254,16 +250,8 @@ export default function SubscriptionClient() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-2xl">
-          <div className="max-w-md mx-auto text-center">
-            <div className="mb-2.5">
-              <span className="text-[13px] font-bold text-purple-700">{plans[selectedPlan].period} Plan</span>
-              {plans[selectedPlan].savings && (
-                <span className="ml-1.5 text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">
-                  Save {plans[selectedPlan].savings}
-                </span>
-              )}
-            </div>
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-md p-3 pb-5 bg-white shadow-2xl rounded-xl">
+          <div className="max-w-md mx-auto">
             <button
               onClick={handleContinue}
               disabled={loading}
@@ -273,10 +261,21 @@ export default function SubscriptionClient() {
                          hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
                          shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              CONTINUE FOR <span className="ml-2 font-extrabold text-xl">{plans[selectedPlan].price}</span>
+              CONTINUE FOR{' '}
+              <span className="ml-2 font-extrabold text-xl">
+                {plansWithMDN[selectedPlan].price}
+              </span>
             </button>
-            <p className="text-[10px] mt-2.5 text-gray-600 font-semibold">
-              Then {plans[selectedPlan].billing}. Cancel anytime.
+            <p className="text-[11px] mt-3 text-gray-600 text-center leading-relaxed px-2">
+              By continuing, you agree to our{' '}
+              <a
+                href="https://www.storystream.mobi/tnc.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 underline hover:text-purple-700 font-semibold"
+              >
+                Terms & Conditions
+              </a>
             </p>
           </div>
         </div>

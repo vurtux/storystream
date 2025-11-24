@@ -89,7 +89,7 @@ export default function ProfilePage() {
     //  }else{
     //    router.push("/auth/login");
     //  }
-    localStorage.setItem("isSubscribed", false.toString());
+    localStorage.setItem("isSubscribed", true.toString());
     router.push("/subscribe");
 
   };
