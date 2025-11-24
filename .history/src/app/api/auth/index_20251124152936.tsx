@@ -21,7 +21,7 @@ interface validateProps {
 
 export const handleLogin = async (payload: loginProps) => {
     return await requestApi({
-        url: 'api/v2/feed/GetOTP',
+        url: 'api/v/feed/GetOTP',
         method: 'POST',
         data: payload,
         headers: {
