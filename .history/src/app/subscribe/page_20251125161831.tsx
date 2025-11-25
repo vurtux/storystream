@@ -42,14 +42,14 @@ export default function SubscriptionClient() {
       period: 'Weekly',
       billing: 'R 25/week',
       savings: null,
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239&m=t',
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5239',
     },
     {
       price: 'R 80',
       period: 'Monthly',
       billing: 'R 80/month',
       savings: '36%',
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t',
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240',
     },
   ];
 

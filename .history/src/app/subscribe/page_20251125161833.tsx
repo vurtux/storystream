@@ -49,7 +49,7 @@ export default function SubscriptionClient() {
       period: 'Monthly',
       billing: 'R 80/month',
       savings: '36%',
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240&m=t',
+      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5240',
     },
   ];
 
