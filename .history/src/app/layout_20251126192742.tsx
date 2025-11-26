@@ -20,7 +20,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         {/* 🔹 StoryStream Meta Tags */}
-        <meta httpEquiv="X-UA-Compatible" content="IE=Edge" />
+        <meta charSet="UTF-8" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <title>StoryStream: Audio Books & Shows</title>
         <meta
           name="description"
@@ -33,17 +34,65 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="author" content="StoryStream" />
         <link rel="canonical" href="https://www.storystream.mobi" />
         <meta name="robots" content="index, follow" />
-        <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no"
         />
-        <link rel="icon" href="/images/loginLogo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/loginLogo.png" />
+
+        {/* ✅ Favicons and App Icons */}
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/images/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/images/favicon-16x16.png"
+        />
+        <link rel="icon" href="/images/favicon.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/images/apple-touch-icon.png"
+        />
+        <link rel="manifest" href="/images/site.webmanifest" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/images/android-chrome-192x192.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="512x512"
+          href="/images/android-chrome-512x512.png"
+        />
+
+        {/* ✅ Apple Web App Config */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="StoryStream" />
+
+        {/* 🔹 Open Graph (Social Media) */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="StoryStream: Audio Books & Shows" />
+        <meta property="og:description" content="Discover immersive audio experiences. Stream audiobooks, podcasts, and shows." />
+        <meta property="og:url" content="https://www.storystream.mobi" />
+        <meta property="og:image" content="https://www.storystream.mobi/images/og-image.png" />
+
+        {/* 🔹 Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="StoryStream: Audio Books & Shows" />
+        <meta name="twitter:description" content="Discover immersive audio experiences." />
+        <meta name="twitter:image" content="https://www.storystream.mobi/images/og-image.png" />
       </head>
 
-      <body className="">
+      <body>
+        
         <DashboardProvider>
           <AudioProvider>
             <main

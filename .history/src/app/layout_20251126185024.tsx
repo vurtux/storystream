@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import Script from 'next/script';
 import './globals.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -11,6 +10,7 @@ import Menubar from './dashboard/menubar/page';
 import { DashboardProvider } from '../context/DashboardProvider';
 import ToastProvider from '../components/common/ToastProvider';
 import { AudioProvider } from '../context/AudioProvider';
+import Script from 'next/script';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           content="width=device-width, initial-scale=1.0, user-scalable=no"
         />
 
-        {/* Favicons */}
+        {/* ✔ Favicons */}
         <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
         <link rel="icon" href="/images/favicon.ico" />
@@ -50,22 +50,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/images/android-chrome-512x512.png" />
 
-        {/* Apple */}
+        {/* ✔ Apple Web App */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="StoryStream" />
 
-        {/* OG Tags */}
+        {/* ✔ Social Tags */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content="StoryStream: Audio Books & Shows" />
-        <meta
-          property="og:description"
-          content="Discover immersive audio experiences. Stream audiobooks, podcasts, and shows."
-        />
+        <meta property="og:description" content="Discover immersive audio experiences. Stream audiobooks, podcasts, and shows." />
         <meta property="og:url" content="https://www.storystream.mobi" />
         <meta property="og:image" content="https://www.storystream.mobi/images/og-image.png" />
 
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="StoryStream: Audio Books & Shows" />
         <meta name="twitter:description" content="Discover immersive audio experiences." />
@@ -73,27 +69,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
 
       <body>
-        {/* Tealium Config */}
-        <Script id="utag-config">
-          {`
-            window.utag_cfg_ovrd = window.utag_cfg_ovrd || {};
-            window.utag_cfg_ovrd.noview = true;
-          `}
-        </Script>
-
-        {/* Load Tealium Async */}
-        <Script
-          src="https://tags.tiqcdn.com/utag/vodafone/za-storystream/prod/utag.js"
-          strategy="afterInteractive"
-        />
-
         <DashboardProvider>
           <AudioProvider>
             <main
-              style={{ backgroundColor: '#FFFFFF' }}
-              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
-                shouldShowNavbar ? 'pb-16' : ''
-              }`}
+              style={{ backgroundColor: "#FFFFFF" }}
+              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${shouldShowNavbar ? 'pb-16' : ''}`}
             >
               <ToastProvider />
               {children}
@@ -102,6 +82,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {shouldShowNavbar && <Menubar />}
           </AudioProvider>
         </DashboardProvider>
+
+        {/* ✔ Tealium Scripts (Next.js Safe) */}
+        <Script id="utag-config">
+          {`
+            window.utag_cfg_ovrd = window.utag_cfg_ovrd || {};
+            window.utag_cfg_ovrd.noview = true;
+          `}
+        </Script>
+
+        <Script
+          id="utag-loader"
+          src="https://tags.tiqcdn.com/utag/vodafone/za-storystream/prod/utag.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
