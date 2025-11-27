@@ -195,7 +195,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Login Form Container - Positioned at bottom with 100px upshift */}
-                <div className="absolute bottom-[40px] left-0 right-0 z-10 px-6 pb-12 pt-6 bg-gradient-to-t from-white via-white to-transparent">
+                <div className="absolute bottom-[70px] left-0 right-0 z-10 px-6 pb-12 pt-6 bg-gradient-to-t from-white via-white to-transparent">
                     {/* Logo and Title */}
                     <div className="flex flex-col items-center mb-3">
                         <div className="mb-2">
