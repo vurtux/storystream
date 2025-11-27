@@ -194,11 +194,11 @@ export default function LoginPage() {
                     </button>
                 </div>
 
-                {/* Login Form Container - Positioned at bottom with 100px upshift */}
-                <div className="absolute bottom-[100px] left-0 right-0 z-10 px-6 pb-12 pt-6 bg-gradient-to-t from-white via-white to-transparent">
+                {/* Login Form Container - Positioned at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-12 pt-6 bg-gradient-to-t from-white via-white to-transparent">
                     {/* Logo and Title */}
-                    <div className="flex flex-col items-center mb-3">
-                        <div className="mb-2">
+                    <div className="flex flex-col items-center mb-4">
+                        {/* <div className="mb-2">
                             <Image
                                 src="/images/loginLogo.png"
                                 height={80}
@@ -206,7 +206,7 @@ export default function LoginPage() {
                                 alt="App Logo"
                                 className="h-20 w-20"
                             />
-                        </div>
+                        </div> */}
                         <h1 className="text-xl text-black font-semibold">
                             Login to your account
                         </h1>
