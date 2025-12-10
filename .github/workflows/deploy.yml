@@ -67,7 +67,7 @@ jobs:
             # ✅ Install prod-only deps on SERVER (correct OS)
             npm ci --omit=dev
 
-            mv \$DEPLOY_PATH/current_new \$DEPLOY_PATH/current
+            mv $DEPLOY_PATH/current_new $DEPLOY_PATH/current
 
             # ✅ Ensure PM2 exists
             command -v pm2 >/dev/null 2>&1 || npm install -g pm2
