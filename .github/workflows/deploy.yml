@@ -1,4 +1,4 @@
-name: Deploy to GCE VM (Safe Artifact Model)
+name: Deploy to GCE VM
 
 on:
   push:
@@ -19,24 +19,23 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      # ✅ Clean, deterministic install + build
-      - name: Install deps & build
+      - name: Install deps and build
         run: |
           npm ci
           npm run build
           npm prune --omit=dev
 
-      # ✅ Pack ONLY runtime-safe files (NO node_modules)
-      - name: Pack runtime bundle
+      - name: Pack full app bundle
         run: |
           tar czf app-release.tgz \
             .next \
             public \
+            next.config.js \
             package.json \
             package-lock.json \
-            next.config.js
+            node_modules
 
-      - name: Upload and activate release
+      - name: Upload and activate on server
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
@@ -47,52 +46,32 @@ jobs:
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # ✅ Upload tarball
+          # Upload tar
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no app-release.tgz \
-            $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/releases/app-release.tgz
+            $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app-release.tgz
 
-          # ✅ Extract + rebuild runtime deps + atomic swap + PM2 restart
+          # Extract release atomically
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
             set -e
-
             cd $DEPLOY_PATH
+
+            rm -rf current_new
+            mkdir current_new
+
+            tar xzf app-release.tgz -C current_new
 
             rm -rf current_old
             if [ -d current ]; then mv current current_old; fi
+            mv current_new current
 
-            mkdir -p current_new
-            tar xzf releases/app-release.tgz -C current_new
-            cd current_new
-
-            # ✅ Install prod-only deps on SERVER (correct OS)
-            npm ci --omit=dev
-
-            mv $DEPLOY_PATH/current_new $DEPLOY_PATH/current
-
-            # ✅ Ensure PM2 exists
-            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
-
-            # ✅ Stable PM2 start (NO npx)
             pm2 delete next-app >/dev/null 2>&1 || true
-            pm2 start npm --name next-app -- start -- --port 3000
+            pm2 start \"npx next start -p 3000\" --name next-app --cwd $DEPLOY_PATH/current
             pm2 save
-
-            rm -rf current_old || true
           "
 
-          # ✅ Cleanup SSH key from runner
-          rm -f ~/.ssh/deploy_key
-
-      # ✅ REAL health check through NGINX (not port 3000)
       - name: Health check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
         run: |
-          echo "Waiting for app to come online via Nginx..."
           sleep 10
-          if curl -fs http://$DEPLOY_HOST >/dev/null; then
-            echo "✅ Deployment verified successfully via Nginx."
-          else
-            echo "❌ Deployment failed: Nginx did not respond correctly."
-            exit 1
-          fi
+          curl -I http://$DEPLOY_HOST:3000
