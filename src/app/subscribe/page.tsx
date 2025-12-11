@@ -35,7 +35,7 @@ export default function SubscriptionClient() {
       period: 'Daily',
       billing: 'R 5/day',
       savings: null,
-      link: 'https://dcb.storystream.mobi/?deviceId=134018989792035997&country=za&serviceid=5020&m=t',
+      link: 'https://dcb.storystream.mobi/?deviceId=134099141969851180&country=za&mbidbundle=11179&m=t',
     },
     {
       price: 'R 25',
