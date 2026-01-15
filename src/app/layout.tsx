@@ -1,24 +1,6 @@
 'use client';
 import { ReactNode, useEffect } from 'react';
 import Script from 'next/script';
-
-// Tealium type definition
-declare global {
-  interface Window {
-    utag_data: {
-      page_name: string;
-      page_type: string;
-      page_title: string;
-      page_url: string;
-      utm_source: string;
-      utm_medium: string;
-      utm_campaign: string;
-      utm_content: string;
-      utm_term: string;
-    };
-    utag_cfg_ovrd: any;
-  }
-}
 import './globals.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -38,17 +20,29 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   // Track page view on route change
   useEffect(() => {
-    // Wait for Tealium to load
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    // Wait for Tealium to load (max 5 seconds)
+    let attempts = 0;
+    const maxAttempts = 50;
+
     const checkTealium = setInterval(() => {
+      attempts++;
+
       if (typeof window !== 'undefined' && window.utag && typeof window.utag.view === 'function') {
         clearInterval(checkTealium);
-        
-        // Track the page view
+
+       
         trackPageView({
           pathname,
-          isLoggedIn: false, // TODO: Get from auth context
-          // userId: '', // TODO: Get from auth context
+          isLoggedIn: isLoggedIn, 
+          // userId: '', 
         });
+      }
+
+      // Stop trying after max attempts
+      if (attempts >= maxAttempts) {
+        clearInterval(checkTealium);
+        console.warn('⚠️ Tealium failed to load after retries');
       }
     }, 100);
 
@@ -111,7 +105,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
 
       <body>
-        {/* Tealium Config */}
+        {/* Tealium Config - Set noview: true to handle views manually */}
         <Script id="utag-config">
           {`
             window.utag_cfg_ovrd = window.utag_cfg_ovrd || {};
@@ -119,7 +113,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           `}
         </Script>
 
-        {/* Load Tealium Async */}
+        {/* Load Tealium Script Async */}
         <Script
           src="https://tags.tiqcdn.com/utag/vodafone/za-storystream/prod/utag.js"
           strategy="afterInteractive"

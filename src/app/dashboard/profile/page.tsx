@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
+import { 
+  trackSignout, 
+} from "../../../lib/tealiumTracking";
 type MenuItemProps = {
   imgSrc?: string;
   label: React.ReactNode | string;
@@ -61,6 +63,7 @@ export default function ProfilePage() {
     localStorage.setItem("isLoggedIn", "false");
     localStorage.removeItem("loginData");
     localStorage.removeItem("authData");
+    trackSignout('/profile')
     setLoggedIn(false);
     setIsVip(false);
     router.push("/auth/login");

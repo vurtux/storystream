@@ -45,7 +45,7 @@ export interface UtagViewData {
   order_revenue?: string;
   subscription_type?: string;
   registration_date?: string;
-  [key: string]: any; // Allow additional custom properties
+  [key: string]: any;
 }
 
 declare global {
@@ -53,6 +53,7 @@ declare global {
     utag: {
       view: (data: UtagViewData) => void;
     };
+    utag_cfg_ovrd: any;
   }
 }
 
@@ -60,24 +61,9 @@ declare global {
  * Get platform type based on user agent
  */
 export function getPlatform(): string {
-  if (typeof navigator === 'undefined') return 'web-desktop';
-
-  const ua = navigator.userAgent.toLowerCase();
-
-  if (/mobile|android|iphone|ipod/.test(ua)) {
-    if (/iphone|ipod|ipad/.test(ua)) {
-      return 'ios';
-    } else if (/android/.test(ua)) {
-      return 'android';
-    }
+  
     return 'web-mobile';
-  }
 
-  if (/tablet|ipad/.test(ua)) {
-    return 'web-tablet';
-  }
-
-  return 'web-desktop';
 }
 
 /**
@@ -90,6 +76,7 @@ export function getPageSection(pathname: string): string {
 
 /**
  * Build page name in Adobe Analytics format
+ * Format: domain:section:subsection
  */
 export function buildPageName(pathname: string): string {
   const domain = 'storystream';
@@ -128,22 +115,169 @@ export function getEventName(pathname: string, customEvent?: string): string {
 }
 
 /**
- * Get user country (default: South Africa for StoryStream)
+ * Get page URL
  */
-export function getUserCountry(): string {
-  // TODO: Get from user's location or settings
-  return 'South Africa';
+export function getPageUrl(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.href;
+  }
+  return '';
 }
 
 /**
- * Get login status (default: loggedout)
+ * Get page title
  */
-export function getLoginStatus(isLoggedIn?: boolean): string {
-  return isLoggedIn ? 'loggedin' : 'loggedout';
+export function getPageTitle(): string {
+  if (typeof document !== 'undefined') {
+    return document.title;
+  }
+  return '';
+}
+
+/**
+ * Build product data for e-commerce tracking
+ */
+export function buildProductData(options: {
+  productId?: string;
+  productName?: string;
+  productPrice?: string;
+  productCategory?: string;
+  productSku?: string;
+  productType?: 'free' | 'paid';
+}): Partial<UtagViewData> {
+  const data: Partial<UtagViewData> = {};
+
+  if (options.productId) {
+    data.product_id = [options.productId];
+  }
+  if (options.productName) {
+    data.product_name = [options.productName];
+  }
+  if (options.productPrice) {
+    data.product_price = [options.productPrice];
+  }
+  if (options.productCategory) {
+    data.product_category = [options.productCategory];
+  }
+  if (options.productSku) {
+    data.product_sku = [options.productSku];
+  }
+  if (options.productType) {
+    data.product_type = options.productType;
+  }
+
+  return data;
+}
+
+/**
+ * Build subscription data
+ */
+export function buildSubscriptionData(options: {
+  planActive?: string;
+  planId?: string;
+  subscriptionId?: string;
+  planName?: string;
+  planType?: string;
+  planBrand?: 'video' | 'games' | 'audio';
+  duration?: string;
+  assetType?: 'free trial' | 'premium' | 'standard';
+  dateStart?: string;
+  dateEnd?: string;
+  addonName?: string;
+  addonType?: string;
+  addonDateStart?: string;
+  addonDateEnd?: string;
+}): Partial<UtagViewData> {
+  const data: Partial<UtagViewData> = {};
+
+  if (options.planActive) {
+    data.visitor_asset_plan_active = [options.planActive];
+  }
+  if (options.planId) {
+    data.visitor_asset_plan_id_active = options.planId;
+  }
+  if (options.subscriptionId) {
+    data.visitor_asset_subscription_id_active = options.subscriptionId;
+  }
+  if (options.planName) {
+    data.visitor_asset_plan_name_active = [options.planName];
+  }
+  if (options.planType) {
+    data.visitor_asset_plan_type_active = options.planType;
+  }
+  if (options.planBrand) {
+    data.visitor_asset_plan_brand_active = options.planBrand;
+  }
+  if (options.duration) {
+    data.visitor_asset_duration_active = options.duration;
+  }
+  if (options.assetType) {
+    data.visitor_assest_type_active = options.assetType;
+  }
+  if (options.dateStart) {
+    data.visitor_assest_date_start_active = options.dateStart;
+  }
+  if (options.dateEnd) {
+    data.visitor_assest_date_end_active = options.dateEnd;
+  }
+  if (options.addonName) {
+    data.visitor_addon_name_active = options.addonName;
+  }
+  if (options.addonType) {
+    data.visitor_addon_type_active = options.addonType;
+  }
+  if (options.addonDateStart) {
+    data.visitor_addon_date_start_active = options.addonDateStart;
+  }
+  if (options.addonDateEnd) {
+    data.visitor_addon_date_end_active = options.addonDateEnd;
+  }
+
+  return data;
+}
+
+/**
+ * Build transaction/order data
+ */
+export function buildTransactionData(options: {
+  transactionId?: string;
+  orderRevenue?: string;
+  subscriptionType?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  registrationDate?: string;
+}): Partial<UtagViewData> {
+  const data: Partial<UtagViewData> = {};
+
+  if (options.transactionId) {
+    data.transaction_id = options.transactionId;
+  }
+  if (options.orderRevenue) {
+    data.order_revenue = options.orderRevenue;
+  }
+  if (options.subscriptionType) {
+    data.subscription_type = options.subscriptionType;
+  }
+  if (options.registrationDate) {
+    data.registration_date = options.registrationDate;
+  }
+
+  return data;
+}
+
+/**
+ * Combine multiple data objects
+ */
+export function combineData(...dataObjects: Partial<UtagViewData>[]): Partial<UtagViewData> {
+  return dataObjects.reduce((acc, obj) => {
+    return {
+      ...acc,
+      ...obj,
+    };
+  }, {});
 }
 
 /**
  * Main function to track page view with utag.view()
+ * Pass only the data you have, rest is auto-generated
  */
 export function trackPageView(options: {
   pathname: string;
@@ -173,11 +307,13 @@ export function trackPageView(options: {
     transactionData = {},
   } = options;
 
+  // Auto-generate from pathname/document
   const pageName = buildPageName(pathname);
   const pageSection = getPageSection(pathname);
   const platform = getPlatform();
-  const country = getUserCountry();
-  const loginStatus = getLoginStatus(isLoggedIn);
+  const pageUrl = getPageUrl();
+  const pageTitle = getPageTitle();
+  const loginStatus = isLoggedIn ? 'loggedin' : 'loggedout';
 
   // Base view data (ALWAYS required)
   const baseData: UtagViewData = {
@@ -186,18 +322,18 @@ export function trackPageView(options: {
     page_name: pageName,
     page_section: `storystream:${pageSection}`,
     page_parent_domain: 'storystream',
-    page_country: country,
-    page_url: typeof window !== 'undefined' ? window.location.href : '',
+    page_country: 'South Africa',
+    page_url: pageUrl,
     page_locale: 'za',
-    page_title: typeof document !== 'undefined' ? document.title : '',
+    page_title: pageTitle,
     page_platform: platform,
     visitor_login_status: loginStatus,
     page_load: 1,
-    site_version: '1.7',
+    site_version: '1.0.1',
     site_type: 'web',
   };
 
-  // Add optional user data
+  // Add optional user data only if provided
   if (userId) {
     baseData.visitor_id_asset_active = userId;
   }
@@ -208,12 +344,12 @@ export function trackPageView(options: {
     baseData.visitor_login_loyalty_redeemed = loyaltyRedeemed;
   }
 
-  // Merge all data (product, subscription, transaction, custom)
+  // Merge all data - only provided data is included
   const finalData: UtagViewData = {
     ...baseData,
-    ...productData,
-    ...subscriptionData,
-    ...transactionData,
+    ...(Object.keys(productData).length > 0 && productData),
+    ...(Object.keys(subscriptionData).length > 0 && subscriptionData),
+    ...(Object.keys(transactionData).length > 0 && transactionData),
   };
 
   console.log('📊 Tealium View Data:', finalData);
@@ -224,6 +360,7 @@ export function trackPageView(options: {
 
 /**
  * Track login event
+ * USAGE: trackLogin('user123', '/dashboard')
  */
 export function trackLogin(userId: string, pathname: string): void {
   trackPageView({
@@ -236,6 +373,7 @@ export function trackLogin(userId: string, pathname: string): void {
 
 /**
  * Track signup event
+ * USAGE: trackSignup('user123', '/dashboard', '2024-01-15')
  */
 export function trackSignup(
   userId: string,
@@ -247,14 +385,13 @@ export function trackSignup(
     isLoggedIn: true,
     userId,
     customEvent: 'signup_successful',
-    transactionData: {
-      registration_date: registrationDate,
-    },
+    transactionData: buildTransactionData({ registrationDate }),
   });
 }
 
 /**
  * Track signout event
+ * USAGE: trackSignout('/home')
  */
 export function trackSignout(pathname: string): void {
   trackPageView({
@@ -295,5 +432,57 @@ export function trackSubscriptionCompleted(
     userId,
     customEvent: 'subscription_completed',
     subscriptionData,
+  });
+}
+
+/**
+ * Track product view
+ * USAGE: trackProductView(product, 'user123', '/podcast/details')
+ */
+export function trackProductView(
+  product: any,
+  userId: string,
+  pathname: string
+): void {
+  const productData = buildProductData({
+    productId: product.id,
+    productName: product.name,
+    productPrice: product.price?.toString() || '0',
+    productCategory: product.category || 'Product',
+    productSku: product.sku || product.id,
+    productType: product.isPaid ? 'paid' : 'free',
+  });
+
+  trackPageView({
+    pathname,
+    isLoggedIn: true,
+    userId,
+    productData,
+  });
+}
+
+/**
+ * Track multiple products (list view)
+ * USAGE: trackProductsList(products, 'user123', '/search')
+ */
+export function trackProductsList(
+  products: any[],
+  userId: string,
+  pathname: string
+): void {
+  const productData = {
+    product_id: products.map((p) => p.id),
+    product_name: products.map((p) => p.name),
+    product_price: products.map((p) => p.price?.toString() || '0'),
+    product_category: products.map((p) => p.category || 'Product'),
+    product_sku: products.map((p) => p.sku || p.id),
+    product_type: products.some((p) => p.isPaid) ? 'paid' : 'free',
+  };
+
+  trackPageView({
+    pathname,
+    isLoggedIn: true,
+    userId,
+    productData,
   });
 }

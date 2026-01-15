@@ -1,15 +1,23 @@
 'use client';
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
 import { handleVerification, handleLogin } from "../../api/auth";
 import { showError, showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
+import { 
+  trackLogin, 
+  trackSignup, 
+  trackSubscriptionCompleted, 
+  buildSubscriptionData,
+  trackPageView 
+} from "../../../lib/tealiumTracking";
 
 const OTPVerification: React.FC = () => {
   const { setAuth, authData } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [otp, setOtp] = useState(["", "", "", ""]);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -22,6 +30,14 @@ const OTPVerification: React.FC = () => {
       router.replace('/dashboard/home');
     }
   }, [router]);
+
+  // Track page view on load
+  useEffect(() => {
+    trackPageView({
+      pathname: pathname??'',
+      isLoggedIn: false,
+    });
+  }, [pathname]);
 
   // Countdown timer
   useEffect(() => {
@@ -73,6 +89,48 @@ const OTPVerification: React.FC = () => {
       if (res.response.status) {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('loginData', JSON.stringify(res.response));
+
+        // Extract user data
+        const userId = res.response.profile.userId.toString();
+        const vipInfo = res.response.vipInfo;
+        const profile = res.response.profile;
+
+        // Track login event
+        trackLogin(userId, '/dashboard/home');
+
+        // Track subscription if user is VIP (vip === 1)
+        if (profile.vip === 1 && vipInfo) {
+          const registrationDate = new Date(vipInfo.sub_date).toLocaleDateString('en-ZA');
+          
+          const subscriptionData = buildSubscriptionData({
+            subscriptionId: vipInfo.plan_id,
+            planName: vipInfo.plan_name,
+            planId: vipInfo.plan_id,
+            planType: 'Subscription',
+            planBrand: 'audio',
+            duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
+            assetType: 'premium',
+            dateStart: registrationDate,
+            dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString('en-ZA'),
+          });
+          trackLogin(userId, '/dashboard/home')
+
+          trackSubscriptionCompleted('/dashboard/home', userId, subscriptionData);
+
+          console.log('📊 Tracked subscription:', {
+            planName: vipInfo.plan_name,
+            planId: vipInfo.plan_id,
+            expiryDate: vipInfo.expiry_date,
+          });
+        }
+
+        // Log tracking data
+        console.log('📊 Tracked login:', {
+          userId: userId,
+          vip: profile.vip,
+          mobileNo: profile.mobileNo,
+        });
+
         router.push('/home');
         localStorage.setItem('menu', 'home');
         showSuccess('Login successfully!');
@@ -106,10 +164,6 @@ const OTPVerification: React.FC = () => {
       setIsResending(false);
     }
   };
-
-  // useEffect(() => {
-  //   console.log(authData, "authData");
-  // }, [])
 
   return (
     <div className="min-h-screen bg-white relative px-4 pt-6">
@@ -159,7 +213,7 @@ const OTPVerification: React.FC = () => {
 
         {/* Resend timer logic */}
         <p className="text-lg text-center mt-2">
-          Didn’t receive OTP?{' '}
+          Didn't receive OTP?{' '}
           {secondsLeft > 0 ? (
             <span style={{ color: "#6B0DFF"}} className="font-medium">Resend in {secondsLeft}s</span>
           ) : (
@@ -175,5 +229,25 @@ const OTPVerification: React.FC = () => {
     </div>
   );
 };
+
+/**
+ * Helper function to calculate subscription duration
+ */
+function calculateDuration(startDate: string, endDate: string): string {
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 7) return '7 Days';
+    if (diffDays === 30) return '30 Days';
+    if (diffDays === 365) return 'Yearly';
+    
+    return `${diffDays} Days`;
+  } catch (e) {
+    return 'Active';
+  }
+}
 
 export default OTPVerification;
