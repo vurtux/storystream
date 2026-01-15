@@ -1,6 +1,24 @@
 'use client';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Script from 'next/script';
+
+// Tealium type definition
+declare global {
+  interface Window {
+    utag_data: {
+      page_name: string;
+      page_type: string;
+      page_title: string;
+      page_url: string;
+      utm_source: string;
+      utm_medium: string;
+      utm_campaign: string;
+      utm_content: string;
+      utm_term: string;
+    };
+    utag_cfg_ovrd: any;
+  }
+}
 import './globals.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -10,12 +28,33 @@ import Menubar from './dashboard/menubar/page';
 import { DashboardProvider } from '../context/DashboardProvider';
 import ToastProvider from '../components/common/ToastProvider';
 import { AudioProvider } from '../context/AudioProvider';
+import { trackPageView } from '../lib/tealiumTracking';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
 
   const hideNavbarOnRoutes = ['/auth/login', '/auth/verification'];
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
+
+  // Track page view on route change
+  useEffect(() => {
+    // Wait for Tealium to load
+    const checkTealium = setInterval(() => {
+      if (typeof window !== 'undefined' && window.utag && typeof window.utag.view === 'function') {
+        clearInterval(checkTealium);
+        
+        // Track the page view
+        trackPageView({
+          pathname,
+          isLoggedIn: false, // TODO: Get from auth context
+          // userId: '', // TODO: Get from auth context
+        });
+      }
+    }, 100);
+
+    // Cleanup
+    return () => clearInterval(checkTealium);
+  }, [pathname]);
 
   return (
     <html lang="en">

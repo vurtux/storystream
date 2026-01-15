@@ -1,25 +1,29 @@
-// module.exports = {
-//   webpack: (config) => {
-//     config.resolve.fallback = {
-//       fs: false,
-//       child_process: false,
-//     };
-//     return config;
-//   },
-// };
-
 /** @type {import('next').NextConfig} */
 module.exports = {
   images: {
-    domains: ['ik.imagekit.io', 'files.hubhopper.com', 'images.lystnfm.com'], // Add external image domains here
+    domains: ['ik.imagekit.io', 'files.hubhopper.com', 'images.lystnfm.com'],
   },
-  webpack: (config) => {
-    config.resolve.fallback = {
+
+  // Turbopack config (webpack se replace kiya)
+  turbo: {
+    resolveAlias: {
       fs: false,
       child_process: false,
-    };
+    },
+  },
+
+  // Agar Webpack config ZARURI hai dev mein, toh:
+  webpack: (config, { isServer }) => {
+    // Sirf production build mein use karo, dev mein nahi
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        child_process: false,
+      };
+    }
     return config;
   },
+
   async rewrites() {
     return [
       {
@@ -54,6 +58,6 @@ module.exports = {
         source: '/home/see-all/:path*',
         destination: '/see-all/:path*',
       },
-    ]
-    }
+    ];
+  },
 };
