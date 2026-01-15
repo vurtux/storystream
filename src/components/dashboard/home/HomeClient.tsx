@@ -3,12 +3,16 @@ import React, { useEffect, useState } from "react";
 import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
 import HeaderSlider from "../DashboardHeader";
-import { handleValidate,handleGetProfile } from "../../../app/api/auth";
+import { handleValidate, handleGetProfile } from "../../../app/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
 import Image from "next/image";
-
+import {
+  trackLogin,
+  buildSubscriptionData,
+  trackSubscriptionCompleted
+} from "../../../lib/tealiumTracking";
 type SpotlightContent = {
   conId: number;
   conName: string;
@@ -83,7 +87,6 @@ const HomeClient = () => {
     const countryParam = searchParams.get("country");
     const langParam = searchParams.get("lang");
 
-    // Store country and language if provided
     if (countryParam) {
       localStorage.setItem("country", countryParam);
     }
@@ -92,48 +95,84 @@ const HomeClient = () => {
       localStorage.setItem("language", langParam);
     }
 
-    // If sid exists, validate the user
-    if (sid && !isValidating) {
-      setIsValidating(true);
+    if (!sid || isValidating) return;
 
-      const validateUser = async () => {
-        try {
-          const payload = { sid };
-          const res = await handleValidate(payload);
+    setIsValidating(true);
 
-          const resPro = await handleGetProfile(res.response.profile.userId);
+    const validateUser = async () => {
+      try {
+        // 1️⃣ Validate session
+        const validateRes = await handleValidate({ sid });
 
-          setAuth({ userInfo: resPro.response.profile });
-
-          
-          if (res.response.status) {
-            localStorage.setItem("isLoggedIn", "true");
-            
-            localStorage.setItem("loginData", JSON.stringify(resPro.response));
-            const raw = localStorage.getItem("loginData");
-            localStorage.setItem("mobile", resPro.response.profile.mobileNo);
-            localStorage.setItem("menu", "home");
-            
-            // Redirect to home after successful validation
-            router.push("/home");
-          } else {
-            throw new Error("Verification failed");
-          }
-        } catch (error) {
-          console.log("Error validating user:", error);
-          // Optionally show error popup
-          setPopupTitle("Login Failed");
-          setPopupBody("Unable to verify your session. Please try again.");
-          setPopupButton("Retry");
-          setShowPopup(true);
-        } finally {
-          setIsValidating(false);
+        if (!validateRes?.response?.status) {
+          throw new Error("Session validation failed");
         }
-      };
 
-      validateUser();
-    }
-  }, [searchParams, router, setAuth]);
+        // 2️⃣ Fetch profile
+        const userId = validateRes.response.profile.userId;
+        const profileRes = await handleGetProfile(userId);
+
+        const profile = profileRes.response.profile;
+        const vipInfo = profileRes.response.vipInfo;
+
+        // 3️⃣ Save auth & localStorage
+        setAuth({ userInfo: profile });
+
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("loginData", JSON.stringify(profileRes.response));
+        localStorage.setItem("mobile", profile.mobileNo);
+        localStorage.setItem("menu", "home");
+
+        // 4️⃣ Tracking login
+        trackLogin(userId.toString(), "/Verification");
+
+        // 5️⃣ Tracking subscription (VIP only)
+        if (profile.vip === 1 && vipInfo) {
+          const subscriptionData = buildSubscriptionData({
+            subscriptionId: vipInfo.plan_id,
+            planName: vipInfo.plan_name,
+            planId: vipInfo.plan_id,
+            planType: "Subscription",
+            planBrand: "audio",
+            duration: calculateDuration(
+              vipInfo.sub_date,
+              vipInfo.expiry_date
+            ),
+            assetType: "premium",
+            dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
+            dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+          });
+
+          trackSubscriptionCompleted(
+            "/dashboard/home",
+            userId.toString(),
+            subscriptionData
+          );
+        }
+
+        console.log("📊 Tracked login:", {
+          userId,
+          vip: profile.vip,
+          mobileNo: profile.mobileNo,
+        });
+
+        router.push("/home");
+      } catch (error) {
+        console.error("Error validating user:", error);
+        setPopupTitle("Login Failed");
+        setPopupBody("Unable to verify your session. Please try again.");
+        setPopupButton("Retry");
+        setShowPopup(true);
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateUser();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
 
   // Handle country change & popup display
   useEffect(() => {
@@ -252,5 +291,21 @@ const HomeClient = () => {
     </div>
   );
 };
+function calculateDuration(startDate: string, endDate: string): string {
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 7) return '7 Days';
+    if (diffDays === 30) return '30 Days';
+    if (diffDays === 365) return 'Yearly';
+    
+    return `${diffDays} Days`;
+  } catch (e) {
+    return 'Active';
+  }
+}
 
 export default HomeClient;
