@@ -123,9 +123,6 @@ const HomeClient = () => {
         localStorage.setItem("mobile", profile.mobileNo);
         localStorage.setItem("menu", "home");
 
-        // 4️⃣ Tracking login
-        trackLogin(userId.toString(), "/Verification");
-
         // 5️⃣ Tracking subscription (VIP only)
         if (profile.vip === 1 && vipInfo) {
           const subscriptionData = buildSubscriptionData({
@@ -143,7 +140,7 @@ const HomeClient = () => {
             dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
           });
 
-          trackSubscriptionCompleted(
+          trackLogin(
             "/dashboard/home",
             userId.toString(),
             subscriptionData

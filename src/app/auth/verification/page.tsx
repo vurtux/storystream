@@ -6,8 +6,8 @@ import { handleVerification, handleLogin } from "../../api/auth";
 import { showError, showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
-import { 
-  trackLogin, 
+import {
+  trackLogin,
   buildSubscriptionData,
   trackSubscriptionCompleted
 } from "../../../lib/tealiumTracking";
@@ -21,7 +21,7 @@ const OTPVerification: React.FC = () => {
   const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
-   
+
     const isLoggedIn = localStorage.getItem('isLoggedIn');
 
     if (isLoggedIn === 'true') {
@@ -32,7 +32,7 @@ const OTPVerification: React.FC = () => {
   // Countdown timer
   useEffect(() => {
     if (secondsLeft <= 0) return;
-    
+
     const interval = setInterval(() => {
       setSecondsLeft((prev) => prev - 1);
     }, 1000);
@@ -60,67 +60,71 @@ const OTPVerification: React.FC = () => {
   };
 
   const handleVerify = async () => {
-  try {
-    const authValue = JSON.parse(localStorage.getItem('authData') || '{}');
+    try {
+      const authValue = JSON.parse(localStorage.getItem('authData') || '{}');
 
-    const payload = {
-      deviceId: authValue.deviceId,
-      langCode: "en",
-      mobileNo: authValue.mobileNo,
-      isdCode: authValue.isdCode,
-      otp: otp.join(""),
-      last_login_source: "",
-    };
+      const payload = {
+        deviceId: authValue.deviceId,
+        langCode: "en",
+        mobileNo: authValue.mobileNo,
+        isdCode: authValue.isdCode,
+        otp: otp.join(""),
+        last_login_source: "",
+      };
 
-    const res = await handleVerification(payload);
+      const res = await handleVerification(payload);
 
-    if (!res?.response?.status) {
-      throw new Error("Verification failed");
-    }
+      if (!res?.response?.status) {
+        throw new Error("Verification failed");
+      }
 
-    const { profile, vipInfo } = res.response;
-    const userId = profile?.userId?.toString() || "guest";
+      const { profile, vipInfo } = res.response;
+      const userId = profile?.userId?.toString() || "guest";
 
-    // Save auth
-    setAuth({ userInfo: profile });
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("loginData", JSON.stringify(res.response));
-    localStorage.setItem("menu", "home");
+      // Save auth
+      setAuth({ userInfo: profile });
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("loginData", JSON.stringify(res.response));
+      localStorage.setItem("menu", "home");
 
-    // Track login
-    trackLogin(userId, "/Verification");
 
-    // Track subscription (VIP only)
-    if (profile.vip === 1 && vipInfo) {
-      const subscriptionData = buildSubscriptionData({
-        subscriptionId: vipInfo.plan_id,
-        planName: vipInfo.plan_name,
-        planId: vipInfo.plan_id,
-        planType: "Subscription",
-        planBrand: "audio",
-        duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
-        assetType: "premium",
-        dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
-        dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+
+      // Track subscription (VIP only)
+      if (profile.vip === 1 && vipInfo) {
+        const subscriptionData = buildSubscriptionData({
+          subscriptionId: vipInfo.plan_id,
+          planName: vipInfo.plan_name,
+          planId: vipInfo.plan_id,
+          planType: "Subscription",
+          planBrand: "audio",
+          duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
+          assetType: "premium",
+          dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
+          dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+        });
+
+
+        trackLogin(
+          "/Verification",
+          userId.toString(),
+          subscriptionData
+        );
+      }
+
+      console.log("📊 Tracked login:", {
+        userId,
+        vip: profile.vip,
+        mobileNo: profile.mobileNo,
       });
 
-      trackSubscriptionCompleted("/dashboard/home", userId, subscriptionData);
+      showSuccess("Login successfully!");
+      router.push("/home");
+
+    } catch (error) {
+      console.error("Error in login api:", error);
+      showError("Login failed");
     }
-
-    console.log("📊 Tracked login:", {
-      userId,
-      vip: profile.vip,
-      mobileNo: profile.mobileNo,
-    });
-
-    showSuccess("Login successfully!");
-    router.push("/home");
-
-  } catch (error) {
-    console.error("Error in login api:", error);
-    showError("Login failed");
-  }
-};
+  };
 
   const handleSendOtp = async () => {
     setIsResending(true);
@@ -198,7 +202,7 @@ const OTPVerification: React.FC = () => {
         <p className="text-lg text-center mt-2">
           Didn’t receive OTP?{' '}
           {secondsLeft > 0 ? (
-            <span style={{ color: "#6B0DFF"}} className="font-medium">Resend in {secondsLeft}s</span>
+            <span style={{ color: "#6B0DFF" }} className="font-medium">Resend in {secondsLeft}s</span>
           ) : (
             <span
               onClick={handleSendOtp}
@@ -223,7 +227,7 @@ function calculateDuration(startDate: string, endDate: string): string {
     if (diffDays === 7) return '7 Days';
     if (diffDays === 30) return '30 Days';
     if (diffDays === 365) return 'Yearly';
-    
+
     return `${diffDays} Days`;
   } catch (e) {
     return 'Active';

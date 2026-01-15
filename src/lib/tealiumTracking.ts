@@ -362,12 +362,25 @@ export function trackPageView(options: {
  * Track login event
  * USAGE: trackLogin('user123', '/dashboard')
  */
-export function trackLogin(userId: string, pathname: string): void {
+// export function trackLogin(userId: string, pathname: string): void {
+//   trackPageView({
+//     pathname,
+//     isLoggedIn: true,
+//     userId,
+//     customEvent: 'login_successful',
+//   });
+// }
+export function trackLogin(
+  pathname: string,
+  userId: string,
+  subscriptionData: Partial<UtagViewData>
+): void {
   trackPageView({
     pathname,
     isLoggedIn: true,
     userId,
     customEvent: 'login_successful',
+    subscriptionData,
   });
 }
 
