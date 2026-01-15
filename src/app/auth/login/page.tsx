@@ -18,6 +18,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSendOtp = async () => {
+        
         // Validation: Check if mobile number is entered
         if (!mobileNo || mobileNo.trim() === "") {
             showError("Please enter your mobile number");
