@@ -145,9 +145,10 @@ const DetailsClient = ({ conId, title }: any) => {
         });
 
         trackPageView({
-          pathname: pathname??'',
+          pathname: pathname ?? '',
           isLoggedIn: isPaid,
           userId: userId !== "guest" ? userId : undefined,
+          tealiumEvent: 'product_view',
           productData,
         });
 
@@ -215,6 +216,7 @@ const DetailsClient = ({ conId, title }: any) => {
           pathname: `/episode/${item.episode_id}`,
           isLoggedIn: true,
           userId: data?.profile?.userId,
+          tealiumEvent: "episode_play",
           customEvent: "episode_play",
           productData,
         });
@@ -266,6 +268,7 @@ const DetailsClient = ({ conId, title }: any) => {
           pathname: `/episode/${firstEpisode.episode_id}`,
           isLoggedIn: isPaid,
           userId: userId !== "guest" ? userId : undefined,
+          tealiumEvent: "play_first_episode",
           customEvent: "play_first_episode",
           productData,
         });
@@ -488,6 +491,7 @@ const DetailsClient = ({ conId, title }: any) => {
             pathname: `/episode/${item.episode_id}`,
             isLoggedIn: true,
             userId: data?.profile?.userId,
+            tealiumEvent: "episode_download",
             customEvent: "episode_download",
             productData,
           });

@@ -31,11 +31,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined' && window.utag && typeof window.utag.view === 'function') {
         clearInterval(checkTealium);
 
-       
+
+        const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+        const userId = loginData.profile?.userId?.toString();
+        const userType = loginData.profile?.vip === 1 ? 'paid' : 'free';
+        const loyaltyPoints = loginData.profile?.loyaltyPoints?.toString();
+        const loyaltyRedeemed = loginData.profile?.loyaltyRedeemed?.toString();
+
         trackPageView({
           pathname,
-          isLoggedIn: isLoggedIn, 
-          // userId: '', 
+          isLoggedIn: isLoggedIn,
+          userId: userId,
+          loyaltyPoints: loyaltyPoints,
+          loyaltyRedeemed: loyaltyRedeemed,
+          subscriptionData: isLoggedIn ? { user_type: userType } : {}
         });
       }
 
@@ -105,8 +114,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
 
       <body>
+        {/* Initial utag_data formulation */}
+        <Script id="utag-data-init" strategy="beforeInteractive">
+          {`
+            var utag_data = {
+              "page_name": "",
+              "page_type": "",
+              "page_title": "",
+              "page_url": ""
+            };
+          `}
+        </Script>
+
         {/* Tealium Config - Set noview: true to handle views manually */}
-        <Script id="utag-config">
+        <Script id="utag-config" strategy="beforeInteractive">
           {`
             window.utag_cfg_ovrd = window.utag_cfg_ovrd || {};
             window.utag_cfg_ovrd.noview = true;
@@ -123,9 +144,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AudioProvider>
             <main
               style={{ backgroundColor: '#FFFFFF' }}
-              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${
-                shouldShowNavbar ? 'pb-16' : ''
-              }`}
+              className={`flex-1 min-h-screen max-w-md w-full m-auto pt-0 px-3 overflow-y-auto thin-scrollbar ${shouldShowNavbar ? 'pb-16' : ''
+                }`}
             >
               <ToastProvider />
               {children}

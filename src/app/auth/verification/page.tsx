@@ -89,27 +89,26 @@ const OTPVerification: React.FC = () => {
 
 
 
-      // Track subscription (VIP only)
-      if (profile.vip === 1 && vipInfo) {
-        const subscriptionData = buildSubscriptionData({
-          subscriptionId: vipInfo.plan_id,
-          planName: vipInfo.plan_name,
-          planId: vipInfo.plan_id,
-          planType: "Subscription",
-          planBrand: "audio",
-          duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
-          assetType: "premium",
-          dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
-          dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
-        });
+      // Track Login for all users
+      const userType = profile.vip === 1 ? "paid" : "free";
+      const subscriptionData = (profile.vip === 1 && vipInfo) ? buildSubscriptionData({
+        subscriptionId: vipInfo.plan_id,
+        planName: vipInfo.plan_name,
+        planId: vipInfo.plan_id,
+        planType: "Subscription",
+        planBrand: "audio",
+        duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
+        assetType: "premium",
+        dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
+        dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+      }) : {};
 
-
-        trackLogin(
-          "/Verification",
-          userId.toString(),
-          subscriptionData
-        );
-      }
+      trackLogin(
+        "/Verification",
+        userId.toString(),
+        userType,
+        subscriptionData
+      );
 
       console.log("📊 Tracked login:", {
         userId,

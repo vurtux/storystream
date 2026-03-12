@@ -11,8 +11,10 @@ export interface UtagViewData {
   page_locale: string;
   page_title: string;
   page_platform: string;
+  page_channel: string;
   visitor_id_asset_active?: string;
   visitor_login_status: string;
+  user_type?: string;
   visitor_login_loyalty_points?: string;
   visitor_login_loyalty_redeemed?: string;
   page_load?: number;
@@ -61,9 +63,23 @@ declare global {
  * Get platform type based on user agent
  */
 export function getPlatform(): string {
-  
-    return 'web-mobile';
+  if (typeof window === 'undefined') return 'web-desktop';
 
+  const ua = window.navigator.userAgent.toLowerCase();
+  
+  // Check if running in a mobile app webview (common indicator)
+  const isMobileApp = /mobileapp|miniapp/i.test(ua);
+  if (isMobileApp) {
+    if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+    if (/android/i.test(ua)) return 'android';
+  }
+
+  const isMobile = /iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(ua);
+  const isTablet = /ipad|android(?!.*mobile)/i.test(ua);
+
+  if (isTablet) return 'web-tablet';
+  if (isMobile) return 'web-mobile';
+  return 'web-desktop';
 }
 
 /**
@@ -82,18 +98,21 @@ export function buildPageName(pathname: string): string {
   const domain = 'storystream';
   const segments = pathname.split('/').filter(Boolean);
 
-  const section = segments[0] || 'home';
-  const subsection = segments[1] || '';
+  let pageName = domain;
 
-  let pageName = `${domain}:${section}`;
-
-  if (subsection) {
-    pageName += `:${subsection}`;
+  if (segments.length === 0) {
+    pageName += ':home';
+  } else {
+    segments.forEach((segment) => {
+      // Clean segment: lowercase and remove special characters
+      const cleanSegment = segment.toLowerCase().replace(/[^a-z0-9-]/g, '').trim();
+      if (cleanSegment) {
+        pageName += `:${cleanSegment}`;
+      }
+    });
   }
 
-  pageName = pageName.toLowerCase().trim();
-  pageName = pageName.replace(/[^a-z0-9:-]/g, '');
-
+  // Ensure it doesn't exceed 100 characters
   if (pageName.length > 100) {
     pageName = pageName.substring(0, 100);
   }
@@ -107,9 +126,12 @@ export function buildPageName(pathname: string): string {
 export function getEventName(pathname: string, customEvent?: string): string {
   if (customEvent) return customEvent;
 
-  if (pathname.includes('login') || pathname.includes('auth')) return 'login';
-  if (pathname.includes('signup') || pathname.includes('register')) return 'registration';
-  if (pathname.includes('subscription')) return 'subscription';
+  const normalizedPath = pathname.toLowerCase();
+
+  if (normalizedPath === '' || normalizedPath === '/' || normalizedPath.includes('home')) return 'home';
+  if (normalizedPath.includes('login') || normalizedPath.includes('auth')) return 'login';
+  if (normalizedPath.includes('signup') || normalizedPath.includes('register')) return 'registration';
+  if (normalizedPath.includes('subscription')) return 'subscription';
 
   return 'page_view';
 }
@@ -289,6 +311,8 @@ export function trackPageView(options: {
   productData?: Partial<UtagViewData>;
   subscriptionData?: Partial<UtagViewData>;
   transactionData?: Partial<UtagViewData>;
+  tealiumEvent?: string; 
+  siteType?: 'web' | 'miniapp' | 'mobileapp';
 }): void {
   if (typeof window === 'undefined' || !window.utag || typeof window.utag.view !== 'function') {
     console.warn('⚠️ Tealium utag.view not loaded yet');
@@ -305,6 +329,8 @@ export function trackPageView(options: {
     productData = {},
     subscriptionData = {},
     transactionData = {},
+    tealiumEvent = 'view', // Default to view
+    siteType = 'web',
   } = options;
 
   // Auto-generate from pathname/document
@@ -315,22 +341,26 @@ export function trackPageView(options: {
   const pageTitle = getPageTitle();
   const loginStatus = isLoggedIn ? 'loggedin' : 'loggedout';
 
+  const country = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'south africa') || 'south africa';
+  const locale = (typeof window !== 'undefined' ? localStorage.getItem('language') : 'za') || 'za';
+
   // Base view data (ALWAYS required)
   const baseData: UtagViewData = {
-    tealium_event: 'view',
+    tealium_event: tealiumEvent,
     event_name: getEventName(pathname, customEvent),
     page_name: pageName,
     page_section: `storystream:${pageSection}`,
     page_parent_domain: 'storystream',
-    page_country: 'South Africa',
+    page_country: country.toLowerCase(),
     page_url: pageUrl,
-    page_locale: 'za',
+    page_locale: locale.toLowerCase(),
     page_title: pageTitle,
     page_platform: platform,
+    page_channel: 'pla',
     visitor_login_status: loginStatus,
     page_load: 1,
-    site_version: '1.0.1',
-    site_type: 'web',
+    site_version: '1.7',
+    site_type: siteType,
   };
 
   // Add optional user data only if provided
@@ -363,24 +393,22 @@ export function trackPageView(options: {
  * USAGE: trackLogin('user123', '/dashboard')
  */
 // export function trackLogin(userId: string, pathname: string): void {
-//   trackPageView({
-//     pathname,
-//     isLoggedIn: true,
-//     userId,
-//     customEvent: 'login_successful',
-//   });
-// }
 export function trackLogin(
   pathname: string,
   userId: string,
-  subscriptionData: Partial<UtagViewData>
+  userType: 'free' | 'paid',
+  subscriptionData: Partial<UtagViewData> = {}
 ): void {
   trackPageView({
     pathname,
     isLoggedIn: true,
     userId,
+    tealiumEvent: 'login_successful',
     customEvent: 'login_successful',
-    subscriptionData,
+    subscriptionData: {
+      ...subscriptionData,
+      user_type: userType
+    },
   });
 }
 
@@ -397,6 +425,7 @@ export function trackSignup(
     pathname,
     isLoggedIn: true,
     userId,
+    tealiumEvent: 'signup_successful',
     customEvent: 'signup_successful',
     transactionData: buildTransactionData({ registrationDate }),
   });
@@ -410,6 +439,7 @@ export function trackSignout(pathname: string): void {
   trackPageView({
     pathname,
     isLoggedIn: false,
+    tealiumEvent: 'signout',
     customEvent: 'signout',
   });
 }
@@ -426,6 +456,7 @@ export function trackOrderCompleted(
     pathname,
     isLoggedIn: true,
     userId,
+    tealiumEvent: 'order_completed',
     customEvent: 'order_completed',
     transactionData,
   });
@@ -443,6 +474,7 @@ export function trackSubscriptionCompleted(
     pathname,
     isLoggedIn: true,
     userId,
+    tealiumEvent: 'subscription_completed',
     customEvent: 'subscription_completed',
     subscriptionData,
   });

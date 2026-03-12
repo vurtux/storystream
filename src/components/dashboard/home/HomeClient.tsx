@@ -123,29 +123,26 @@ const HomeClient = () => {
         localStorage.setItem("mobile", profile.mobileNo);
         localStorage.setItem("menu", "home");
 
-        // 5️⃣ Tracking subscription (VIP only)
-        if (profile.vip === 1 && vipInfo) {
-          const subscriptionData = buildSubscriptionData({
-            subscriptionId: vipInfo.plan_id,
-            planName: vipInfo.plan_name,
-            planId: vipInfo.plan_id,
-            planType: "Subscription",
-            planBrand: "audio",
-            duration: calculateDuration(
-              vipInfo.sub_date,
-              vipInfo.expiry_date
-            ),
-            assetType: "premium",
-            dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
-            dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
-          });
+        // 5️⃣ Tracking login
+        const userType = profile.vip === 1 ? "paid" : "free";
+        const subscriptionData = (profile.vip === 1 && vipInfo) ? buildSubscriptionData({
+          subscriptionId: vipInfo.plan_id,
+          planName: vipInfo.plan_name,
+          planId: vipInfo.plan_id,
+          planType: "Subscription",
+          planBrand: "audio",
+          duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
+          assetType: "premium",
+          dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
+          dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+        }) : {};
 
-          trackLogin(
-            "/dashboard/home",
-            userId.toString(),
-            subscriptionData
-          );
-        }
+        trackLogin(
+          "/dashboard/home",
+          userId.toString(),
+          userType,
+          subscriptionData
+        );
 
         console.log("📊 Tracked login:", {
           userId,
@@ -200,6 +197,33 @@ const HomeClient = () => {
       );
       setPopupButton("Home");
       setShowPopup(true);
+
+      // Track subscription completed
+      try {
+        const stored = JSON.parse(localStorage.getItem("loginData") || "{}");
+        if (stored?.profile?.userId) {
+          const userId = stored.profile.userId;
+          const vipInfo = stored.vipInfo;
+
+          if (vipInfo) {
+            const subscriptionData = buildSubscriptionData({
+              subscriptionId: vipInfo.plan_id,
+              planName: vipInfo.plan_name,
+              planId: vipInfo.plan_id,
+              planType: "Subscription",
+              planBrand: "audio",
+              duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
+              assetType: "premium",
+              dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
+              dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
+            });
+
+            trackSubscriptionCompleted("/home", userId.toString(), subscriptionData);
+          }
+        }
+      } catch (e) {
+        console.error("Error tracking sub success:", e);
+      }
     } else if (popupParam === "2") {
       setPopupTitle("Welcome Back");
       setPopupBody(
@@ -298,7 +322,7 @@ function calculateDuration(startDate: string, endDate: string): string {
     if (diffDays === 7) return '7 Days';
     if (diffDays === 30) return '30 Days';
     if (diffDays === 365) return 'Yearly';
-    
+
     return `${diffDays} Days`;
   } catch (e) {
     return 'Active';
