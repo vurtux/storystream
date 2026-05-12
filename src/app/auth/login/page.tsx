@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -261,6 +262,16 @@ export default function LoginPage() {
                             'Send OTP'
                         )}
                     </button>
+
+                    {/* Subscribe Now Link */}
+                    <div className="text-center mt-4">
+                        <Link 
+                            href="/subscribe" 
+                            className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors underline cursor-pointer"
+                        >
+                            Subscribe Now
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
