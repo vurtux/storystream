@@ -77,7 +77,7 @@ export default function LoginPage() {
                     return;
                 } else {
                     showError("Please subscribe to continue");
-                    router.push("/subscribe");
+                    router.push("/subscribe?fromLogin=true");
                     return;
                 }
             }
@@ -125,7 +125,7 @@ export default function LoginPage() {
                 }
             } else {
                 showError("Please subscribe to continue");
-                router.push("/subscribe");
+                router.push("/subscribe?fromLogin=true");
             }
 
         } catch (error) {
@@ -266,7 +266,7 @@ export default function LoginPage() {
                     {/* Subscribe Now Link */}
                     <div className="text-center mt-4">
                         <Link 
-                            href="/subscribe" 
+                            href="/subscribe?fromLogin=true" 
                             className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors underline cursor-pointer"
                         >
                             Subscribe Now

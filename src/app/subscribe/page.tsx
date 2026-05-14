@@ -53,11 +53,12 @@ export default function SubscriptionClient() {
     },
   ];
 
+  const fromLogin = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('fromLogin') === 'true' : false;
   const mobile = typeof window !== 'undefined' ? localStorage.getItem('mobile') : null;
 
   const plansWithMDN = plans.map(plan => ({
     ...plan,
-    link: mobile ? `${plan.link}&msisdn=${mobile}` : plan.link,
+    link: (fromLogin && mobile) ? `${plan.link}&msisdn=${mobile}` : plan.link,
   }));
 
   const features = [
