@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { showError } from '../../utils/toastService';
 
@@ -24,7 +24,7 @@ const FeatureRow = ({ name, freeIcon, playIcon }: FeatureRowProps) => {
   );
 };
 
-export default function SubscriptionClient() {
+function SubscriptionClient() {
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function SubscriptionClient() {
     },
   ];
 
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const searchParams = useSearchParams();
   const fromLogin = searchParams?.get('fromLogin') === 'true';
   const urlMsisdn = searchParams?.get('msisdn');
   const mobile = urlMsisdn || (typeof window !== 'undefined' ? localStorage.getItem('mobile') : null);
@@ -284,5 +284,17 @@ export default function SubscriptionClient() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    }>
+      <SubscriptionClient />
+    </Suspense>
   );
 }
