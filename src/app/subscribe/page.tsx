@@ -53,8 +53,10 @@ export default function SubscriptionClient() {
     },
   ];
 
-  const fromLogin = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('fromLogin') === 'true' : false;
-  const mobile = typeof window !== 'undefined' ? localStorage.getItem('mobile') : null;
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const fromLogin = searchParams?.get('fromLogin') === 'true';
+  const urlMsisdn = searchParams?.get('msisdn');
+  const mobile = urlMsisdn || (typeof window !== 'undefined' ? localStorage.getItem('mobile') : null);
 
   const plansWithMDN = plans.map(plan => ({
     ...plan,

@@ -77,7 +77,7 @@ export default function LoginPage() {
                     return;
                 } else {
                     showError("Please subscribe to continue");
-                    router.push("/subscribe?fromLogin=true");
+                    router.push(`/subscribe?fromLogin=true&msisdn=${mobileNo}`);
                     return;
                 }
             }
@@ -125,7 +125,7 @@ export default function LoginPage() {
                 }
             } else {
                 showError("Please subscribe to continue");
-                router.push("/subscribe?fromLogin=true");
+                router.push(`/subscribe?fromLogin=true&msisdn=${mobileNo}`);
             }
 
         } catch (error) {
