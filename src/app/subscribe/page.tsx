@@ -56,7 +56,7 @@ function SubscriptionClient() {
   const searchParams = useSearchParams();
   const fromLogin = searchParams?.get('fromLogin') === 'true';
   const urlMsisdn = searchParams?.get('msisdn');
-  const mobile = urlMsisdn || (typeof window !== 'undefined' ? localStorage.getItem('mobile') : null);
+  const mobile = urlMsisdn;
 
   const plansWithMDN = plans.map(plan => ({
     ...plan,

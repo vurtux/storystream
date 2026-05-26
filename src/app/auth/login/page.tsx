@@ -77,7 +77,8 @@ export default function LoginPage() {
                     return;
                 } else {
                     showError("Please subscribe to continue");
-                    router.push(`/subscribe?fromLogin=true&msisdn=${mobileNo}`);
+                    const redirectUrl = mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true";
+                    router.push(redirectUrl);
                     return;
                 }
             }
@@ -125,7 +126,8 @@ export default function LoginPage() {
                 }
             } else {
                 showError("Please subscribe to continue");
-                router.push(`/subscribe?fromLogin=true&msisdn=${mobileNo}`);
+                const redirectUrl = mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true";
+                router.push(redirectUrl);
             }
 
         } catch (error) {
@@ -266,7 +268,7 @@ export default function LoginPage() {
                     {/* Subscribe Now Link */}
                     <div className="text-center mt-4">
                         <Link 
-                            href="/subscribe?fromLogin=true" 
+                            href={mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true"} 
                             className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors underline cursor-pointer"
                         >
                             Subscribe Now

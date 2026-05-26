@@ -136,15 +136,13 @@ export default function ProfilePage() {
       {/* Menu Items */}
       <div className="space-y-4 flex-1">
 
-        {/* Subscribe Now - only when logged in */}
-        {!isVip && (
-          <MenuItem
-            imgSrc="/images/subscriptionLogo.png"
-            label="Subscribe Now"
-            value={<IoIosArrowForward />}
-            onClick={handleSubscription}
-          />
-        )}
+        {/* Subscribe Now */}
+        <MenuItem
+          imgSrc="/images/subscriptionLogo.png"
+          label="Subscribe Now"
+          value={<IoIosArrowForward />}
+          onClick={handleSubscription}
+        />
 
         {/* Login - only when NOT logged in */}
         {!loggedIn && (
