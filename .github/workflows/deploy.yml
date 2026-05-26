@@ -28,7 +28,6 @@ jobs:
 
       - name: Pack release bundle
         run: |
-          # Include whichever next.config variant your project uses
           CONFIG_FILES=$(ls next.config.* 2>/dev/null || true)
           tar czf app-release.tgz \
             .next \
@@ -50,16 +49,13 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-          # Ensure base deploy path exists
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
             "mkdir -p $DEPLOY_PATH"
 
-          # Upload release archive
           scp -i ~/.ssh/deploy_key \
             app-release.tgz \
             "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app-release.tgz"
 
-          # Deploy on server — variables expand locally (correct behaviour)
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" << EOF
             set -ex
 
@@ -77,8 +73,11 @@ jobs:
             [ -d current ] && mv current current_old || true
             mv current_new current
 
+            echo "=== Killing anything on port 3000 ==="
+            fuser -k 3000/tcp || true
+            sleep 2
+
             echo "=== Restarting app via PM2 ==="
-            # startOrRestart handles both first-run and subsequent deploys
             if pm2 describe next-app > /dev/null 2>&1; then
               pm2 restart next-app --update-env
             else
@@ -93,8 +92,11 @@ jobs:
             echo "=== Waiting for app to come up ==="
             sleep 8
 
+            echo "=== PM2 logs ==="
+            pm2 logs next-app --lines 20 --nostream
+
             echo "=== Health check ==="
-            curl -sf http://localhost:3000 > /dev/null && echo "OK" || echo "WARN: health check failed"
+            curl -sf --max-time 10 http://localhost:3000 > /dev/null && echo "OK" || echo "WARN: health check failed"
 
             echo "=== PM2 Status ==="
             pm2 status
@@ -111,4 +113,4 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
-            "curl -sf http://localhost:3000 > /dev/null && echo 'Healthy' || (echo 'FAILED'; pm2 logs next-app --lines 30; exit 1)"
+            "curl -sf --max-time 10 http://localhost:3000 > /dev/null && echo 'Healthy' || (echo 'FAILED'; pm2 logs next-app --lines 30 --nostream; exit 1)"
