@@ -205,7 +205,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="mt-8 text-center text-gray-500 text-sm">
-        Version: 1.0.2 ({country})
+        Version: 1.0.3 ({country})
       </div>
     </div>
   );
