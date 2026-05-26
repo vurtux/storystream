@@ -19,55 +19,64 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install deps and build
-        run: |
-          npm ci
-          npm run build
-          npm prune --omit=dev
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Pack full app bundle
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Remove dev dependencies
+        run: npm prune --omit=dev
+
+      - name: Pack release bundle
         run: |
           tar czf app-release.tgz \
             .next \
             public \
-            next.config.js \
             package.json \
             package-lock.json \
+            next.config.js \
             node_modules
 
-      - name: Upload and activate on server
+      - name: Upload and deploy
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DEPLOY_KEY:  ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           mkdir -p ~/.ssh
+
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # Upload tar
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+
+          # Ensure base deploy path exists
+          ssh -i ~/.ssh/deploy_key \
+            $DEPLOY_USER@$DEPLOY_HOST \
+            "mkdir -p $DEPLOY_PATH"
+
+          # Upload release archive
           scp -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
             app-release.tgz \
             $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app-release.tgz
 
-          # Activate release
+          # Deploy on server
           ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
             $DEPLOY_USER@$DEPLOY_HOST << EOF
 
             set -e
 
             cd $DEPLOY_PATH
 
-            echo "Cleaning old temp release..."
+            echo "Cleaning previous temp release..."
             rm -rf current_new
 
-            echo "Creating new release dir..."
+            echo "Creating release directory..."
             mkdir current_new
 
-            echo "Extracting bundle..."
+            echo "Extracting release..."
             tar xzf app-release.tgz -C current_new
 
             echo "Rotating releases..."
@@ -79,64 +88,41 @@ jobs:
 
             mv current_new current
 
-            echo "Stopping existing PM2 app..."
-            pm2 delete next-app >/dev/null 2>&1 || true
-
-            echo "Starting Next.js app..."
             cd current
 
-            pm2 start npm \
-              --name next-app \
-              --cwd $DEPLOY_PATH/current \
-              -- start
+            echo "Stopping old PM2 process..."
+            pm2 delete next-app || true
 
+            echo "Starting Next.js app..."
+            pm2 start npm --name next-app -- start
+
+            echo "Saving PM2 state..."
             pm2 save
+
+            echo "Waiting for app..."
+            sleep 10
+
+            echo "Health check..."
+            curl -I http://localhost:3000
 
             echo "PM2 Status:"
             pm2 status
 
-            echo "Listening ports:"
-            ss -tulnp | grep 3000 || true
-
           EOF
 
-      - name: Health check
+      - name: Final health check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_KEY:  ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           mkdir -p ~/.ssh
+
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+
           ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
-            $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
-
-            echo "Waiting for app startup..."
-
-            for i in {1..30}; do
-              if curl -f http://localhost:3000 > /dev/null 2>&1; then
-                echo "Application is healthy"
-                exit 0
-              fi
-
-              echo "Retry $i..."
-              sleep 5
-            done
-
-            echo "Health check failed"
-
-            echo "PM2 Logs:"
-            pm2 logs next-app --lines 100 --nostream || true
-
-            echo "PM2 Status:"
-            pm2 status || true
-
-            echo "Listening ports:"
-            ss -tulnp | grep 3000 || true
-
-            exit 1
-
-          EOF
+            $DEPLOY_USER@$DEPLOY_HOST \
+            "curl -I http://localhost:3000"
