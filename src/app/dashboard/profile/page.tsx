@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { 
-  trackSignout, 
+import {
+  trackSignout,
 } from "../../../lib/tealiumTracking";
 type MenuItemProps = {
   imgSrc?: string;
@@ -205,7 +205,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="mt-8 text-center text-gray-500 text-sm">
-        Version: 1.0.1 ({country})
+        Version: 1.0.2 ({country})
       </div>
     </div>
   );
