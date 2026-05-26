@@ -47,31 +47,96 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
           # Upload tar
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no app-release.tgz \
+          scp -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            app-release.tgz \
             $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app-release.tgz
 
-          # Extract release atomically
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          # Activate release
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            $DEPLOY_USER@$DEPLOY_HOST << EOF
+
             set -e
+
             cd $DEPLOY_PATH
 
+            echo "Cleaning old temp release..."
             rm -rf current_new
+
+            echo "Creating new release dir..."
             mkdir current_new
 
+            echo "Extracting bundle..."
             tar xzf app-release.tgz -C current_new
 
-            rm -rf current_old
-            if [ -d current ]; then mv current current_old; fi
+            echo "Rotating releases..."
+            rm -rf current_old || true
+
+            if [ -d current ]; then
+              mv current current_old
+            fi
+
             mv current_new current
 
+            echo "Stopping existing PM2 app..."
             pm2 delete next-app >/dev/null 2>&1 || true
-            pm2 start \"npx next start -p 3000\" --name next-app --cwd $DEPLOY_PATH/current
+
+            echo "Starting Next.js app..."
+            cd current
+
+            pm2 start npm \
+              --name next-app \
+              --cwd $DEPLOY_PATH/current \
+              -- start
+
             pm2 save
-          "
+
+            echo "PM2 Status:"
+            pm2 status
+
+            echo "Listening ports:"
+            ss -tulnp | grep 3000 || true
+
+          EOF
 
       - name: Health check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KEY:  ${{ secrets.DEPLOY_KEY }}
         run: |
-          sleep 10
-          curl -I http://$DEPLOY_HOST:3000
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+
+            echo "Waiting for app startup..."
+
+            for i in {1..30}; do
+              if curl -f http://localhost:3000 > /dev/null 2>&1; then
+                echo "Application is healthy"
+                exit 0
+              fi
+
+              echo "Retry $i..."
+              sleep 5
+            done
+
+            echo "Health check failed"
+
+            echo "PM2 Logs:"
+            pm2 logs next-app --lines 100 --nostream || true
+
+            echo "PM2 Status:"
+            pm2 status || true
+
+            echo "Listening ports:"
+            ss -tulnp | grep 3000 || true
+
+            exit 1
+
+          EOF
