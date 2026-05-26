@@ -1,0 +1,116 @@
+name: Deploy to GCE VM
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Remove dev dependencies
+        run: npm prune --omit=dev
+
+      - name: Pack release bundle
+        run: |
+          CONFIG_FILES=$(ls next.config.* 2>/dev/null || true)
+          tar czf app-release.tgz \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            $CONFIG_FILES \
+            node_modules
+
+      - name: Upload and deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p $DEPLOY_PATH"
+
+          scp -i ~/.ssh/deploy_key \
+            app-release.tgz \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app-release.tgz"
+
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" << EOF
+            set -ex
+
+            cd $DEPLOY_PATH
+
+            echo "=== Cleaning previous temp release ==="
+            rm -rf current_new
+            mkdir current_new
+
+            echo "=== Extracting release ==="
+            tar xzf app-release.tgz -C current_new
+
+            echo "=== Rotating releases ==="
+            rm -rf current_old || true
+            [ -d current ] && mv current current_old || true
+            mv current_new current
+
+            echo "=== Killing anything on port 3000 ==="
+            fuser -k 3000/tcp || true
+            sleep 2
+
+            echo "=== Restarting app via PM2 ==="
+            if pm2 describe next-app > /dev/null 2>&1; then
+              pm2 restart next-app --update-env
+            else
+              pm2 start npm \
+                --name next-app \
+                --cwd $DEPLOY_PATH/current \
+                -- start
+            fi
+
+            pm2 save
+
+            echo "=== Waiting for app to come up ==="
+            sleep 8
+
+            echo "=== PM2 logs ==="
+            pm2 logs next-app --lines 20 --nostream
+
+            echo "=== Health check ==="
+            curl -sf --max-time 10 http://localhost:3000 > /dev/null && echo "OK" || echo "WARN: health check failed"
+
+            echo "=== PM2 Status ==="
+            pm2 status
+          EOF
+
+      - name: Final health check
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "curl -sf --max-time 10 http://localhost:3000 > /dev/null && echo 'Healthy' || (echo 'FAILED'; pm2 logs next-app --lines 30 --nostream; exit 1)"
