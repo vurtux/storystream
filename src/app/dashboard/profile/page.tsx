@@ -137,12 +137,14 @@ export default function ProfilePage() {
       <div className="space-y-4 flex-1">
 
         {/* Subscribe Now */}
-        <MenuItem
-          imgSrc="/images/subscriptionLogo.png"
-          label="Subscribe Now"
-          value={<IoIosArrowForward />}
-          onClick={handleSubscription}
-        />
+        {!loggedIn && (
+          <MenuItem
+            imgSrc="/images/subscriptionLogo.png"
+            label="Subscribe Now"
+            value={<IoIosArrowForward />}
+            onClick={handleSubscription}
+          />
+        )}
 
         {/* Login - only when NOT logged in */}
         {!loggedIn && (
@@ -156,12 +158,6 @@ export default function ProfilePage() {
         {/* Logged-in Options */}
         {loggedIn && (
           <>
-            <MenuItem
-              imgSrc="/profile/Profile.png"
-              label="Manage Account"
-              value={<IoIosArrowForward />}
-              onClick={handleManageAccount}
-            />
 
             {isVip && (
               <MenuItem
@@ -179,7 +175,7 @@ export default function ProfilePage() {
           imgSrc="/profile/Calling.png"
           label="Contact Us"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("https://www.myuzeplay.com/static/support", "_self")}
+          onClick={() => window.open("/support.html", "_self")}
         />
         <MenuItem
           imgSrc="/profile/Shield Done.png"

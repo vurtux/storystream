@@ -159,7 +159,7 @@ const DetailsClient = ({ conId, title }: any) => {
     }
   }, [podcastData, loading, isPaid, pathname]);
 
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const observer = useRef<IntersectionObserver | null>(null);
 
   const confirm = () => {
     setShowSubscriptionDialog(true);
@@ -365,31 +365,18 @@ const DetailsClient = ({ conId, title }: any) => {
     }
   };
 
-  const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      setPage(prev => prev + 1);
-    }
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => prev + 1);
+      }
+    }, { threshold: 0.1, rootMargin: "100px" });
+    
+    if (node) observer.current.observe(node);
   }, [loadingMore, hasMore]);
-
-  useEffect(() => {
-    if (!observerTarget.current) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1, rootMargin: "100px" }
-    );
-
-    const currentTarget = observerTarget.current;
-    observer.observe(currentTarget);
-
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [episodeData, loadMore, hasMore, loadingMore]);
 
   useEffect(() => {
     if (page > 1) {
@@ -711,7 +698,7 @@ const DetailsClient = ({ conId, title }: any) => {
 
             {hasMore && (
               <div
-                ref={observerTarget}
+                ref={lastElementRef}
                 className="h-10 w-full flex items-center justify-center"
                 style={{ minHeight: "40px" }}
               >

@@ -19,7 +19,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSendOtp = async () => {
-        
+
         // Validation: Check if mobile number is entered
         if (!mobileNo || mobileNo.trim() === "") {
             showError("Please enter your mobile number");
@@ -54,7 +54,7 @@ export default function LoginPage() {
             };
 
             setAuthData(tempAuth);
-            
+
             // Use try-catch for localStorage operations (some browsers may block it)
             try {
                 localStorage.setItem("authData", JSON.stringify(tempAuth));
@@ -66,11 +66,11 @@ export default function LoginPage() {
             // Check MDN profile first
             const payloadMDN = { mobileNo, isdCode };
             const mdnRes = await ValidateMDN(payloadMDN);
-            
+
             if (!mdnRes?.response?.status) {
                 const isSubscribed = localStorage.getItem("isSubscribed");
                 const storedPlan = localStorage.getItem("selectedPlan");
-                
+
                 if (isSubscribed === "true" && storedPlan) {
                     const linkWithMobile = `${storedPlan}&msisdn=${mobileNo}`;
                     window.location.href = linkWithMobile;
@@ -93,11 +93,11 @@ export default function LoginPage() {
 
             // Send OTP if VIP
             if (vipInfo?.isActive === 5 || profile?.vip === 1) {
-                const payload = { 
-                    deviceId, 
-                    langCode: "en", 
-                    mobileNo, 
-                    isdCode 
+                const payload = {
+                    deviceId,
+                    langCode: "en",
+                    mobileNo,
+                    isdCode
                 };
                 const loginRes = await handleLogin(payload);
 
@@ -114,7 +114,7 @@ export default function LoginPage() {
             // If user is NOT VIP → Check subscription
             const isSubscribed = localStorage.getItem("isSubscribed");
             const storedPlan = localStorage.getItem("selectedPlan");
-            
+
             if (isSubscribed === "true" && storedPlan) {
                 try {
                     const linkWithMobile = `${storedPlan}&msisdn=${mobileNo}`;
@@ -125,7 +125,7 @@ export default function LoginPage() {
                     showError("Invalid subscription data. Please try again.");
                 }
             } else {
-                showError("Please subscribe to continue");
+                // showError("Please subscribe to continue");
                 const redirectUrl = mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true";
                 router.push(redirectUrl);
             }
@@ -267,8 +267,8 @@ export default function LoginPage() {
 
                     {/* Subscribe Now Link */}
                     <div className="text-center mt-4">
-                        <Link 
-                            href={mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true"} 
+                        <Link
+                            href={mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true"}
                             className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors underline cursor-pointer"
                         >
                             Subscribe Now

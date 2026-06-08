@@ -12,6 +12,7 @@ export default function ManageSubscription() {
   const [currentPlan, setCurrentPlan] = useState("Daily");
   const [currentPrice, setCurrentPrice] = useState("R 5");
   const [nextChargeDate, setNextChargeDate] = useState("12 Nov 2025");
+  const [showPopup, setShowPopup] = useState(false);
 
   const plans = [
     {
@@ -42,10 +43,24 @@ export default function ManageSubscription() {
       // Set current plan/price/date if available
       setCurrentPlan(stored.vipInfo?.plan_name || stored.profile?.planType || "Daily");
       setCurrentPrice(stored.vipInfo?.price || stored.profile?.price || "R 5");
-      setNextChargeDate(
-  (stored.vipInfo?.expiry_date || stored.profile?.nextCharge || "12 Nov 2025")
-    .split(/[T ]/)[0]
-);
+      let rawDate = stored.vipInfo?.expiry_date || stored.profile?.nextCharge;
+      let formattedDate = "12 Nov 2025";
+      if (rawDate) {
+        if (!isNaN(Number(rawDate)) && String(rawDate).length > 8) {
+          rawDate = Number(rawDate);
+        }
+        const d = new Date(rawDate);
+        if (!isNaN(d.getTime())) {
+          formattedDate = d.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+        } else {
+          formattedDate = String(rawDate).split(/[T ]/)[0];
+        }
+      }
+      setNextChargeDate(formattedDate);
 ;
     }
   }, []);
@@ -86,7 +101,10 @@ export default function ManageSubscription() {
                 {plans.map((plan) => (
                   <div
                     key={plan.period}
-                    className="border border-purple-300 rounded-xl p-4 bg-purple-50 opacity-80 cursor-default"
+                    onClick={() => {
+                        setShowPopup(true);
+                    }}
+                    className="border border-purple-300 rounded-xl p-4 bg-purple-50 opacity-80 cursor-pointer"
                   >
                     <div className="flex justify-between items-center">
                       <div className="text-left">
@@ -139,6 +157,26 @@ export default function ManageSubscription() {
           ← Back to Profile
         </div>
       </div>
+
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
+            <div className="p-6 text-center">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">Upgrade Plan</h2>
+              <p className="text-gray-600 text-sm mb-5">To upgrade your plan, cancel your existing subscription and re-subscribe.</p>
+              <button
+                onClick={() => {
+                  setShowPopup(false);
+                  router.push("/subscribe");
+                }}
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow hover:brightness-110 transition"
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
