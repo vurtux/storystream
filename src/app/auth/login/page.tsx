@@ -76,7 +76,7 @@ export default function LoginPage() {
                     window.location.href = linkWithMobile;
                     return;
                 } else {
-                    showError("Please subscribe to continue");
+                    // showError("Please subscribe to continue");
                     const redirectUrl = mobileNo?.trim() ? `/subscribe?fromLogin=true&msisdn=${mobileNo}` : "/subscribe?fromLogin=true";
                     router.push(redirectUrl);
                     return;

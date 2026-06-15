@@ -175,7 +175,7 @@ export default function ProfilePage() {
           imgSrc="/profile/Calling.png"
           label="Contact Us"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("/support.html", "_self")}
+          onClick={() => window.open("mailto:customerservice@mobibox.mobi")}
         />
         <MenuItem
           imgSrc="/profile/Shield Done.png"
