@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowForward, IoIosHelpCircleOutline } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -9,20 +9,25 @@ import {
 } from "../../../lib/tealiumTracking";
 type MenuItemProps = {
   imgSrc?: string;
+  icon?: React.ReactNode;
   label: React.ReactNode | string;
   value?: React.ReactNode | string;
   textColor?: string;
   onClick?: () => void;
 };
 
-function MenuItem({ imgSrc, label, value, textColor = "text-gray-900", onClick }: MenuItemProps) {
+function MenuItem({ imgSrc, icon, label, value, textColor = "text-gray-900", onClick }: MenuItemProps) {
   return (
     <div
       onClick={onClick}
       className="flex items-center justify-between py-3 cursor-pointer px-2 rounded select-none"
     >
       <div className="flex items-center space-x-3">
-        {imgSrc && <Image src={imgSrc} alt="icon" width={24} height={24} />}
+        {icon ? (
+          icon
+        ) : (
+          imgSrc && <Image src={imgSrc} alt="icon" width={24} height={24} />
+        )}
         <span
           style={{
             fontWeight: 600,
@@ -188,6 +193,12 @@ export default function ProfilePage() {
           label="Terms of Service"
           value={<IoIosArrowForward />}
           onClick={() => window.open("/tnc.html", "_self")}
+        />
+        <MenuItem
+          icon={<IoIosHelpCircleOutline size={26} className="text-gray-500" />}
+          label="Frequently Asked Questions"
+          value={<IoIosArrowForward />}
+          onClick={() => window.open("/faq.html", "_self")}
         />
 
         {/* Logout - only when logged in */}
