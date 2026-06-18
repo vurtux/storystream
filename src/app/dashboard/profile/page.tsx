@@ -196,7 +196,7 @@ export default function ProfilePage() {
         />
         <MenuItem
           icon={<IoIosHelpCircleOutline size={26} className="text-gray-500" />}
-          label="Frequently Asked Questions"
+          label="FAQs"
           value={<IoIosArrowForward />}
           onClick={() => window.open("/faq.html", "_self")}
         />
