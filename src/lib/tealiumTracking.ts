@@ -405,76 +405,84 @@ export function trackEvent(options: {
   tealiumEvent?: string; 
   siteType?: 'web' | 'miniapp' | 'mobileapp';
 }): void {
-  if (typeof window === 'undefined' || !window.utag || typeof window.utag.link !== 'function') {
-    console.warn('⚠️ Tealium utag.link not loaded yet');
-    return;
-  }
+  const tryTrack = (attempts = 0) => {
+    if (typeof window === 'undefined' || !window.utag || typeof window.utag.link !== 'function') {
+      if (attempts < 20) {
+        setTimeout(() => tryTrack(attempts + 1), 250);
+      } else {
+        console.warn('⚠️ Tealium utag.link not loaded yet after retries');
+      }
+      return;
+    }
 
-  const {
-    pathname,
-    isLoggedIn = false,
-    userId,
-    loyaltyPoints,
-    loyaltyRedeemed,
-    customEvent,
-    productData = {},
-    subscriptionData = {},
-    transactionData = {},
-    tealiumEvent = 'link', 
-    siteType = 'web',
-  } = options;
+    const {
+      pathname,
+      isLoggedIn = false,
+      userId,
+      loyaltyPoints,
+      loyaltyRedeemed,
+      customEvent,
+      productData = {},
+      subscriptionData = {},
+      transactionData = {},
+      tealiumEvent = 'link', 
+      siteType = 'web',
+    } = options;
 
-  // Auto-generate from pathname/document
-  const pageName = buildPageName(pathname);
-  const pageSection = getPageSection(pathname);
-  const platform = getPlatform();
-  const pageUrl = getPageUrl();
-  const pageTitle = getPageTitle();
-  const loginStatus = isLoggedIn ? 'loggedin' : 'loggedout';
+    // Auto-generate from pathname/document
+    const pageName = buildPageName(pathname);
+    const pageSection = getPageSection(pathname);
+    const platform = getPlatform();
+    const pageUrl = getPageUrl();
+    const pageTitle = getPageTitle();
+    const loginStatus = isLoggedIn ? 'loggedin' : 'loggedout';
 
-  const country = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'south africa') || 'south africa';
-  const locale = (typeof window !== 'undefined' ? localStorage.getItem('language') : 'za') || 'za';
+    const country = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'south africa') || 'south africa';
+    const locale = (typeof window !== 'undefined' ? localStorage.getItem('language') : 'za') || 'za';
 
-  // Base event data (ALWAYS required)
-  const baseData: UtagViewData = {
-    tealium_event: tealiumEvent,
-    event_name: getEventName(pathname, customEvent),
-    page_name: pageName,
-    page_section: `storystream:${pageSection}`,
-    page_parent_domain: 'storystream',
-    page_country: country.toLowerCase(),
-    page_url: pageUrl,
-    page_locale: locale.toLowerCase(),
-    page_title: pageTitle,
-    page_platform: platform,
-    page_channel: 'pla',
-    visitor_login_status: loginStatus,
-    page_load: 1,
-    site_version: '1.7',
-    site_type: siteType,
+    // Base event data (ALWAYS required)
+    const baseData: UtagViewData = {
+      tealium_event: tealiumEvent,
+      event_name: getEventName(pathname, customEvent),
+      page_name: pageName,
+      page_section: `storystream:${pageSection}`,
+      page_parent_domain: 'storystream',
+      page_country: country.toLowerCase(),
+      page_url: pageUrl,
+      page_locale: locale.toLowerCase(),
+      page_title: pageTitle,
+      page_platform: platform,
+      page_channel: 'pla',
+      visitor_login_status: loginStatus,
+      page_load: 1,
+      site_version: '1.7',
+      site_type: siteType,
+    };
+
+    if (userId) {
+      baseData.visitor_id_asset_active = userId;
+    }
+    if (loyaltyPoints) {
+      baseData.visitor_login_loyalty_points = loyaltyPoints;
+    }
+    if (loyaltyRedeemed) {
+      baseData.visitor_login_loyalty_redeemed = loyaltyRedeemed;
+    }
+
+    const finalData: UtagViewData = {
+      ...baseData,
+      ...(Object.keys(productData).length > 0 && productData),
+      ...(Object.keys(subscriptionData).length > 0 && subscriptionData),
+      ...(Object.keys(transactionData).length > 0 && transactionData),
+    };
+
+    console.log('📊 Tealium Link Data:', finalData);
+
+    // Send to Tealium
+    window.utag.link(finalData);
   };
 
-  if (userId) {
-    baseData.visitor_id_asset_active = userId;
-  }
-  if (loyaltyPoints) {
-    baseData.visitor_login_loyalty_points = loyaltyPoints;
-  }
-  if (loyaltyRedeemed) {
-    baseData.visitor_login_loyalty_redeemed = loyaltyRedeemed;
-  }
-
-  const finalData: UtagViewData = {
-    ...baseData,
-    ...(Object.keys(productData).length > 0 && productData),
-    ...(Object.keys(subscriptionData).length > 0 && subscriptionData),
-    ...(Object.keys(transactionData).length > 0 && transactionData),
-  };
-
-  console.log('📊 Tealium Link Data:', finalData);
-
-  // Send to Tealium
-  window.utag.link(finalData);
+  tryTrack();
 }
 
 /**
