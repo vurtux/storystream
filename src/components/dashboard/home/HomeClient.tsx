@@ -11,6 +11,7 @@ import Image from "next/image";
 import {
   trackLogin,
   buildSubscriptionData,
+  buildTransactionData,
   trackSubscriptionCompleted
 } from "../../../lib/tealiumTracking";
 type SpotlightContent = {
@@ -218,7 +219,13 @@ const HomeClient = () => {
               dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
             });
 
-            trackSubscriptionCompleted("/home", userId.toString(), subscriptionData);
+            const transactionData = buildTransactionData({
+              transactionId: vipInfo.transaction_id || Math.floor(Math.random() * 100000000).toString(),
+              orderRevenue: "5.00", // Update this dynamically if needed, usually include tax
+              subscriptionType: "daily", // Change this dynamically as well based on plan
+            });
+
+            trackSubscriptionCompleted("/home", userId.toString(), subscriptionData, transactionData);
           }
         }
       } catch (e) {

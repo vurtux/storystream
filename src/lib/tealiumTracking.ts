@@ -54,6 +54,7 @@ declare global {
   interface Window {
     utag: {
       view: (data: UtagViewData) => void;
+      link: (data: UtagViewData) => void;
     };
     utag_cfg_ovrd: any;
   }
@@ -389,6 +390,94 @@ export function trackPageView(options: {
 }
 
 /**
+ * Main function to track event/conversion with utag.link()
+ */
+export function trackEvent(options: {
+  pathname: string;
+  isLoggedIn?: boolean;
+  userId?: string;
+  loyaltyPoints?: string;
+  loyaltyRedeemed?: string;
+  customEvent?: string;
+  productData?: Partial<UtagViewData>;
+  subscriptionData?: Partial<UtagViewData>;
+  transactionData?: Partial<UtagViewData>;
+  tealiumEvent?: string; 
+  siteType?: 'web' | 'miniapp' | 'mobileapp';
+}): void {
+  if (typeof window === 'undefined' || !window.utag || typeof window.utag.link !== 'function') {
+    console.warn('⚠️ Tealium utag.link not loaded yet');
+    return;
+  }
+
+  const {
+    pathname,
+    isLoggedIn = false,
+    userId,
+    loyaltyPoints,
+    loyaltyRedeemed,
+    customEvent,
+    productData = {},
+    subscriptionData = {},
+    transactionData = {},
+    tealiumEvent = 'link', 
+    siteType = 'web',
+  } = options;
+
+  // Auto-generate from pathname/document
+  const pageName = buildPageName(pathname);
+  const pageSection = getPageSection(pathname);
+  const platform = getPlatform();
+  const pageUrl = getPageUrl();
+  const pageTitle = getPageTitle();
+  const loginStatus = isLoggedIn ? 'loggedin' : 'loggedout';
+
+  const country = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'south africa') || 'south africa';
+  const locale = (typeof window !== 'undefined' ? localStorage.getItem('language') : 'za') || 'za';
+
+  // Base event data (ALWAYS required)
+  const baseData: UtagViewData = {
+    tealium_event: tealiumEvent,
+    event_name: getEventName(pathname, customEvent),
+    page_name: pageName,
+    page_section: `storystream:${pageSection}`,
+    page_parent_domain: 'storystream',
+    page_country: country.toLowerCase(),
+    page_url: pageUrl,
+    page_locale: locale.toLowerCase(),
+    page_title: pageTitle,
+    page_platform: platform,
+    page_channel: 'pla',
+    visitor_login_status: loginStatus,
+    page_load: 1,
+    site_version: '1.7',
+    site_type: siteType,
+  };
+
+  if (userId) {
+    baseData.visitor_id_asset_active = userId;
+  }
+  if (loyaltyPoints) {
+    baseData.visitor_login_loyalty_points = loyaltyPoints;
+  }
+  if (loyaltyRedeemed) {
+    baseData.visitor_login_loyalty_redeemed = loyaltyRedeemed;
+  }
+
+  const finalData: UtagViewData = {
+    ...baseData,
+    ...(Object.keys(productData).length > 0 && productData),
+    ...(Object.keys(subscriptionData).length > 0 && subscriptionData),
+    ...(Object.keys(transactionData).length > 0 && transactionData),
+  };
+
+  console.log('📊 Tealium Link Data:', finalData);
+
+  // Send to Tealium
+  window.utag.link(finalData);
+}
+
+/**
  * Track login event
  * USAGE: trackLogin('user123', '/dashboard')
  */
@@ -399,7 +488,7 @@ export function trackLogin(
   userType: 'free' | 'paid',
   subscriptionData: Partial<UtagViewData> = {}
 ): void {
-  trackPageView({
+  trackEvent({
     pathname,
     isLoggedIn: true,
     userId,
@@ -421,7 +510,7 @@ export function trackSignup(
   pathname: string,
   registrationDate: string
 ): void {
-  trackPageView({
+  trackEvent({
     pathname,
     isLoggedIn: true,
     userId,
@@ -436,7 +525,7 @@ export function trackSignup(
  * USAGE: trackSignout('/home')
  */
 export function trackSignout(pathname: string): void {
-  trackPageView({
+  trackEvent({
     pathname,
     isLoggedIn: false,
     tealiumEvent: 'signout',
@@ -452,7 +541,7 @@ export function trackOrderCompleted(
   userId: string,
   transactionData: Partial<UtagViewData>
 ): void {
-  trackPageView({
+  trackEvent({
     pathname,
     isLoggedIn: true,
     userId,
@@ -468,15 +557,17 @@ export function trackOrderCompleted(
 export function trackSubscriptionCompleted(
   pathname: string,
   userId: string,
-  subscriptionData: Partial<UtagViewData>
+  subscriptionData: Partial<UtagViewData>,
+  transactionData: Partial<UtagViewData> = {}
 ): void {
-  trackPageView({
+  trackEvent({
     pathname,
     isLoggedIn: true,
     userId,
     tealiumEvent: 'subscription_completed',
     customEvent: 'subscription_completed',
     subscriptionData,
+    transactionData,
   });
 }
 
