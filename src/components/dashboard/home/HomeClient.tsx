@@ -219,10 +219,24 @@ const HomeClient = () => {
               dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
             });
 
+            let parsedRevenue = "0.00";
+            let parsedType: any = "monthly";
+            if (vipInfo.plan_name) {
+              const amountMatch = vipInfo.plan_name.match(/[\d\.]+/);
+              if (amountMatch) parsedRevenue = amountMatch[0];
+              
+              const lowerName = vipInfo.plan_name.toLowerCase();
+              if (lowerName.includes("day") || lowerName.includes("daily")) parsedType = "daily";
+              else if (lowerName.includes("week")) parsedType = "weekly";
+              else if (lowerName.includes("month")) parsedType = "monthly";
+              else if (lowerName.includes("quarter")) parsedType = "quarterly";
+              else if (lowerName.includes("year") || lowerName.includes("annu")) parsedType = "yearly";
+            }
+
             const transactionData = buildTransactionData({
               transactionId: vipInfo.transaction_id || Math.floor(Math.random() * 100000000).toString(),
-              orderRevenue: "5.00", // Update this dynamically if needed, usually include tax
-              subscriptionType: "daily", // Change this dynamically as well based on plan
+              orderRevenue: parsedRevenue, 
+              subscriptionType: parsedType, 
             });
 
             trackSubscriptionCompleted("/home", userId.toString(), subscriptionData, transactionData);
