@@ -1,27 +1,56 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+type Plan = {
+  plan_id: string;
+  plan_name: string;
+  price: string;
+  period: string;
+  billing: string;
+  savings?: string | null;
+};
+
 export default function ManageSubscription() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+
   const [userId, setUserId] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const [currentPlanId, setCurrentPlanId] = useState("");
   const [currentPlan, setCurrentPlan] = useState("Daily");
   const [currentPrice, setCurrentPrice] = useState("R 5");
-  const [nextChargeDate, setNextChargeDate] = useState("12 Nov 2025");
+  const [nextChargeDate, setNextChargeDate] =
+    useState("12 Nov 2025");
+
   const [showPopup, setShowPopup] = useState(false);
 
-  const plans = [
+  // =====================================================
+  // STATIC PLANS
+  // =====================================================
+
+  const plans: Plan[] = [
     {
+      plan_id: "1658",
+      plan_name: "Storystream (Daily)",
+      price: "R 5",
+      period: "Daily",
+      billing: "R 5/day",
+      savings: null,
+    },
+    {
+      plan_id: "1660",
+      plan_name: "Storystream (Weekly)",
       price: "R 25",
       period: "Weekly",
       billing: "R 25/week",
       savings: null,
     },
     {
+      plan_id: "1659",
+      plan_name: "Storystream (Monthly)",
       price: "R 80",
       period: "Monthly",
       billing: "R 80/month",
@@ -29,45 +58,153 @@ export default function ManageSubscription() {
     },
   ];
 
+  // =====================================================
+  // LOAD USER SUBSCRIPTION DATA
+  // =====================================================
+
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("loginData") || "{}");
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem("loginData") || "{}"
+      );
 
-    if (stored?.profile?.userId) {
-      setUserId(stored.profile.userId);
+      const profile = stored?.profile;
+      const vipInfo = stored?.vipInfo;
 
-      // ✅ PRIORITY: Treat as subscribed if isActive === 5 OR profile.vip === 1
-      const vipActive = stored?.vipInfo?.isActive === 5;
-      const profileVip = stored?.profile?.vip === 1;
+      if (!profile?.userId) {
+        return;
+      }
+
+      // User ID
+      setUserId(String(profile.userId));
+
+      // =================================================
+      // SUBSCRIPTION STATUS
+      // =================================================
+
+      const vipActive =
+        vipInfo?.isActive === 1 ||
+        vipInfo?.isActive === 5;
+
+      const profileVip = profile?.vip === 1;
+
       setIsSubscribed(vipActive || profileVip);
 
-      // Set current plan/price/date if available
-      setCurrentPlan(stored.vipInfo?.plan_name || stored.profile?.planType || "Daily");
-      setCurrentPrice(stored.vipInfo?.price || stored.profile?.price || "R 5");
-      let rawDate = stored.vipInfo?.expiry_date || stored.profile?.nextCharge;
-      let formattedDate = "12 Nov 2025";
+      // =================================================
+      // CURRENT PLAN ID FROM API
+      // =================================================
+
+      const apiPlanId = String(
+        vipInfo?.plan_id || ""
+      );
+
+      setCurrentPlanId(apiPlanId);
+
+      // =================================================
+      // FIND CURRENT PLAN FROM STATIC PLANS
+      // =================================================
+
+      const matchedPlan = plans.find(
+        (plan) => plan.plan_id === apiPlanId
+      );
+
+      if (matchedPlan) {
+        setCurrentPlan(matchedPlan.period);
+        setCurrentPrice(matchedPlan.price);
+      } else {
+        // Fallback if plan ID is not found
+        setCurrentPlan(
+          vipInfo?.plan_name ||
+          profile?.planType ||
+          "Daily"
+        );
+
+        setCurrentPrice(
+          vipInfo?.price ||
+          profile?.price ||
+          "R 5"
+        );
+      }
+
+      // =================================================
+      // EXPIRY / NEXT CHARGE DATE
+      // =================================================
+
+      const rawDate =
+        vipInfo?.expiry_date ||
+        profile?.nextCharge;
+
       if (rawDate) {
-        if (!isNaN(Number(rawDate)) && String(rawDate).length > 8) {
-          rawDate = Number(rawDate);
+        let dateValue: string | number = rawDate;
+
+        // Handle timestamp if API returns timestamp
+        if (
+          !isNaN(Number(rawDate)) &&
+          String(rawDate).length > 8
+        ) {
+          dateValue = Number(rawDate);
         }
-        const d = new Date(rawDate);
-        if (!isNaN(d.getTime())) {
-          formattedDate = d.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
+
+        const date = new Date(dateValue);
+
+        if (!isNaN(date.getTime())) {
+          const formattedDate =
+            date.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            });
+
+          setNextChargeDate(formattedDate);
         } else {
-          formattedDate = String(rawDate).split(/[T ]/)[0];
+          setNextChargeDate(
+            String(rawDate).split(/[T ]/)[0]
+          );
         }
       }
-      setNextChargeDate(formattedDate);
-;
+    } catch (error) {
+      console.error(
+        "Error loading subscription data:",
+        error
+      );
     }
   }, []);
 
+  // =====================================================
+  // UPGRADE PLANS
+  // =====================================================
+
+  const upgradePlans = plans.filter((plan) => {
+    // Daily (1658)
+    // Upgrade options: Weekly + Monthly
+    if (currentPlanId === "1658") {
+      return (
+        plan.plan_id === "1660" ||
+        plan.plan_id === "1659"
+      );
+    }
+
+    // Weekly (1660)
+    // Upgrade option: Monthly
+    if (currentPlanId === "1660") {
+      return plan.plan_id === "1659";
+    }
+
+    // Monthly (1659)
+    // No upgrade available
+    if (currentPlanId === "1659") {
+      return false;
+    }
+
+    return false;
+  });
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-50">
+
       <div className="bg-white shadow-md rounded-2xl p-6 max-w-md w-full text-center">
+
+        {/* LOGO */}
         <Image
           src="/images/subscriptionLogo.png"
           alt="Subscription"
@@ -76,66 +213,113 @@ export default function ManageSubscription() {
           className="mx-auto mb-4"
         />
 
+        {/* TITLE */}
         <h2 className="text-2xl font-semibold text-purple-700 mb-3">
           Manage Subscription
         </h2>
 
+        {/* ================================================= */}
+        {/* ACTIVE SUBSCRIPTION */}
+        {/* ================================================= */}
+
         {isSubscribed ? (
           <>
+            {/* CURRENT PLAN DETAILS */}
+
             <p className="text-gray-700 mb-4 leading-relaxed">
-              <strong>Current Plan:</strong> {currentPlan} <br />
-              <strong>Price:</strong> {currentPrice} <br />
-              <strong>Next Charge Due On:</strong> {nextChargeDate}
+              <strong>Current Plan:</strong>{" "}
+              {currentPlan}
+              <br />
+
+              <strong>Price:</strong>{" "}
+              {currentPrice}
+              <br />
+
+              <strong>Next Charge Due On:</strong>{" "}
+              {nextChargeDate}
             </p>
 
+            {/* CANCEL INSTRUCTION */}
+
             <div className="bg-red-100 text-red-700 font-semibold p-4 rounded-xl mb-6">
-              To Cancel dial <span className="font-bold">135*997#</span>
+              To Cancel dial{" "}
+              <span className="font-bold">
+                135*997#
+              </span>
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                Switch to another plan
-              </h3>
+            {/* ================================================= */}
+            {/* UPGRADE OPTIONS */}
+            {/* ================================================= */}
 
-              <div className="space-y-3">
-                {plans.map((plan) => (
-                  <div
-                    key={plan.period}
-                    onClick={() => {
+            {upgradePlans.length > 0 && (
+              <div className="border-t pt-4">
+
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Switch to another plan
+                </h3>
+
+                <div className="space-y-3">
+
+                  {upgradePlans.map((plan) => (
+                    <div
+                      key={plan.plan_id}
+                      onClick={() => {
                         setShowPopup(true);
-                    }}
-                    className="border border-purple-300 rounded-xl p-4 bg-purple-50 opacity-80 cursor-pointer"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="text-left">
-                        <h4 className="font-semibold text-purple-700">
-                          {plan.period} Plan
-                        </h4>
-                        <p className="text-gray-600 text-sm">
-                          {plan.billing}
-                          {plan.savings && (
-                            <span className="ml-2 text-green-600 font-medium">
-                              Save {plan.savings}
-                            </span>
-                          )}
-                        </p>
+                      }}
+                      className="border border-purple-300 rounded-xl p-4 bg-purple-50 cursor-pointer hover:bg-purple-100 transition"
+                    >
+
+                      <div className="flex justify-between items-center">
+
+                        <div className="text-left">
+
+                          <h4 className="font-semibold text-purple-700">
+                            {plan.period} Plan
+                          </h4>
+
+                          <p className="text-gray-600 text-sm">
+                            {plan.billing}
+
+                            {plan.savings && (
+                              <span className="ml-2 text-green-600 font-medium">
+                                Save {plan.savings}
+                              </span>
+                            )}
+                          </p>
+
+                        </div>
+
+                        <div className="text-purple-700 font-semibold">
+                          {plan.price}
+                        </div>
+
                       </div>
 
-                      <div className="text-purple-700 font-semibold">{plan.price}</div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+
+                </div>
+
               </div>
-            </div>
+            )}
           </>
         ) : (
+
+          /* ================================================= */
+          /* NO ACTIVE SUBSCRIPTION */
+          /* ================================================= */
+
           <>
             <p className="text-gray-700 mb-4">
-              You currently don’t have an active subscription.
+              You currently don’t have an active
+              subscription.
             </p>
 
             <button
-              onClick={() => router.push("/subscribe")}
+              onClick={() =>
+                router.push("/subscribe")
+              }
               className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-xl w-full transition font-semibold"
             >
               Subscribe Now
@@ -143,27 +327,50 @@ export default function ManageSubscription() {
           </>
         )}
 
+        {/* TERMS & CONDITIONS */}
+
         <div
-          onClick={() => window.open("/tnc.html", "_self")}
+          onClick={() =>
+            window.open("/tnc.html", "_self")
+          }
           className="mt-6 text-purple-600 cursor-pointer underline text-sm"
         >
           Terms & Conditions
         </div>
 
+        {/* BACK TO PROFILE */}
+
         <div
-          onClick={() => router.push("/dashboard/profile")}
+          onClick={() =>
+            router.push("/dashboard/profile")
+          }
           className="mt-2 text-purple-600 cursor-pointer underline text-sm"
         >
           ← Back to Profile
         </div>
+
       </div>
+
+      {/* ================================================= */}
+      {/* UPGRADE POPUP */}
+      {/* ================================================= */}
 
       {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+
           <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
+
             <div className="p-6 text-center">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">Upgrade Plan</h2>
-              <p className="text-gray-600 text-sm mb-5">To upgrade your plan, cancel your existing subscription and re-subscribe.</p>
+
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Upgrade Plan
+              </h2>
+
+              <p className="text-gray-600 text-sm mb-5">
+                To upgrade your plan, cancel your
+                existing subscription and re-subscribe.
+              </p>
+
               <button
                 onClick={() => {
                   setShowPopup(false);
@@ -173,10 +380,14 @@ export default function ManageSubscription() {
               >
                 Okay
               </button>
+
             </div>
+
           </div>
+
         </div>
       )}
+
     </div>
   );
 }
