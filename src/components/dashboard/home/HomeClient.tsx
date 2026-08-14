@@ -64,10 +64,6 @@ const HomeClient = () => {
   const searchParams: any = useSearchParams();
   const { setAuth } = useAuth();
   const [homeData, setHomeData] = useState<HomeData>();
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupTitle, setPopupTitle] = useState("");
-  const [popupBody, setPopupBody] = useState("");
-  const [popupButton, setPopupButton] = useState("");
   const [isValidating, setIsValidating] = useState(false);
 
   // Fetch home data
@@ -151,74 +147,19 @@ const HomeClient = () => {
           mobileNo: profile.mobileNo,
         });
 
-        router.push("/home");
-      } catch (error) {
-        console.error("Error validating user:", error);
-        setPopupTitle("Login Failed");
-        setPopupBody("Unable to verify your session. Please try again.");
-        setPopupButton("Retry");
-        setShowPopup(true);
-      } finally {
-        setIsValidating(false);
-      }
-    };
+        // 6️⃣ Handle Subscription Tracking during SSO Login
+        if (profile.vip === 1 && vipInfo) {
+          // Ensure we haven't tracked this specific transaction yet on this device
+          const transactionDateStr = vipInfo.last_transaction_date || vipInfo.sub_date;
+          const trackedDate = localStorage.getItem("last_tracked_transaction");
+          
+          let isFreshSubscription = false;
+          if (transactionDateStr && transactionDateStr !== trackedDate) {
+            isFreshSubscription = true;
+            localStorage.setItem("last_tracked_transaction", transactionDateStr);
+          }
 
-    validateUser();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
-
-  // Handle country change & popup display
-  useEffect(() => {
-    const popupParam = searchParams.get("popup");
-    const countryParam = searchParams.get("country");
-    const langParam = searchParams.get("lang");
-
-    if (countryParam) {
-      localStorage.setItem("country", countryParam);
-    }
-
-    if (langParam) {
-      localStorage.setItem("language", langParam);
-    }
-
-    // Handle popup based on parameter value
-    if (popupParam === "0") {
-      setPopupTitle("Subscription Failed");
-      setPopupBody(
-        "We couldn't process your subscription. Please try again or contact support if the issue persists."
-      );
-      setPopupButton("Try Again");
-      setShowPopup(true);
-    } else if (popupParam === "1") {
-      setPopupTitle("Welcome to Storystream!");
-      setPopupBody(
-        "Thank you for subscribing. Click Home below to continue with your subscription."
-      );
-      setPopupButton("Home");
-      setShowPopup(true);
-
-      // Track subscription completed
-      try {
-        const stored = JSON.parse(localStorage.getItem("loginData") || "{}");
-        if (stored?.profile?.userId) {
-          const userId = stored.profile.userId;
-          const vipInfo = stored.vipInfo;
-
-          if (vipInfo) {
-            const subscriptionData = buildSubscriptionData({
-              subscriptionId: vipInfo.plan_id,
-              planName: vipInfo.plan_name,
-              planId: vipInfo.plan_id,
-              planType: "Subscription",
-              planBrand: "audio",
-              duration: calculateDuration(vipInfo.sub_date, vipInfo.expiry_date),
-              assetType: "premium",
-              dateStart: new Date(vipInfo.sub_date).toLocaleDateString("en-ZA"),
-              dateEnd: new Date(vipInfo.expiry_date).toLocaleDateString("en-ZA"),
-            });
-
+          if (isFreshSubscription) {
             let parsedRevenue = "0.00";
             let parsedType: any = "monthly";
             if (vipInfo.plan_name) {
@@ -242,16 +183,32 @@ const HomeClient = () => {
             trackSubscriptionCompleted("/home", userId.toString(), subscriptionData, transactionData);
           }
         }
-      } catch (e) {
-        console.error("Error tracking sub success:", e);
+
+        router.push("/home");
+      } catch (error) {
+        console.error("Error validating user:", error);
+      } finally {
+        setIsValidating(false);
       }
-    } else if (popupParam === "2") {
-      setPopupTitle("Welcome Back");
-      setPopupBody(
-        "You are already a subscriber. Click Continue below to continue enjoying Storystream."
-      );
-      setPopupButton("Continue");
-      setShowPopup(true);
+    };
+
+    validateUser();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+
+  // Handle country & language change
+  useEffect(() => {
+    const countryParam = searchParams.get("country");
+    const langParam = searchParams.get("lang");
+
+    if (countryParam) {
+      localStorage.setItem("country", countryParam);
+    }
+
+    if (langParam) {
+      localStorage.setItem("language", langParam);
     }
 
     // Fetch home data
@@ -280,12 +237,6 @@ const HomeClient = () => {
     });
   };
 
-  const handlePopupClose = () => {
-    setShowPopup(false);
-    // Remove popup parameter from URL
-    router.push("/home");
-  };
-
   return (
     <div className="relative">
       {/* Sticky header with logo fully left-aligned */}
@@ -299,7 +250,6 @@ const HomeClient = () => {
         />
       </div>
 
-
       {/* Show loading state during validation */}
       {isValidating && (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -312,24 +262,6 @@ const HomeClient = () => {
 
       {/* Render home sections */}
       {!isValidating && renderBlocks()}
-
-      {/* Simple Centered Popup with semi-transparent background */}
-      {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-lg border border-gray-200">
-            <div className="p-6 text-center">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">{popupTitle}</h2>
-              <p className="text-gray-600 text-sm mb-5">{popupBody}</p>
-              <button
-                onClick={handlePopupClose}
-                className="px-6 py-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium shadow hover:brightness-110 transition"
-              >
-                {popupButton}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
