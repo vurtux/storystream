@@ -299,7 +299,7 @@ const DetailsClient = ({ conId, title }: any) => {
     }
   };
 
-  const fetchData = async (pageNum: number = 1, isLoadMore: boolean = false) => {
+  const fetchData = useCallback(async (pageNum: number = 1, isLoadMore: boolean = false) => {
     try {
       if (isLoadMore) {
         setLoadingMore(true);
@@ -336,6 +336,10 @@ const DetailsClient = ({ conId, title }: any) => {
 
         const episodeIds = new_episodes.map((item: any) => item.episode_id);
         setAudioList(episodeIds);
+
+        if (new_episodes.length === 0 || new_episodes.length >= podcast_details.total_episode) {
+          setHasMore(false);
+        }
       } else {
         for (const ep of new_episodes) {
           const exists = await isPodcastDownloaded(ep.episode_id);
@@ -346,16 +350,13 @@ const DetailsClient = ({ conId, title }: any) => {
         }
         setEpisodeData(prev => {
           const updated = [...prev, ...new_episodes];
+          if (new_episodes.length === 0 || updated.length >= podcast_details.total_episode) {
+            setHasMore(false);
+          }
           return updated;
         });
 
         setAudioList((prevList: number[]) => [...prevList, ...new_episodes.map((item: any) => item.episode_id)]);
-      }
-
-      const totalLoaded = isLoadMore ? episodeData.length + new_episodes.length : new_episodes.length;
-
-      if (new_episodes.length === 0 || totalLoaded >= podcast_details.total_episode) {
-        setHasMore(false);
       }
     } catch (error) {
       console.log("Failed to fetch podcast:", error);
@@ -363,7 +364,7 @@ const DetailsClient = ({ conId, title }: any) => {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [conId, setAudioList]);
 
   const lastElementRef = useCallback((node: HTMLDivElement | null) => {
     if (loadingMore) return;
@@ -382,11 +383,11 @@ const DetailsClient = ({ conId, title }: any) => {
     if (page > 1) {
       fetchData(page, true);
     }
-  }, [page]);
+  }, [page, fetchData]);
 
   useEffect(() => {
     fetchData(1, false);
-  }, [detailData, conId]);
+  }, [detailData, conId, fetchData]);
 
   const renderDescription = () => {
     const description = podcastData?.description || "";

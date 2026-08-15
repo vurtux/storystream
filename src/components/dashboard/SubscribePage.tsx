@@ -80,7 +80,7 @@ const SubscribePage = () => {
       setTimer((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(countdown);
-  }, [showSubscriptionDialog, timer]);
+  }, [showSubscriptionDialog, timer, setTimer]);
 
   return (
     <div>

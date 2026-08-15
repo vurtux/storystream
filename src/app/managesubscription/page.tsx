@@ -13,6 +13,37 @@ type Plan = {
   savings?: string | null;
 };
 
+// =====================================================
+// STATIC PLANS
+// =====================================================
+
+const plans: Plan[] = [
+  {
+    plan_id: "1658",
+    plan_name: "Storystream (Daily)",
+    price: "R 5",
+    period: "Daily",
+    billing: "R 5/day",
+    savings: null,
+  },
+  {
+    plan_id: "1660",
+    plan_name: "Storystream (Weekly)",
+    price: "R 25",
+    period: "Weekly",
+    billing: "R 25/week",
+    savings: null,
+  },
+  {
+    plan_id: "1659",
+    plan_name: "Storystream (Monthly)",
+    price: "R 80",
+    period: "Monthly",
+    billing: "R 80/month",
+    savings: "36%",
+  },
+];
+
 export default function ManageSubscription() {
   const router = useRouter();
 
@@ -26,37 +57,6 @@ export default function ManageSubscription() {
     useState("12 Nov 2025");
 
   const [showPopup, setShowPopup] = useState(false);
-
-  // =====================================================
-  // STATIC PLANS
-  // =====================================================
-
-  const plans: Plan[] = [
-    {
-      plan_id: "1658",
-      plan_name: "Storystream (Daily)",
-      price: "R 5",
-      period: "Daily",
-      billing: "R 5/day",
-      savings: null,
-    },
-    {
-      plan_id: "1660",
-      plan_name: "Storystream (Weekly)",
-      price: "R 25",
-      period: "Weekly",
-      billing: "R 25/week",
-      savings: null,
-    },
-    {
-      plan_id: "1659",
-      plan_name: "Storystream (Monthly)",
-      price: "R 80",
-      period: "Monthly",
-      billing: "R 80/month",
-      savings: "36%",
-    },
-  ];
 
   // =====================================================
   // LOAD USER SUBSCRIPTION DATA

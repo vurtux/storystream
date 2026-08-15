@@ -220,7 +220,7 @@ export default function PodcastClient({ episode_id, title }: any) {
       }
     };
     fetchData();
-  }, [episode_id, setAudioSrc, currentAudio]);
+  }, [episode_id, setAudioSrc, currentAudio, audioRef, handlePlay]);
 
   useEffect(() => {
     const audio = audioRef.current;

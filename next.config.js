@@ -4,11 +4,11 @@ module.exports = {
     domains: ['ik.imagekit.io', 'files.hubhopper.com', 'images.lystnfm.com'],
   },
 
-  // Turbopack config (webpack se replace kiya)
-  turbo: {
+  // Turbopack config
+  turbopack: {
     resolveAlias: {
-      fs: false,
-      child_process: false,
+      fs: { browser: '' },
+      child_process: { browser: '' },
     },
   },
 
