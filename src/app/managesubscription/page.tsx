@@ -227,7 +227,7 @@ export default function ManageSubscription() {
 
               {/* CANCEL INSTRUCTION */}
               <div className="bg-red-100 text-red-700 font-semibold p-4 rounded-xl mb-6">
-                To Cancel dial <span className="font-bold">135*997#</span>
+                To Cancel dial <span className="font-bold">*135*997#</span>
               </div>
 
               {/* UPGRADE OPTIONS */}
@@ -377,14 +377,12 @@ export default function ManageSubscription() {
               </div>
               <div className="flex items-center space-x-1.5 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
                 <div
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    isActive ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full ${isActive ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                    }`}
                 />
                 <span
-                  className={`text-xs font-bold ${
-                    isActive ? "text-green-600" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-bold ${isActive ? "text-green-600" : "text-gray-500"
+                    }`}
                 >
                   {isActive ? "Active" : "Inactive"}
                 </span>
@@ -446,9 +444,8 @@ export default function ManageSubscription() {
               <div className="flex justify-between py-2">
                 <span className="font-medium text-gray-900">Subscription Status</span>
                 <span
-                  className={`font-semibold ${
-                    isActive ? "text-green-600" : "text-gray-500"
-                  }`}
+                  className={`font-semibold ${isActive ? "text-green-600" : "text-gray-500"
+                    }`}
                 >
                   {isActive ? "Active" : "Inactive"}
                 </span>
