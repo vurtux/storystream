@@ -110,7 +110,7 @@ export default function PodcastClient({ episode_id, title }: any) {
     isdCode: "",
     mobileNo: "",
     vip: 0,
-    country: "ZA"
+    country: (typeof window !== "undefined" ? localStorage.getItem("country") : "") || "ZA"
   });
 
   const handleClockClick = () => setShowSleepTimer(true);

@@ -10,8 +10,8 @@ interface homeProps {
 }
 
 export const handleSearch = async (payload: homeProps) => {
-
-    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${payload?.country || "ZA"}/en`, payload);
+    const selectedCountry = payload?.country || (typeof window !== "undefined" ? localStorage.getItem("country") : "") || "ZA";
+    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${selectedCountry}/en`, payload);
     return res.data;
 };
 

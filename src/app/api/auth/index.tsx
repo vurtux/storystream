@@ -31,15 +31,22 @@ export const handleLogin = async (payload: loginProps) => {
     });
 };
 export const ValidateMDN = async (payload: mdnProps) => {
-    return await requestApi({
-        url: 'api/v1/feed/ValidateMDN',
-        method: 'POST',
-        data: payload,
-        headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
-        },
-    });
+    try {
+        return await requestApi({
+            url: 'api/v1/feed/ValidateMDN',
+            method: 'POST',
+            data: payload,
+            headers: {
+                'device-os': 'web',
+                'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+            },
+        });
+    } catch (error: any) {
+        if (error?.response?.data) {
+            return error.response.data;
+        }
+        throw error;
+    }
 };
 
 export const handleVerification = async (payload: verifyProps) => {

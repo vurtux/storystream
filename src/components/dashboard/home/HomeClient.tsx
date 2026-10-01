@@ -14,6 +14,7 @@ import {
   buildTransactionData,
   trackSubscriptionCompleted
 } from "../../../lib/tealiumTracking";
+import { getOrFetchUserCountry } from "../../../utils/geo";
 type SpotlightContent = {
   conId: number;
   conName: string;
@@ -70,7 +71,7 @@ const HomeClient = () => {
   const getHomeData = async () => {
     try {
       const lang = localStorage.getItem("language") || "en";
-      const country = localStorage.getItem("country") || "";
+      const country = await getOrFetchUserCountry();
       const res = await handleHome(lang, country);
       setHomeData(res.response.home);
     } catch (error) {

@@ -315,6 +315,13 @@ export function trackPageView(options: {
   tealiumEvent?: string; 
   siteType?: 'web' | 'miniapp' | 'mobileapp';
 }): void {
+  // 🔹 Only fire Tealium tags & events for South Africa (ZA)
+  const currentCountry = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'ZA') || 'ZA';
+  const normCountry = currentCountry.toLowerCase().trim();
+  if (normCountry !== 'za' && normCountry !== 'south africa') {
+    return;
+  }
+
   const tryTrack = (attempts = 0) => {
     if (typeof window === 'undefined' || !window.utag || typeof window.utag.view !== 'function') {
       if (attempts < 20) {
@@ -413,6 +420,13 @@ export function trackEvent(options: {
   tealiumEvent?: string; 
   siteType?: 'web' | 'miniapp' | 'mobileapp';
 }): void {
+  // 🔹 Only fire Tealium tags & events for South Africa (ZA)
+  const currentCountry = (typeof window !== 'undefined' ? localStorage.getItem('country') : 'ZA') || 'ZA';
+  const normCountry = currentCountry.toLowerCase().trim();
+  if (normCountry !== 'za' && normCountry !== 'south africa') {
+    return;
+  }
+
   const tryTrack = (attempts = 0) => {
     if (typeof window === 'undefined' || !window.utag || typeof window.utag.link !== 'function') {
       if (attempts < 20) {

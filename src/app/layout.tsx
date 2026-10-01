@@ -12,11 +12,38 @@ import ToastProvider from '../components/common/ToastProvider';
 import { AudioProvider } from '../context/AudioProvider';
 import { trackPageView } from '../lib/tealiumTracking';
 
+import { getOrFetchUserCountry } from '../utils/geo';
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '';
 
   const hideNavbarOnRoutes = ['/auth/login', '/auth/verification'];
   const shouldShowNavbar = !hideNavbarOnRoutes.includes(pathname);
+
+  // Initialize user country on app open & conditionally load Tealium for ZA only
+  useEffect(() => {
+    getOrFetchUserCountry().then((country) => {
+      const normCountry = (country || '').toLowerCase().trim();
+      if (normCountry === 'za' || normCountry === 'south africa') {
+        if (typeof window !== 'undefined' && !document.getElementById('tealium-utag-script')) {
+          (window as any).utag_cfg_ovrd = (window as any).utag_cfg_ovrd || {};
+          (window as any).utag_cfg_ovrd.noview = true;
+          (window as any).utag_data = (window as any).utag_data || {
+            page_name: '',
+            page_type: '',
+            page_title: '',
+            page_url: '',
+          };
+
+          const script = document.createElement('script');
+          script.id = 'tealium-utag-script';
+          script.src = 'https://tags.tiqcdn.com/utag/vodafone/za-storystream/prod/utag.js';
+          script.async = true;
+          document.head.appendChild(script);
+        }
+      }
+    });
+  }, []);
 
   // Track page view on route change
   useEffect(() => {
@@ -133,12 +160,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             window.utag_cfg_ovrd.noview = true;
           `}
         </Script>
-
-        {/* Load Tealium Script Async */}
-        <Script
-          src="https://tags.tiqcdn.com/utag/vodafone/za-storystream/prod/utag.js"
-          strategy="afterInteractive"
-        />
 
         <DashboardProvider>
           <AudioProvider>

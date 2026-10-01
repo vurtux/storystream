@@ -9,16 +9,17 @@ import { MdArrowBack } from "react-icons/md";
 import { handleUpdateProfile } from '../../../api/profile';
 import { showError, showSuccess } from '../../../../utils/toastService';
 
+import { getOrFetchUserCountry } from "../../../../utils/geo";
+
 export default function EditProfilePage() {
     const router = useRouter();
-
     const [userId, setUserId] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [countryCode, setCountryCode] = useState("ZA");
-    const [isdCode, setIsdCode] = useState("91");
+    const [countryCode, setCountryCode] = useState("");
+    const [isdCode, setIsdCode] = useState("");
     const [gender, setGender] = useState("M");
 
     const handleUpdate = async () => {
@@ -50,16 +51,19 @@ export default function EditProfilePage() {
 
   try {
     const raw = localStorage.getItem("loginData");
+    const storedCountry = localStorage.getItem("country") || "";
 
     if (!raw) {
       console.log("No loginData found");
+      if (storedCountry) setCountryCode(storedCountry);
+      else getOrFetchUserCountry().then((c) => setCountryCode(c));
       return;
     }
 
-    // ✅ Safe parse
+    // Safe parse
     const stored = JSON.parse(raw);
 
-    // ✅ Extract profile
+    // Extract profile
     const profile = stored?.profile || {};
 
     console.log("Loaded profile:", profile);
@@ -69,8 +73,8 @@ export default function EditProfilePage() {
     setLastName(profile.lastname || "");
     setEmail(profile.email || "");
     setPhone(profile.mobileNo || "");
-    setCountryCode(profile.country || "ZA");
-    setIsdCode(profile.isdCode || "91");
+    setCountryCode(profile.country || storedCountry || "ZA");
+    setIsdCode(profile.isdCode || "27");
     setGender(profile.gender || "M");
 
   } catch (err) {

@@ -7,6 +7,8 @@ import Image from "next/image";
 import {
   trackSignout,
 } from "../../../lib/tealiumTracking";
+import { getOrFetchUserCountry } from "../../../utils/geo";
+import { getPolicyUrls } from "../../../utils/policyUtils";
 type MenuItemProps = {
   imgSrc?: string;
   icon?: React.ReactNode;
@@ -61,7 +63,7 @@ function MenuItem({ imgSrc, icon, label, value, textColor = "text-gray-900", onC
 export default function ProfilePage() {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [country, setCountry] = useState("ZA");
+  const [country, setCountry] = useState("");
   const [isVip, setIsVip] = useState(false);
 
   const handleLogout = () => {
@@ -91,25 +93,20 @@ export default function ProfilePage() {
   };
 
   const handleBannerClick = () => {
-    //  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    //  if (isLoggedIn) {
-    //    router.push("/subscribe");
-    //  }else{
-    //    router.push("/auth/login");
-    //  }
     localStorage.setItem("isSubscribed", false.toString());
     router.push("/subscribe");
-
   };
-
-
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     setLoggedIn(isLoggedIn);
 
     const savedCountry = localStorage.getItem("country");
-    if (savedCountry) setCountry(savedCountry);
+    if (savedCountry) {
+      setCountry(savedCountry);
+    } else {
+      getOrFetchUserCountry().then((c) => setCountry(c));
+    }
 
     const stored = JSON.parse(localStorage.getItem("loginData") || "{}");
 
@@ -186,13 +183,19 @@ export default function ProfilePage() {
           imgSrc="/profile/Shield Done.png"
           label="Privacy Policy"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("/pp.html", "_self")}
+          onClick={() => {
+            const { privacyPolicyUrl } = getPolicyUrls();
+            window.open(privacyPolicyUrl, "_self");
+          }}
         />
         <MenuItem
           imgSrc="/profile/Paper.png"
           label="Terms of Service"
           value={<IoIosArrowForward />}
-          onClick={() => window.open("/tnc.html", "_self")}
+          onClick={() => {
+            const { termsUrl } = getPolicyUrls();
+            window.open(termsUrl, "_self");
+          }}
         />
         <MenuItem
           icon={<IoIosHelpCircleOutline size={26} className="text-gray-500" />}

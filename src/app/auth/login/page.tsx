@@ -10,13 +10,23 @@ import { showError, showSuccess } from "../../../utils/toastService";
 import { useEffect, useState } from "react";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import useAuth from "../../../hooks/useAuth";
+import { getOrFetchUserCountry } from "../../../utils/geo";
 
 export default function LoginPage() {
   const { setAuthData } = useAuth();
   const router = useRouter();
   const [mobileNo, setMobileNo] = useState("");
-  const [isdCode, setIsdCode] = useState("27"); // South Africa code is 27, not 91
+  const [isdCode, setIsdCode] = useState("27");
+  const [countryCode, setCountryCode] = useState("za");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    getOrFetchUserCountry().then((c) => {
+      if (c) {
+        setCountryCode(c.toLowerCase());
+      }
+    });
+  }, []);
 
   const handleSendOtp = async () => {
     // Validation: Check if mobile number is entered
@@ -25,14 +35,12 @@ export default function LoginPage() {
       return;
     }
 
-    // Validation: Check minimum length (SA numbers are typically 9 digits without country code)
-    // Must be >= 9
-    if (mobileNo.length < 9) {
-      showError("Please enter a valid mobile number ");
+    if (mobileNo.length < 6) {
+      showError("Please enter a valid mobile number");
       return;
     }
 
-    const finalMobileNo = mobileNo.slice(-9);
+    const finalMobileNo = mobileNo;
 
     setIsLoading(true);
 
@@ -155,14 +163,21 @@ export default function LoginPage() {
   }, [router]);
 
   const handlePhoneChange = (value: string, data: any) => {
-    const stdCode = data?.dialCode || "27";
+    const stdCode = data?.dialCode || "";
 
     // Remove dialCode from start of value
     const numberWithoutStd = value.startsWith(stdCode)
       ? value.slice(stdCode.length)
       : value;
 
-    setIsdCode(stdCode);
+    if (stdCode) {
+      setIsdCode(stdCode);
+    }
+    if (data?.countryCode) {
+      const codeUpper = data.countryCode.toUpperCase();
+      setCountryCode(data.countryCode.toLowerCase());
+      localStorage.setItem("country", codeUpper);
+    }
     setMobileNo(numberWithoutStd);
   };
 
@@ -229,16 +244,13 @@ export default function LoginPage() {
               Phone Number
             </label>
             <PhoneInput
-              country={"za"}
-              onlyCountries={["za"]}
-              disableDropdown
-              disableCountryGuess
-              enableSearch={false}
+              country={countryCode.toLowerCase() || undefined}
+              enableSearch={true}
               countryCodeEditable={false}
               containerClass="w-full text-black rounded-md border border-gray-300 focus-within:border-purple-500 shadow-sm"
               inputClass="!w-full !py-2.5 !pl-12 !pr-3 !text-sm !rounded-md !border-none focus:!ring-0"
               buttonClass="!bg-transparent !border-none !left-2 absolute z-10"
-              dropdownClass="!z-50"
+              dropdownClass="!z-50 text-black"
               onChange={handlePhoneChange}
               disabled={isLoading}
               placeholder="Enter phone number"

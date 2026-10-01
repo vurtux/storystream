@@ -13,9 +13,9 @@ export const handleCategory = async () => {
 };
 
 export const handleCategoryDetail = async (conId: any, lang: any, country: any) => {
-
+    const selectedCountry = country || (typeof window !== "undefined" ? localStorage.getItem("country") : "") || "ZA";
     return await requestApi({
-        url: `/api/v1/feed/GetCategoryBucket/3ab0242fb7a6f01b9c2467dd221a43a5/web/${country || "ZA"}/${lang || 'en'}/${conId}`,
+        url: `/api/v1/feed/GetCategoryBucket/3ab0242fb7a6f01b9c2467dd221a43a5/web/${selectedCountry}/${lang || 'en'}/${conId}`,
         method: 'GET',
     });
 };

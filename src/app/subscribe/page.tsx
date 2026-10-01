@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { showError } from '../../utils/toastService';
+import { getPolicyUrls } from '../../utils/policyUtils';
 
 interface FeatureRowProps {
   name: string;
@@ -227,7 +228,7 @@ function SubscriptionClient() {
               Subscriptions will be added to your Vodacom Account/Airtime.
             </p>
             <a
-              href="https://www.storystream.mobi/tnc.html"
+              href={getPolicyUrls().termsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-purple-600 text-[11px] underline hover:text-purple-700 font-semibold mt-1 block"
@@ -272,7 +273,7 @@ function SubscriptionClient() {
             <p className="text-[11px] mt-3 text-gray-600 text-center leading-relaxed px-2">
               By continuing, you agree to our{' '}
               <a
-                href="https://www.storystream.mobi/tnc.html"
+                href={getPolicyUrls().termsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-600 underline hover:text-purple-700 font-semibold"

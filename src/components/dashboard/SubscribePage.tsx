@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import React, { useEffect, useState } from "react";
 import useDashboard from "../../hooks/useDashboard";
+import { getPolicyUrls } from "../../utils/policyUtils";
 
 type UserData = {
   userId: string | number;
@@ -22,7 +23,7 @@ const SubscribePage = () => {
     isdCode: "",
     mobileNo: "",
     vip: 0,
-    country: "ZA",
+    country: (typeof window !== "undefined" ? localStorage.getItem("country") : "") || "ZA",
   });
 
   const handleSubscribe = async () => {
@@ -38,11 +39,13 @@ const SubscribePage = () => {
   if (typeof window === "undefined") return;
 
   const raw = localStorage.getItem("loginData");
+  const storedCountry = localStorage.getItem("country") || "";
 
   let data: any = null;
 
   // ✅ If nothing found
   if (!raw) {
+    if (storedCountry) setUserData((prev) => ({ ...prev, country: storedCountry }));
     return;
   }
 
@@ -69,7 +72,7 @@ const SubscribePage = () => {
     isdCode: data.profile.isdCode || "",
     mobileNo: data.profile.mobileNo || "",
     vip: data.profile.vip || 0,
-    country: data.profile.country || "ZA",
+    country: data.profile.country || storedCountry || "ZA",
   });
 }, []);
 
@@ -139,7 +142,7 @@ const SubscribePage = () => {
           <p className="text-xs text-gray-500 mt-3">
             By subscribing, you agree to our{" "}
             <a
-              href="https://www.storystream.mobi/tnc.html"
+              href={getPolicyUrls(userData.country).termsUrl}
               className="text-purple-600 underline hover:text-purple-800"
             >
               Terms and Conditions
