@@ -9,13 +9,8 @@ import { showError } from '../../../utils/toastService';
 import slugify from 'slugify';
 
 // Shimmer component
-const ShimmerCard = ({ width = 200, height = 50 }) => (
-    <div className="relative flex animate-pulse">
-        <div
-            className="bg-gray-300 rounded-md"
-            style={{ width: `${width}px`, height: `${height}px` }}
-        />
-    </div>
+const ShimmerCard = () => (
+    <div className="relative w-full aspect-[4/3] animate-pulse bg-gray-200 rounded-2xl" />
 );
 
 export default function CategoryGrid() {
@@ -62,16 +57,24 @@ export default function CategoryGrid() {
             <div className="grid grid-cols-2 gap-4">
                 {loading
                     ? Array(2).fill(null).map((_, index) => (
-                        <ShimmerCard key={index} width={200} height={100} />
+                        <ShimmerCard key={index} />
                     ))
                     : topCategoryData?.map((category, index) => (
                         <div
                             onClick={() => handleSeeAll(category?.conName, category?.conId)}
-                            className='relative flex cursor-pointer'
+                            className='relative flex cursor-pointer overflow-hidden rounded-2xl aspect-[4/3] w-full shadow-sm hover:shadow-md transition-shadow'
                             key={index}
                         >
-                            <span className='absolute top-10 left-2 text-sm text-white whitespace-normal break-words'>{category.conName}</span>
-                            <Image width={200} height={200} src={category?.imgIrl} alt="category" />
+                            <span className='absolute top-4 left-4 z-10 text-sm font-semibold text-white drop-shadow-sm whitespace-normal break-words'>
+                                {category.conName}
+                            </span>
+                            <Image 
+                                fill 
+                                sizes="(max-width: 768px) 50vw, 33vw"
+                                src={category?.imgIrl} 
+                                alt={category?.conName || "category"} 
+                                className="object-cover w-full h-full rounded-2xl"
+                            />
                         </div>
                     ))
                 }
@@ -86,16 +89,24 @@ export default function CategoryGrid() {
             <div className="grid grid-cols-2 gap-4">
                 {loading
                     ? Array(10).fill(null).map((_, index) => (
-                        <ShimmerCard key={index} width={200} height={100} />
+                        <ShimmerCard key={index} />
                     ))
                     : allCategoryData?.map((category, index) => (
                         <div
                             onClick={() => handleSeeAll(category?.conName, category?.conId)}
-                            className='relative flex cursor-pointer'
+                            className='relative flex cursor-pointer overflow-hidden rounded-2xl aspect-[4/3] w-full shadow-sm hover:shadow-md transition-shadow'
                             key={index}
                         >
-                            <span className='absolute top-10 left-2 text-sm text-white'>{category.conName}</span>
-                            <Image src={category?.imgIrl} alt="category" width={200} height={100} />
+                            <span className='absolute top-4 left-4 z-10 text-sm font-semibold text-white drop-shadow-sm whitespace-normal break-words'>
+                                {category.conName}
+                            </span>
+                            <Image 
+                                fill 
+                                sizes="(max-width: 768px) 50vw, 33vw"
+                                src={category?.imgIrl} 
+                                alt={category?.conName || "category"} 
+                                className="object-cover w-full h-full rounded-2xl"
+                            />
                         </div>
                     ))
                 }
