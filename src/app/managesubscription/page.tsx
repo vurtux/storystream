@@ -244,7 +244,7 @@ export default function ManageSubscription() {
             <div className="bg-red-100 text-red-700 font-semibold p-4 rounded-xl mb-6">
               To Cancel dial{" "}
               <span className="font-bold">
-                135*997#
+                *135*997#
               </span>
             </div>
 
