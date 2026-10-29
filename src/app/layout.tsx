@@ -126,11 +126,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           `}
         </Script>
 
-        {/* Tealium Config - Set noview: true to handle views manually */}
+        {/* Tealium Config - Set noview: true to handle views manually, and enforce secure SameSite cookies */}
         <Script id="utag-config" strategy="beforeInteractive">
           {`
             window.utag_cfg_ovrd = window.utag_cfg_ovrd || {};
             window.utag_cfg_ovrd.noview = true;
+            window.utag_cfg_ovrd.cookie_secure = true;
+            window.utag_cfg_ovrd.cookie_samesite = "Lax";
           `}
         </Script>
 

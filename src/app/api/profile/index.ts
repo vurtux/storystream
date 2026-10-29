@@ -1,5 +1,6 @@
 import api from '../../../lib/axios';
 import { requestApi } from '../../../utils/request';
+import { API_KEYS, API_HEADERS } from '../../../utils/apiConfig';
 
 interface homeProps {
     deviceId: string;
@@ -11,20 +12,34 @@ interface homeProps {
 
 export const handleSearch = async (payload: homeProps) => {
 
-    const res = await api.post(`/api/v1/feed/GetHome/a995570eea6c716c8305ea42213a853d/web/${payload?.country || "ZA"}/en`, payload);
+    const res = await api.post(`/api/v1/feed/GetHome/${API_KEYS.HOME_FEED}/web/${payload?.country || "ZA"}/en`, payload);
     return res.data;
 };
 
-export const handleGetProfile = async () => {
+export const handleGetProfile = async (userId?: string) => {
+    let resolvedUserId = userId;
+    if (!resolvedUserId && typeof window !== 'undefined') {
+        try {
+            const loginData = JSON.parse(localStorage.getItem('loginData') || '{}');
+            resolvedUserId = loginData?.profile?.userId?.toString();
+        } catch (e) {
+            console.error("Error reading loginData:", e);
+        }
+    }
+
+    if (!resolvedUserId) {
+        return null;
+    }
+
     return await requestApi({
         url: 'api/v1/feed/GetProfile',
         method: 'POST',
         data: {
-            "userId": "17193448"
+            userId: resolvedUserId,
         },
         headers: {
-            'device-os': 'web',
-            'API-KEY': 'eb3fb92a88badce847f88fb8c9bb9be6',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.CONTENT_FEED,
         },
     });
 };
@@ -61,8 +76,8 @@ export const handleUpdateProfile = async ({
             gender,
         },
         headers: {
-            'device-os': 'web',
-            'API-KEY': 'eb3fb92a88badce847f88fb8c9bb9be6',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.CONTENT_FEED,
         },
     });
 };

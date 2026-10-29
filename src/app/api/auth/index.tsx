@@ -1,4 +1,5 @@
 import { requestApi } from "../../../utils/request";
+import { API_KEYS, API_HEADERS } from "../../../utils/apiConfig";
 
 interface loginProps {
     deviceId: string;
@@ -25,8 +26,8 @@ export const handleLogin = async (payload: loginProps) => {
         method: 'POST',
         data: payload,
         headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.FEED_AUTH,
         },
     });
 };
@@ -36,8 +37,8 @@ export const ValidateMDN = async (payload: mdnProps) => {
         method: 'POST',
         data: payload,
         headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.FEED_AUTH,
         },
     });
 };
@@ -48,8 +49,8 @@ export const handleVerification = async (payload: verifyProps) => {
         method: 'POST',
         data: payload,
         headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.FEED_AUTH,
         },
     });
 };
@@ -60,14 +61,16 @@ export const handleValidate = async (payload: validateProps) => {
         method: 'POST',
         data: payload,
         headers: {
-            'device-os': 'web',
-            'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.FEED_AUTH,
         },
     });
 };
 
-
 export const handleGetProfile = async (userID: string) => {
+    if (!userID) {
+        throw new Error("User ID is required to fetch profile");
+    }
     return await requestApi({
         url: 'api/v1/feed/GetProfile',
         method: 'POST',
@@ -75,8 +78,8 @@ export const handleGetProfile = async (userID: string) => {
             userId: userID
         },
         headers: {
-            'device-os': 'web',
-            'API-KEY': 'eb3fb92a88badce847f88fb8c9bb9be6',
+            'device-os': API_HEADERS.DEVICE_OS,
+            'API-KEY': API_KEYS.CONTENT_FEED,
         },
     });
 };

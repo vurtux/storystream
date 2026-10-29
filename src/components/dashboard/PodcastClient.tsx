@@ -152,6 +152,9 @@ export default function PodcastClient({ episode_id, title }: any) {
   };
 
   const handleAudioChange = (temp: any) => {
+    if (autoPlayTimerRef.current) {
+      clearTimeout(autoPlayTimerRef.current);
+    }
     console.log(audioList, "audioList");
     setIsPlaying(false);
     if (temp === "plus" && currentAudio < audioList.length - 1) {
@@ -183,18 +186,22 @@ export default function PodcastClient({ episode_id, title }: any) {
     }
   }, [playbackRate, audioRef]);
 
+  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
+    let isCancelled = false;
 
     const fetchData = async () => {
       try {
         const isAlreadyDownloaded = await isPodcastDownloaded(episode_id?.toString());
-        if(isAlreadyDownloaded){
+        if (isAlreadyDownloaded) {
           const podcast_data: any = await playOfflinePodcast(episode_id?.toString(), audioRef);
+          if (isCancelled) return;
           setOfflineImgUrl(podcast_data?.imageUrl);
           setIsDownloaded(true);
           console.log(podcast_data?.imageUrl, "podcast_data");
-          setTimeout(() => {
-            handlePlay();
+          autoPlayTimerRef.current = setTimeout(() => {
+            if (!isCancelled) handlePlay();
           }, 1000);
           return;
         }
@@ -205,6 +212,7 @@ export default function PodcastClient({ episode_id, title }: any) {
           lang,
           country
         );
+        if (isCancelled) return;
         const ep =
           result?.response?.podcast?.podcast_episode_details?.length > 0
             ? result?.response?.podcast?.podcast_episode_details[0]
@@ -212,15 +220,23 @@ export default function PodcastClient({ episode_id, title }: any) {
         setEpisodeData(ep);
         localStorage.setItem("episodeData", JSON.stringify(ep));
         setAudioSrc(ep?.stream_url);
-        setTimeout(() => {
-          handlePlay();
+        autoPlayTimerRef.current = setTimeout(() => {
+          if (!isCancelled) handlePlay();
         }, 1000);
       } catch (error) {
         console.log("Failed to fetch podcast:", error);
       }
     };
+
     fetchData();
-  }, [episode_id, setAudioSrc, currentAudio, audioRef, handlePlay]);
+
+    return () => {
+      isCancelled = true;
+      if (autoPlayTimerRef.current) {
+        clearTimeout(autoPlayTimerRef.current);
+      }
+    };
+  }, [episode_id]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -256,15 +272,23 @@ export default function PodcastClient({ episode_id, title }: any) {
   };
 
   const handleCheck = async (episodeData: any) => {
+    if (autoPlayTimerRef.current) {
+      clearTimeout(autoPlayTimerRef.current);
+    }
     const isVip: any = localStorage.getItem("loginData");
     if (!isVip) {
       confirm();
+      return;
     }
-    const parsedData = JSON.parse(isVip);
-    if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+    try {
+      const parsedData = JSON.parse(isVip);
+      if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+        confirm();
+      } else {
+        handlePlayPause(episodeData);
+      }
+    } catch {
       confirm();
-    } else {
-      handlePlayPause(episodeData);
     }
   };
 

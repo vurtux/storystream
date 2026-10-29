@@ -1,4 +1,5 @@
 import { requestApi } from "../../../utils/request";
+import { API_KEYS } from "../../../utils/apiConfig";
 
 interface PodcastPagingProps {
     conId: number,
@@ -11,42 +12,30 @@ interface PodcastPagingProps {
 
 export const handlePodcastPaging = async (params: PodcastPagingProps) => {
     return await requestApi({
-        url: `api/v1/feed/GetPodcastDetailPaging/eb3fb92a88badce847f88fb8c9bb9be6/web/${params.country || "ZA"}/${params?.lang || "en"}/${params?.conId}`,
+        url: `api/v1/feed/GetPodcastDetailPaging/${API_KEYS.CONTENT_FEED}/web/${params.country || "ZA"}/${params?.lang || "en"}/${params?.conId}`,
         method: 'GET',
         params: {
             page: params.page ?? 1,
             debug: params.debug ?? false,
             test: params.test ?? '1122',
         },
-        // headers: {
-        //     'device-os': 'web',
-        //     'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
-        // },
     });
 };
 
 export const getEpisodeDetail = async (episode_id: number, lang: any, country: any) => {
     return await requestApi({
-        url: `api/v1/feed/GetEpisodeDetail/eb3fb92a88badce847f88fb8c9bb9be6/web/${country || "ZA"}/pl/${episode_id}`,
+        url: `api/v1/feed/GetEpisodeDetail/${API_KEYS.CONTENT_FEED}/web/${country || "ZA"}/pl/${episode_id}`,
         method: 'GET',
-        // headers: {
-        //     'device-os': 'web',
-        //     'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
-        // },
     });
 };
 
 export const getContentDownloadCheck = async (episode_id: number, country: any, userId: any) => {
     return await requestApi({
-        url: `api/v1/feed/contentDownloadCheck/3ab0242fb7a6f01b9c2467dd221a43a5/web/${country}`,
+        url: `api/v1/feed/contentDownloadCheck/${API_KEYS.FEED_AUTH}/web/${country}`,
         method: 'POST',
         data: {
             "userId": userId,
             "plan_id":"1658"
         },
-        // headers: {
-        //     'device-os': 'web',
-        //     'API-KEY': '3ab0242fb7a6f01b9c2467dd221a43a5',
-        // },
     });
 };

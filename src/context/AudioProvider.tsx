@@ -1,5 +1,4 @@
-'use client'
-import { createContext, useRef, useState, useEffect } from 'react';
+import { createContext, useRef, useState, useCallback } from 'react';
 import useDashboard from '../hooks/useDashboard';
 
 interface AudioContextType {
@@ -29,51 +28,44 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     const [currentAudio, setCurrentAudio] = useState<number>(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Example: set audioSrc from localStorage (adjust as needed)
-    // useEffect(() => {
-    //     const data = localStorage.getItem('seeAllData');
-    //     if (data) {
-    //         const parsed = JSON.parse(data);
-    //         if (parsed?.stream_url) setAudioSrc(parsed.stream_url);
-    //     }
-    // }, []);
-
-    const handlePlay = () => {
+    const handlePlay = useCallback(() => {
         const isVip: any = localStorage.getItem('loginData');
-        if(!isVip) return;
-        const parsedData = JSON.parse(isVip);
-        if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+        if (!isVip) return;
+        try {
+            const parsedData = JSON.parse(isVip);
+            if (!parsedData?.profile || parsedData?.profile?.vip !== 1) {
+                return;
+            }
+        } catch {
             return;
         }
 
         const audio = audioRef.current;
-        console.log(audio, "audio")
         if (!audio) return;
 
-        audio.play();
+        audio.play().catch((err) => console.log("Audio play error:", err));
         setOpenPlayButton(true);
         setIsPlaying(true);
-    };
+    }, [setOpenPlayButton]);
 
-    const handlePlayPause = (episodeData: any) => {
-        if (episodeData.is_billable === 2) {
-            // confirm()
+    const handlePlayPause = useCallback((episodeData: any) => {
+        if (episodeData?.is_billable === 2) {
             return;
         }
 
         const audio = audioRef.current;
-        console.log(audio, "audio")
         if (!audio) return;
 
-        if (isPlaying) {
+        if (!audio.paused) {
             audio.pause();
             setOpenPlayButton(false);
+            setIsPlaying(false);
         } else {
-            audio.play();
+            audio.play().catch((err) => console.log("Audio play error:", err));
             setOpenPlayButton(true);
+            setIsPlaying(true);
         }
-        setIsPlaying(!isPlaying);
-    };
+    }, [setOpenPlayButton]);
 
     return (
         <AudioContext.Provider value={{
@@ -91,7 +83,19 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
             setAudioSrc
         }}>
             {children}
-            <audio ref={audioRef} src={audioSrc || "audio"} preload="metadata" />
+            <audio 
+                ref={audioRef} 
+                src={audioSrc || "audio"} 
+                preload="metadata"
+                onPlay={() => {
+                    setIsPlaying(true);
+                    setOpenPlayButton(true);
+                }}
+                onPause={() => {
+                    setIsPlaying(false);
+                    setOpenPlayButton(false);
+                }}
+            />
         </AudioContext.Provider>
     );
 };

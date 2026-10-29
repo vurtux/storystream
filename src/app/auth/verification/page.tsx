@@ -17,19 +17,64 @@ const OTPVerification: React.FC = () => {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
+  const MAX_FAILED_ATTEMPTS = 5;
+  const LOCKOUT_TIME_SECONDS = 300; // 5 minutes lockout
+
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isResending, setIsResending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutSecondsLeft, setLockoutSecondsLeft] = useState(0);
 
+  // Check existing lockout on mount
   useEffect(() => {
-
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-
     if (isLoggedIn === 'true') {
       router.replace('/dashboard/home');
+      return;
+    }
+
+    try {
+      const storedLockoutUntil = localStorage.getItem('otp_lockout_until');
+      if (storedLockoutUntil) {
+        const remainingMs = parseInt(storedLockoutUntil, 10) - Date.now();
+        if (remainingMs > 0) {
+          setLockoutSecondsLeft(Math.ceil(remainingMs / 1000));
+        } else {
+          localStorage.removeItem('otp_lockout_until');
+          localStorage.removeItem('otp_failed_attempts');
+        }
+      }
+
+      const storedAttempts = localStorage.getItem('otp_failed_attempts');
+      if (storedAttempts) {
+        setFailedAttempts(parseInt(storedAttempts, 10));
+      }
+    } catch (e) {
+      console.error("Error reading lockout storage:", e);
     }
   }, [router]);
 
-  // Countdown timer
+  // Lockout countdown timer
+  useEffect(() => {
+    if (lockoutSecondsLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      setLockoutSecondsLeft((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem('otp_lockout_until');
+          localStorage.removeItem('otp_failed_attempts');
+          setFailedAttempts(0);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lockoutSecondsLeft]);
+
+  // Resend OTP Countdown timer
   useEffect(() => {
     if (secondsLeft <= 0) return;
 
@@ -40,7 +85,10 @@ const OTPVerification: React.FC = () => {
     return () => clearInterval(interval);
   }, [secondsLeft]);
 
+  const isLocked = lockoutSecondsLeft > 0;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    if (isLocked) return;
     const val = e.target.value;
     if (!/^\d?$/.test(val)) return;
 
@@ -54,12 +102,25 @@ const OTPVerification: React.FC = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (isLocked) return;
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
   };
 
   const handleVerify = async () => {
+    if (isLocked) {
+      showError(`Account locked. Try again in ${Math.ceil(lockoutSecondsLeft / 60)} minutes.`);
+      return;
+    }
+
+    const otpCode = otp.join("");
+    if (otpCode.length < 4) {
+      showError("Please enter the complete 4-digit OTP.");
+      return;
+    }
+
+    setIsVerifying(true);
     try {
       const authValue = JSON.parse(localStorage.getItem('authData') || '{}');
 
@@ -68,15 +129,20 @@ const OTPVerification: React.FC = () => {
         langCode: "en",
         mobileNo: authValue.mobileNo,
         isdCode: authValue.isdCode,
-        otp: otp.join(""),
+        otp: otpCode,
         last_login_source: "",
       };
 
       const res = await handleVerification(payload);
 
       if (!res?.response?.status) {
-        throw new Error("Verification failed");
+        throw new Error(res?.response?.msg || "Verification failed");
       }
+
+      // Success: Reset rate-limiting tracking
+      localStorage.removeItem('otp_lockout_until');
+      localStorage.removeItem('otp_failed_attempts');
+      setFailedAttempts(0);
 
       const { profile, vipInfo } = res.response;
       const userId = profile?.userId?.toString() || "guest";
@@ -86,8 +152,6 @@ const OTPVerification: React.FC = () => {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("loginData", JSON.stringify(res.response));
       localStorage.setItem("menu", "home");
-
-
 
       // Track Login for all users
       const userType = profile.vip === 1 ? "paid" : "free";
@@ -121,7 +185,23 @@ const OTPVerification: React.FC = () => {
 
     } catch (error) {
       console.error("Error in login api:", error);
-      showError("Login failed");
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+
+      if (newAttempts >= MAX_FAILED_ATTEMPTS) {
+        const lockoutUntil = Date.now() + LOCKOUT_TIME_SECONDS * 1000;
+        localStorage.setItem('otp_lockout_until', lockoutUntil.toString());
+        localStorage.setItem('otp_failed_attempts', newAttempts.toString());
+        setLockoutSecondsLeft(LOCKOUT_TIME_SECONDS);
+        setOtp(["", "", "", ""]);
+        showError("Too many failed attempts. Account temporarily locked for 5 minutes.");
+      } else {
+        localStorage.setItem('otp_failed_attempts', newAttempts.toString());
+        const remaining = MAX_FAILED_ATTEMPTS - newAttempts;
+        showError(`Invalid OTP. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`);
+      }
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -167,12 +247,33 @@ const OTPVerification: React.FC = () => {
           We have sent you a 4-digit verification code on your mobile number
         </p>
 
+        {/* Lockout Warning Banner */}
+        {isLocked ? (
+          <div className="w-full max-w-xs mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-center">
+            <p className="text-red-700 font-semibold text-sm">Account Temporarily Locked</p>
+            <p className="text-red-600 text-xs mt-1">
+              Too many invalid attempts. Please wait{' '}
+              <span className="font-bold">
+                {Math.floor(lockoutSecondsLeft / 60)}m {lockoutSecondsLeft % 60}s
+              </span>
+            </p>
+          </div>
+        ) : failedAttempts > 0 ? (
+          <div className="w-full max-w-xs mb-4 text-center">
+            <span className="text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+              {MAX_FAILED_ATTEMPTS - failedAttempts} attempt{MAX_FAILED_ATTEMPTS - failedAttempts > 1 ? 's' : ''} remaining
+            </span>
+          </div>
+        ) : null}
+
         {/* OTP boxes */}
         <div className="flex gap-6 mb-6">
           {otp.map((digit, index) => (
             <div
               key={index}
-              className="w-12 h-12 border rounded-lg flex items-center justify-center text-xl font-semibold"
+              className={`w-12 h-12 border rounded-lg flex items-center justify-center text-xl font-semibold ${
+                isLocked ? "opacity-50 cursor-not-allowed bg-gray-100" : ""
+              }`}
             >
               <input
                 ref={(el) => {
@@ -181,20 +282,30 @@ const OTPVerification: React.FC = () => {
                 type="tel"
                 maxLength={1}
                 value={digit}
+                disabled={isLocked || isVerifying}
                 onChange={(e) => handleChange(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-full bg-gray-100 rounded-lg text-center text-black px-4 py-2 outline-none"
+                className={`w-full bg-gray-100 rounded-lg text-center text-black px-4 py-2 outline-none ${
+                  isLocked ? "cursor-not-allowed" : ""
+                }`}
               />
             </div>
           ))}
         </div>
 
         <button
-          style={{ background: "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)" }}
+          style={{
+            background: isLocked || isVerifying || otp.join("").length < 4
+              ? "#9CA3AF"
+              : "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)",
+          }}
           onClick={handleVerify}
-          className="w-full cursor-pointer max-w-xs py-3 rounded-2xl text-white font-semibold mb-4"
+          disabled={isLocked || isVerifying || otp.join("").length < 4}
+          className={`w-full max-w-xs py-3 rounded-2xl text-white font-semibold mb-4 transition ${
+            isLocked || isVerifying || otp.join("").length < 4 ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+          }`}
         >
-          Verify
+          {isVerifying ? "Verifying..." : isLocked ? `Locked (${lockoutSecondsLeft}s)` : "Verify"}
         </button>
 
         {/* Resend timer logic */}
@@ -204,8 +315,10 @@ const OTPVerification: React.FC = () => {
             <span style={{ color: "#6B0DFF" }} className="font-medium">Resend in {secondsLeft}s</span>
           ) : (
             <span
-              onClick={handleSendOtp}
-              className="text-purple-600 font-medium cursor-pointer"
+              onClick={isLocked ? undefined : handleSendOtp}
+              className={`font-medium ${
+                isLocked ? "text-gray-400 cursor-not-allowed" : "text-purple-600 cursor-pointer"
+              }`}
             >
               Resend
             </span>

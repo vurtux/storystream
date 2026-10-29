@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { showError } from '../../utils/toastService';
@@ -55,8 +55,33 @@ function SubscriptionClient() {
 
   const searchParams = useSearchParams();
   const fromLogin = searchParams?.get('fromLogin') === 'true';
-  const urlMsisdn = searchParams?.get('msisdn');
-  const mobile = urlMsisdn;
+  const [mobile, setMobile] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlMsisdn = searchParams?.get('msisdn');
+      if (urlMsisdn) {
+        setMobile(urlMsisdn);
+        try {
+          sessionStorage.setItem('temp_msisdn', urlMsisdn);
+          // Sanitize URL immediately so MSISDN does not remain in browser history or leak via Referer
+          const url = new URL(window.location.href);
+          url.searchParams.delete('msisdn');
+          const cleanUrl = url.pathname + (url.search ? url.search : '');
+          window.history.replaceState({}, '', cleanUrl);
+        } catch (e) {
+          console.error("Storage error:", e);
+        }
+      } else {
+        try {
+          const stored = sessionStorage.getItem('temp_msisdn');
+          if (stored) setMobile(stored);
+        } catch (e) {
+          console.error("Storage error:", e);
+        }
+      }
+    }
+  }, [searchParams]);
 
   const plansWithMDN = plans.map(plan => ({
     ...plan,
