@@ -144,13 +144,14 @@ const OTPVerification: React.FC = () => {
       localStorage.removeItem('otp_failed_attempts');
       setFailedAttempts(0);
 
-      const { profile, vipInfo } = res.response;
+      const { authToken, ...loginData } = res.response;
+      const { profile, vipInfo } = loginData;
       const userId = profile?.userId?.toString() || "guest";
 
       // Save auth
       setAuth({ userInfo: profile });
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("loginData", JSON.stringify(res.response));
+      localStorage.setItem("loginData", JSON.stringify(loginData));
       localStorage.setItem("menu", "home");
 
       // Track Login for all users

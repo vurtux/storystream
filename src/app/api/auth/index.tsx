@@ -33,7 +33,7 @@ export const handleLogin = async (payload: loginProps) => {
 };
 export const ValidateMDN = async (payload: mdnProps) => {
     return await requestApi({
-        url: 'api/v1/feed/ValidateMDN',
+        url: 'api/v1/storystream/ValidateMDN',
         method: 'POST',
         data: payload,
         headers: {
@@ -45,7 +45,7 @@ export const ValidateMDN = async (payload: mdnProps) => {
 
 export const handleVerification = async (payload: verifyProps) => {
     return await requestApi({
-        url: 'api/v1/feed/ValidateOTP',
+        url: 'api/v1/storystream/ValidateOTP',
         method: 'POST',
         data: payload,
         headers: {
@@ -57,7 +57,7 @@ export const handleVerification = async (payload: verifyProps) => {
 
 export const handleValidate = async (payload: validateProps) => {
     return await requestApi({
-        url: 'api/v1/feed/ValidateSSO',
+        url: 'api/v1/storystream/ValidateSSO',
         method: 'POST',
         data: payload,
         headers: {
@@ -67,19 +67,19 @@ export const handleValidate = async (payload: validateProps) => {
     });
 };
 
-export const handleGetProfile = async (userID: string) => {
-    if (!userID) {
-        throw new Error("User ID is required to fetch profile");
+// Takes the token from the login response. Do not send userId.
+export const handleGetProfile = async (authToken: string) => {
+    if (!authToken) {
+        throw new Error("Login token is required to fetch profile");
     }
     return await requestApi({
-        url: 'api/v1/feed/GetProfile',
+        url: 'api/v1/storystream/GetProfile',
         method: 'POST',
-        data: {
-            userId: userID
-        },
+        data: {},
         headers: {
             'device-os': API_HEADERS.DEVICE_OS,
             'API-KEY': API_KEYS.CONTENT_FEED,
+            'Authorization': `Bearer ${authToken}`,
         },
     });
 };

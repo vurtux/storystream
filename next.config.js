@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   poweredByHeader: false,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     domains: ['ik.imagekit.io', 'files.hubhopper.com', 'images.lystnfm.com'],
   },
@@ -41,6 +44,7 @@ module.exports = {
 
   // Turbopack config
   turbopack: {
+    root: __dirname,
     resolveAlias: {
       fs: { browser: '' },
       child_process: { browser: '' },

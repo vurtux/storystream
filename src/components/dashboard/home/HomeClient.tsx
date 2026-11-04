@@ -107,7 +107,7 @@ const HomeClient = () => {
 
         // 2️⃣ Fetch profile
         const userId = validateRes.response.profile.userId;
-        const profileRes = await handleGetProfile(userId);
+        const profileRes = await handleGetProfile(validateRes.response.authToken);
 
         const profile = profileRes.response.profile;
         const vipInfo = profileRes.response.vipInfo;

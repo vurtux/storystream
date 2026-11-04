@@ -16,33 +16,7 @@ export const handleSearch = async (payload: homeProps) => {
     return res.data;
 };
 
-export const handleGetProfile = async (userId?: string) => {
-    let resolvedUserId = userId;
-    if (!resolvedUserId && typeof window !== 'undefined') {
-        try {
-            const loginData = JSON.parse(localStorage.getItem('loginData') || '{}');
-            resolvedUserId = loginData?.profile?.userId?.toString();
-        } catch (e) {
-            console.error("Error reading loginData:", e);
-        }
-    }
-
-    if (!resolvedUserId) {
-        return null;
-    }
-
-    return await requestApi({
-        url: 'api/v1/feed/GetProfile',
-        method: 'POST',
-        data: {
-            userId: resolvedUserId,
-        },
-        headers: {
-            'device-os': API_HEADERS.DEVICE_OS,
-            'API-KEY': API_KEYS.CONTENT_FEED,
-        },
-    });
-};
+export { handleGetProfile } from '../auth';
 
 export const handleUpdateProfile = async ({
     userId,
