@@ -35,7 +35,7 @@ module.exports = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://tags.tiqcdn.com https://*.tiqcdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://api.myuze.app https://*.tiqcdn.com https://*.tealiumiq.com https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://tags.tiqcdn.com https://*.tiqcdn.com https://cdn.cookielaw.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://api.myuze.app https://*.tiqcdn.com https://*.tealiumiq.com https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'self';",
           },
         ],
       },
