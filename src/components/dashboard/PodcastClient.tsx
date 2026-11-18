@@ -8,11 +8,19 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import useDashboard from "../../hooks/useDashboard";
-import { getEpisodeDetail } from "../../app/api/podcast";
-import { showError } from "../../utils/toastService";
+import { getContentDownloadCheck, getEpisodeDetail } from "../../app/api/podcast";
+import { showError, showSuccess } from "../../utils/toastService";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
-import { getOfflineEpisode, isPodcastDownloaded, playOfflinePodcast } from "../../utils/indexDB";
+import { getOfflineEpisode, isPodcastDownloaded, playOfflinePodcast, saveEpisodeOffline } from "../../utils/indexDB";
+import { trackPageView, buildProductData } from "../../lib/tealiumTracking";
+
+const NO_AUDIO_MESSAGE = "This episode is available with an active StoryStream subscription.";
+const PENDING_PAYMENT_MESSAGE = "Insufficient funds detected. Please top up your airtime to complete your subscription or renewal.";
+const DOWNLOAD_LIMIT_MESSAGE = "Your download limit for the day has been reached. Please upgrade your plan in My Account > Manage Subscription, or try again tomorrow.";
+const DOWNLOAD_FAILED_MESSAGE = "Download failed. Please try again.";
+const PENDING_SUBSCRIPTION = 5;
+const DAILY_LIMIT_PLAN_ID = "1658";
 
 interface Episode {
   episode_id: number;
@@ -105,6 +113,7 @@ export default function PodcastClient({ episode_id, title }: any) {
   const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
   const [offlineImgUrl, setOfflineImgUrl] = useState("/images/loginLogo.png");
   const [isDownloaded, setIsDownloaded] = useState(false);
+  const [podcastName, setPodcastName] = useState("");
   const [timer, setTimer] = useState(5);
   const [userData, setUserData] = useState<UserData>({
     userId: "",
@@ -134,17 +143,76 @@ export default function PodcastClient({ episode_id, title }: any) {
     }
   };
 
-  const handleDownload = () => {
-    const fileUrl = episodeData?.download_url || episodeData?.stream_url;
-    const encoded = encodeURIComponent(fileUrl);
-    const downloadUrl = `/api/download?url=${encoded}`;
+  // Saves the episode for offline play, with the same rules as the download on the book page.
+  const handleDownload = async () => {
+    let loginData: any = null;
+    try {
+      loginData = JSON.parse(localStorage.getItem("loginData") || "null");
+    } catch {
+      loginData = null;
+    }
+    if (!loginData?.profile) {
+      router.push("/auth/login");
+      return;
+    }
+    if (loginData?.vipInfo?.isActive === PENDING_SUBSCRIPTION) {
+      showError(PENDING_PAYMENT_MESSAGE);
+      return;
+    }
+    if (loginData.profile.vip !== 1) {
+      confirm();
+      return;
+    }
+    if (!episodeData?.stream_url) {
+      showError(NO_AUDIO_MESSAGE);
+      return;
+    }
 
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `${episodeData?.title || "podcast"}.mp3`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const episodeKey = String(episode_id);
+    try {
+      if (loginData?.vipInfo?.plan_id === DAILY_LIMIT_PLAN_ID) {
+        const country = localStorage.getItem("country") || "";
+        const check = await getContentDownloadCheck(Number(episode_id), country, loginData.profile.userId);
+        if (check?.response?.total_download_available <= 0) {
+          showError(DOWNLOAD_LIMIT_MESSAGE);
+          return;
+        }
+      }
+
+      trackPageView({
+        pathname: `/episode/${episodeKey}`,
+        isLoggedIn: true,
+        userId: loginData.profile.userId,
+        tealiumEvent: "episode_download",
+        customEvent: "episode_download",
+        productData: buildProductData({
+          productId: episodeKey,
+          productName: episodeData.title,
+          productPrice: episodeData.is_billable === 1 ? "9.99" : "0",
+          productCategory: "Episode",
+          productSku: `EP-${episodeKey}`,
+          productType: episodeData.is_billable === 1 ? "paid" : "free",
+        }),
+      });
+
+      await saveEpisodeOffline({
+        episode_id: episodeKey,
+        img_local_uri: episodeData.img_local_uri,
+        stream_uri: episodeData.stream_url,
+        title: episodeData.title,
+        podcast_name: podcastName,
+      });
+      // saveEpisodeOffline logs and swallows its own errors, so check what was stored
+      if (await isPodcastDownloaded(episodeKey)) {
+        setIsDownloaded(true);
+        showSuccess("Downloaded successfully!");
+      } else {
+        showError(DOWNLOAD_FAILED_MESSAGE);
+      }
+    } catch (error) {
+      console.log("Error downloading:", error);
+      showError(DOWNLOAD_FAILED_MESSAGE);
+    }
   };
 
   const confirm = () => {
@@ -219,10 +287,11 @@ export default function PodcastClient({ episode_id, title }: any) {
             ? result?.response?.podcast?.podcast_episode_details[0]
             : {};
         setEpisodeData(ep);
+        setPodcastName(result?.response?.podcast?.podcast_details?.title || "");
         localStorage.setItem("episodeData", JSON.stringify(ep));
         if (!ep?.stream_url) {
           // the server sends audio only to an active subscriber (a pending or lapsed one gets none)
-          showError("This episode is available with an active StoryStream subscription.");
+          showError(NO_AUDIO_MESSAGE);
           return;
         }
         setAudioSrc(ep?.stream_url);

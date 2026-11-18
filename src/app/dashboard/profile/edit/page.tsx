@@ -16,7 +16,6 @@ export default function EditProfilePage() {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [countryCode, setCountryCode] = useState("ZA");
     const [gender, setGender] = useState("M");
 
     const handleUpdate = async () => {
@@ -60,8 +59,11 @@ export default function EditProfilePage() {
     setFirstName(profile.firstname || "");
     setLastName(profile.lastname || "");
     setEmail(profile.email || "");
-    setPhone(profile.mobileNo || "");
-    setCountryCode((profile.country || "ZA").toLowerCase());
+    // the number is stored without its country code; without it the widget guesses the
+    // country from the leading digits (a 65... number showed as Singapore)
+    const isd = String(profile.isdCode || "").replace(/\D/g, "");
+    const mobile = String(profile.mobileNo || "").replace(/\D/g, "");
+    setPhone(isd && !mobile.startsWith(isd) ? `${isd}${mobile}` : mobile);
     setGender(profile.gender || "M");
 
   } catch (err) {
@@ -109,7 +111,6 @@ export default function EditProfilePage() {
 
                 {/* The mobile number is the login identity, so it is shown but not editable here */}
                 <PhoneInput
-                    country={countryCode}
                     value={phone}
                     disabled
                     disableDropdown

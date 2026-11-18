@@ -28,6 +28,16 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     const [currentAudio, setCurrentAudio] = useState<number>(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    // The audio element's onPlay handler marks it playing once playback really starts.
+    // The browser can refuse (autoplay before the user has interacted), so the button
+    // must not claim it is playing just because play() was asked for.
+    const startPlayback = useCallback((audio: HTMLAudioElement) => {
+        audio.play().catch((err) => {
+            console.log("Audio play error:", err);
+            setIsPlaying(false);
+        });
+    }, []);
+
     const handlePlay = useCallback(() => {
         const isVip: any = localStorage.getItem('loginData');
         if (!isVip) return;
@@ -43,10 +53,8 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        audio.play().catch((err) => console.log("Audio play error:", err));
-        setOpenPlayButton(true);
-        setIsPlaying(true);
-    }, [setOpenPlayButton]);
+        startPlayback(audio);
+    }, [startPlayback]);
 
     const handlePlayPause = useCallback((episodeData: any) => {
         if (episodeData?.is_billable === 2) {
@@ -61,11 +69,9 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
             setOpenPlayButton(false);
             setIsPlaying(false);
         } else {
-            audio.play().catch((err) => console.log("Audio play error:", err));
-            setOpenPlayButton(true);
-            setIsPlaying(true);
+            startPlayback(audio);
         }
-    }, [setOpenPlayButton]);
+    }, [setOpenPlayButton, startPlayback]);
 
     return (
         <AudioContext.Provider value={{
