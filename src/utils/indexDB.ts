@@ -19,10 +19,12 @@ export async function getDB() {
 
 export async function savePodcast(podcastUrl: any, id: any) {
   const res = await fetch(podcastUrl);
+  if (!res.ok) {
+    throw new Error(`Audio fetch failed: ${res.status} ${res.statusText}`);
+  }
   const blob = await res.blob();
 
   const db = await getDB();
-  console.log(db, "db");
   await db.put(STORE_NAME, blob, id);
   console.log("✅ Saved for offline:", id);
 }
@@ -43,8 +45,10 @@ export async function saveEpisodeOffline(data: any) {
   try {
     const db = await getDB();
 
-    // Fetch audio
     const audioRes = await fetch(stream_uri);
+    if (!audioRes.ok) {
+      throw new Error(`Audio fetch failed: ${audioRes.status} ${audioRes.statusText}`);
+    }
     const audioBlob = await audioRes.blob();
 
         // Fetch image directly (no proxy)

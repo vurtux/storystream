@@ -4,13 +4,13 @@ import { getAnalytics } from "firebase/analytics";
 import { getRemoteConfig, RemoteConfig } from "firebase/remote-config";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBzf4a3klT1JGYu0WpI_h1jJylOcnqImkY",
-  authDomain: "storystream-2965b.firebaseapp.com",
-  projectId: "storystream-2965b",
-  storageBucket: "storystream-2965b.firebasestorage.app",
-  messagingSenderId: "585951737951",
-  appId: "1:585951737951:web:ac22a0ff9179ecb0d283ea",
-  measurementId: "G-JR317RMKSL",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

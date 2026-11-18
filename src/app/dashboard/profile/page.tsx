@@ -7,6 +7,7 @@ import Image from "next/image";
 import {
   trackSignout,
 } from "../../../lib/tealiumTracking";
+import { saveSessionToken } from "../../../utils/sessionToken";
 type MenuItemProps = {
   imgSrc?: string;
   icon?: React.ReactNode;
@@ -68,6 +69,7 @@ export default function ProfilePage() {
     localStorage.setItem("isLoggedIn", "false");
     localStorage.removeItem("loginData");
     localStorage.removeItem("authData");
+    saveSessionToken(null);
     trackSignout('/profile')
     setLoggedIn(false);
     setIsVip(false);

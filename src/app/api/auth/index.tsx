@@ -78,7 +78,7 @@ export const handleGetProfile = async (authToken: string) => {
         data: {},
         headers: {
             'device-os': API_HEADERS.DEVICE_OS,
-            'API-KEY': API_KEYS.CONTENT_FEED,
+            'API-KEY': API_KEYS.FEED_AUTH,
             'Authorization': `Bearer ${authToken}`,
         },
     });

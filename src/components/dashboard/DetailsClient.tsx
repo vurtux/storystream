@@ -313,8 +313,6 @@ const DetailsClient = ({ conId, title }: any) => {
       const result = await handlePodcastPaging({
         conId: Number(conId),
         page: pageNum,
-        debug: false,
-        test: "1122",
         lang: lang,
         country,
       });

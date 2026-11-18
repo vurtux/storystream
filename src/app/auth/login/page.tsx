@@ -11,6 +11,10 @@ import { useEffect, useState } from "react";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import useAuth from "../../../hooks/useAuth";
 
+const RATE_LIMITED_CODE = "429";
+const RATE_LIMITED_MESSAGE = "Too many attempts for this number. Please try again later.";
+const OTP_NOT_SENT_CODE = "4004";
+
 export default function LoginPage() {
   const { setAuthData } = useAuth();
   const router = useRouter();
@@ -68,6 +72,11 @@ export default function LoginPage() {
       // Check MDN profile first
       const payloadMDN = { mobileNo: finalMobileNo, isdCode };
       const mdnRes = await ValidateMDN(payloadMDN);
+
+      if (mdnRes?.response?.code === RATE_LIMITED_CODE) {
+        showError(mdnRes.response.Error_Description || RATE_LIMITED_MESSAGE);
+        return;
+      }
 
       if (!mdnRes?.response?.status) {
         const isSubscribed = localStorage.getItem("isSubscribed");
@@ -137,7 +146,14 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Error in login api:", error);
-      showError("Login failed. Please check your connection and try again.");
+      const code = (error as { response?: { data?: { response?: { code?: string } } } })
+        ?.response?.data?.response?.code;
+      // The backend answers 4004 when it refuses or fails to send an OTP, including when the number hit its send limit.
+      showError(
+        code === OTP_NOT_SENT_CODE
+          ? "We couldn't send an OTP right now. Please wait a few minutes and try again."
+          : "Login failed. Please check your connection and try again."
+      );
     } finally {
       setIsLoading(false);
     }

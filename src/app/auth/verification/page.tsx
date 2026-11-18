@@ -5,6 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { handleVerification, handleLogin } from "../../api/auth";
 import { showError, showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
+import { saveSessionToken } from "../../../utils/sessionToken";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import {
   trackLogin,
@@ -19,6 +20,7 @@ const OTPVerification: React.FC = () => {
 
   const MAX_FAILED_ATTEMPTS = 5;
   const LOCKOUT_TIME_SECONDS = 300; // 5 minutes lockout
+  const SERVER_LOCKOUT_CODE = "429";
 
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isResending, setIsResending] = useState(false);
@@ -135,6 +137,15 @@ const OTPVerification: React.FC = () => {
 
       const res = await handleVerification(payload);
 
+      if (res?.response?.code === SERVER_LOCKOUT_CODE) {
+        const lockSeconds = Number(res.response.retryAfter) || LOCKOUT_TIME_SECONDS;
+        localStorage.setItem('otp_lockout_until', (Date.now() + lockSeconds * 1000).toString());
+        setLockoutSecondsLeft(lockSeconds);
+        setOtp(["", "", "", ""]);
+        showError(res.response.Error_Description || "Too many wrong OTP attempts. Please try again later.");
+        return;
+      }
+
       if (!res?.response?.status) {
         throw new Error(res?.response?.msg || "Verification failed");
       }
@@ -148,7 +159,8 @@ const OTPVerification: React.FC = () => {
       const { profile, vipInfo } = loginData;
       const userId = profile?.userId?.toString() || "guest";
 
-      // Save auth
+      // Save auth; the token is kept apart from loginData for the StoryStream content routes
+      saveSessionToken(authToken);
       setAuth({ userInfo: profile });
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("loginData", JSON.stringify(loginData));

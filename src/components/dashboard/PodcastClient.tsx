@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import useDashboard from "../../hooks/useDashboard";
 import { getEpisodeDetail } from "../../app/api/podcast";
+import { showError } from "../../utils/toastService";
 import { useAudio } from "../../hooks/useAudio";
 import slugify from "slugify";
 import { getOfflineEpisode, isPodcastDownloaded, playOfflinePodcast } from "../../utils/indexDB";
@@ -219,6 +220,11 @@ export default function PodcastClient({ episode_id, title }: any) {
             : {};
         setEpisodeData(ep);
         localStorage.setItem("episodeData", JSON.stringify(ep));
+        if (!ep?.stream_url) {
+          // the server sends audio only to an active subscriber (a pending or lapsed one gets none)
+          showError("This episode is available with an active StoryStream subscription.");
+          return;
+        }
         setAudioSrc(ep?.stream_url);
         autoPlayTimerRef.current = setTimeout(() => {
           if (!isCancelled) handlePlay();

@@ -12,26 +12,19 @@ import { showError, showSuccess } from '../../../../utils/toastService';
 export default function EditProfilePage() {
     const router = useRouter();
 
-    const [userId, setUserId] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [countryCode, setCountryCode] = useState("ZA");
-    const [isdCode, setIsdCode] = useState("91");
     const [gender, setGender] = useState("M");
 
     const handleUpdate = async () => {
-        console.log({ userId, firstName, lastName, email, phone, isdCode, gender });
         try {
             const res = await handleUpdateProfile({
-                userId,
                 firstName,
                 lastName,
                 email,
-                phone,
-                countryCode,
-                isdCode,
                 gender,
             });
             console.log(res, "API response");
@@ -64,13 +57,11 @@ export default function EditProfilePage() {
 
     console.log("Loaded profile:", profile);
 
-    setUserId(profile.userId || "");
     setFirstName(profile.firstname || "");
     setLastName(profile.lastname || "");
     setEmail(profile.email || "");
     setPhone(profile.mobileNo || "");
-    setCountryCode(profile.country || "ZA");
-    setIsdCode(profile.isdCode || "91");
+    setCountryCode((profile.country || "ZA").toLowerCase());
     setGender(profile.gender || "M");
 
   } catch (err) {
@@ -116,14 +107,12 @@ export default function EditProfilePage() {
                     </div>
                 </div>
 
+                {/* The mobile number is the login identity, so it is shown but not editable here */}
                 <PhoneInput
                     country={countryCode}
                     value={phone}
-                    onChange={(phone: any, country: any) => {
-                        setPhone(phone);
-                        setCountryCode(country.countryCode ?? 'in');
-                        setIsdCode(country.dialCode ?? '91');
-                    }}
+                    disabled
+                    disableDropdown
                     inputClass="!w-full !rounded-xl !py-3 !pl-12 !pr-4 !text-base dark:bg-gray-50 text-black dark:text-black"
                     buttonClass="!rounded-l-xl"
                     containerClass="!w-full !border !rounded-xl"

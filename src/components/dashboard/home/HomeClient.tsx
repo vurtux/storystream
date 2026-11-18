@@ -4,6 +4,7 @@ import { handleHome } from "../../../app/api/home";
 import SquareShape from "./SquareShape";
 import HeaderSlider from "../DashboardHeader";
 import { handleValidate, handleGetProfile } from "../../../app/api/auth";
+import { saveSessionToken } from "../../../utils/sessionToken";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccess } from "../../../utils/toastService";
 import useAuth from "../../../hooks/useAuth";
@@ -115,6 +116,7 @@ const HomeClient = () => {
         // 3️⃣ Save auth & localStorage
         setAuth({ userInfo: profile });
 
+        saveSessionToken(validateRes.response.authToken);
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("loginData", JSON.stringify(profileRes.response));
         localStorage.setItem("mobile", profile.mobileNo);
