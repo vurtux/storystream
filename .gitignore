@@ -40,6 +40,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# graphify code graph (generated locally; rebuild with `graphify update .`)
+graphify-out/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
