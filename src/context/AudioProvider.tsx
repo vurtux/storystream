@@ -91,7 +91,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
             {children}
             <audio 
                 ref={audioRef} 
-                src={audioSrc || "audio"} 
+                src={audioSrc || undefined}
                 preload="metadata"
                 onPlay={() => {
                     setIsPlaying(true);

@@ -35,7 +35,9 @@ module.exports = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://tags.tiqcdn.com https://*.tiqcdn.com https://cdn.cookielaw.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://api.myuze.app https://*.tiqcdn.com https://*.tealiumiq.com https:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'self';",
+            // Tags loaded by Vodacom's Tealium container need their exact script and frame hosts here:
+            // Meta Pixel, TikTok Pixel, Google Ads (gtag and conversion scripts), Adobe Audience Manager (demdex).
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://tags.tiqcdn.com https://*.tiqcdn.com https://cdn.cookielaw.org https://connect.facebook.net https://analytics.tiktok.com https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://api.myuze.app https://*.tiqcdn.com https://*.tealiumiq.com https:; font-src 'self' data: https://fonts.gstatic.com; frame-src 'self' https://vodacomdls.demdex.net https://td.doubleclick.net https://www.googletagmanager.com; frame-ancestors 'self';",
           },
         ],
       },
