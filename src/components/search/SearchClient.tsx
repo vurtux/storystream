@@ -13,6 +13,35 @@ import { handleDefaultSearchApi, handleSearchApi } from "../../app/api/search";
 import NotFoundPage from "../dashboard/NotFound";
 import { showSuccess } from "../../utils/toastService";
 
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+
+// Total listening time in seconds: the book's own total if the API sends it, otherwise the
+// sum of its episodes' durations; 0 when the API sends neither.
+const totalSeconds = (item: any): number => {
+    const bookTotal = Number(item?.total_duration ?? item?.book_details?.total_duration);
+    if (bookTotal > 0) {
+        return bookTotal;
+    }
+    const episodes = Array.isArray(item?.podcast_episode_details) ? item.podcast_episode_details : [];
+    return episodes.reduce((sum: number, episode: any) => sum + (Number(episode?.duration) || 0), 0);
+};
+
+// "13 mins" / "1 hr 5 mins", the same style as the book page; empty when there is no duration.
+const listingDuration = (item: any): string => {
+    const seconds = totalSeconds(item);
+    if (seconds <= 0) {
+        return "";
+    }
+    const minutes = Math.max(1, Math.round(seconds / SECONDS_PER_MINUTE));
+    if (minutes < MINUTES_PER_HOUR) {
+        return `${minutes} mins`;
+    }
+    const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+    const rest = minutes % MINUTES_PER_HOUR;
+    return rest ? `${hours} hr ${rest} mins` : `${hours} hr`;
+};
+
 export default function SearchClient() {
     const router = useRouter();
     const [notFound, setNotFound] = useState(false);
@@ -251,10 +280,14 @@ export default function SearchClient() {
                                             <h3 className="text-sm font-semibold leading-snug">
                                                 {podcast.conName}
                                             </h3>
-                                            <p className="text-xs text-gray-500">{podcast.author || "author"}</p>
-                                            <div className="flex items-center text-xs text-gray-500 mt-1">
-                                                <span>{podcast.duration || "00:00"}</span>
-                                            </div>
+                                            {podcast.author && (
+                                                <p className="text-xs text-gray-500">{podcast.author}</p>
+                                            )}
+                                            {listingDuration(podcast) && (
+                                                <div className="flex items-center text-xs text-gray-500 mt-1">
+                                                    <span>{listingDuration(podcast)}</span>
+                                                </div>
+                                            )}
                                             <div className="flex items-center gap-5 mt-2">
                                                 <button
                                                     style={{ height: "32px", width: "79px", background: "radial-gradient(92.09% 394.93% at 7.91% 50%, #6B0DFF 0%, #FF6B79 100%)" }}
